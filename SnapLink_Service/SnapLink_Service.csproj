@@ -12,7 +12,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.16" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SnapLink_Model\SnapLink_Model.csproj" />
+    <ProjectReference Include="..\SnapLink_Repository\SnapLink_Repository.csproj" />
     <ProjectReference Include="..\Tool\Tool.csproj" />
   </ItemGroup>
 

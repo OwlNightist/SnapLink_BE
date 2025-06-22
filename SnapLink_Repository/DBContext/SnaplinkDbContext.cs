@@ -464,6 +464,11 @@ public partial class SnaplinkDbContext : DbContext
             entity.Property(e => e.Rating)
                 .HasColumnType("decimal(3, 2)")
                 .HasColumnName("rating");
+            entity.Property(e => e.RatingSum)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("ratingSum");
+            entity.Property(e => e.RatingCount)
+                .HasColumnName("ratingCount");
             entity.Property(e => e.Specialty)
                 .HasMaxLength(255)
                 .HasColumnName("specialty");

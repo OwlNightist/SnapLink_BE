@@ -27,6 +27,8 @@ public partial class Payment
 
     public DateTime? UpdatedAt { get; set; }
 
+    public virtual Booking Booking { get; set; } = null!;
+
     public virtual ICollection<Advertisement> Advertisements { get; set; } = new List<Advertisement>();
 
     public virtual ICollection<PremiumSubscription> PremiumSubscriptions { get; set; } = new List<PremiumSubscription>();
