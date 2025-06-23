@@ -48,6 +48,8 @@ builder.Services.AddScoped<ILocationOwnerRepository, LocationOwnerRepository>();
 builder.Services.AddScoped<ILocationOwnerService, LocationOwnerService>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
