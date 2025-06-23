@@ -9,5 +9,6 @@ namespace SnapLink_Service.IService
     public interface IRoleService
     {
         Task<string> CreateDefaultRolesAsync();
+
     }
 }
