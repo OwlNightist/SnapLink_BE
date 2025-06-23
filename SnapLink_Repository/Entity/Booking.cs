@@ -34,4 +34,6 @@ public partial class Booking
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
     public virtual User User { get; set; } = null!;
+
+    public virtual Payment? Payment { get; set; }
 }

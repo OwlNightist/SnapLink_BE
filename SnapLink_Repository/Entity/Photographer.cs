@@ -23,6 +23,10 @@ public partial class Photographer
 
     public decimal? Rating { get; set; }
 
+    public decimal? RatingSum { get; set; }
+
+    public int? RatingCount { get; set; }
+
     public bool? FeaturedStatus { get; set; }
 
     public string? VerificationStatus { get; set; }
