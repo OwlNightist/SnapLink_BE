@@ -42,6 +42,11 @@ builder.Services.AddDbContext<SnaplinkDbContext>(options =>
 builder.Services.AddControllers();
 
 
+// Add DbContext
+//builder.Services.AddDbContext<SnaplinkDbContext>(options =>
+//  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -87,9 +92,6 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 
-// Add DbContext
-builder.Services.AddDbContext<SnaplinkDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add Unit of Work
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -113,25 +115,38 @@ builder.Services.AddScoped<IPhotographerService, PhotographerService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
+
+builder.Services.AddCors(opts =>
+{
+    opts.AddPolicy("corspolicy", build =>
+    {
+        build.WithOrigins("*")
+             .AllowAnyMethod()
+             .AllowAnyHeader();
+    });
+});
+
+
 var app = builder.Build();
 
 // Initialize database with seed data
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<SnaplinkDbContext>();
-    DbInitializer.Initialize(context);
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var context = scope.ServiceProvider.GetRequiredService<SnaplinkDbContext>();
+//    DbInitializer.Initialize(context);
+//}
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
-
+app.UseCors("corspolicy");
 app.UseAuthorization();
 
 app.MapControllers();
