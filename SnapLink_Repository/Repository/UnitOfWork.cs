@@ -34,6 +34,7 @@ namespace SnapLink_Repository.Repository
         private IGenericRepository<Transaction> _transactionRepository;
         private IGenericRepository<User> _userRepository;
         private IGenericRepository<UserRole> _userRoleRepository;
+        private IGenericRepository<UserStyle> _userStyleRepository;
         private IGenericRepository<WithdrawalRequest> _withdrawalRequestRepository;
 
         public UnitOfWork(SnaplinkDbContext context)
@@ -107,6 +108,9 @@ namespace SnapLink_Repository.Repository
 
         public IGenericRepository<UserRole> UserRoleRepository => 
             _userRoleRepository ??= new GenericRepository<UserRole>(_context);
+
+        public IGenericRepository<UserStyle> UserStyleRepository => 
+            _userStyleRepository ??= new GenericRepository<UserStyle>(_context);
 
         public IGenericRepository<WithdrawalRequest> WithdrawalRequestRepository => 
             _withdrawalRequestRepository ??= new GenericRepository<WithdrawalRequest>(_context);

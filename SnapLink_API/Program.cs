@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -39,8 +39,14 @@ builder.Services.AddAuthentication(options =>
 // Add services to the container.
 builder.Services.AddDbContext<SnaplinkDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddControllers();
 
+// Configure JSON serialization to handle circular references
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        options.JsonSerializerOptions.MaxDepth = 32;
+    });
 
 // Add DbContext
 //builder.Services.AddDbContext<SnaplinkDbContext>(options =>
@@ -112,6 +118,8 @@ builder.Services.AddSingleton<PayOS>(provider =>
 
 // Add Services
 builder.Services.AddScoped<IPhotographerService, PhotographerService>();
+builder.Services.AddScoped<IStyleService, StyleService>();
+builder.Services.AddScoped<IUserStyleService, UserStyleService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
@@ -129,15 +137,31 @@ builder.Services.AddCors(opts =>
 
 var app = builder.Build();
 
-// Initialize database with seed data
-//using (var scope = app.Services.CreateScope())
-//{
-//    var context = scope.ServiceProvider.GetRequiredService<SnaplinkDbContext>();
-//    DbInitializer.Initialize(context);
-//}
+// Initialize database with seed data only in Development environment
+if (app.Environment.IsDevelopment())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        try
+        {
+            var context = scope.ServiceProvider.GetRequiredService<SnaplinkDbContext>();
+            DbInitializer.Initialize(context);
+            Console.WriteLine("✅ Database seeded successfully in Development environment.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Error seeding database: {ex.Message}");
+        }
+    }
+}
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() || app.Environment.IsStaging() || app.Environment.IsProduction())
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+else if (app.Environment.IsStaging() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();

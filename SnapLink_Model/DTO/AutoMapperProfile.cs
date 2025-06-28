@@ -14,6 +14,22 @@ namespace SnapLink_Model.DTO
     {
         public AutoMapperProfile()
         {
+            // User mappings
+            CreateMap<User, UserResponse>()
+                .ForMember(dest => dest.FavoriteStyles, opt => opt.MapFrom(src => src.UserStyles.Select(us => us.Style.Name)));
+
+            CreateMap<User, UserDetailResponse>()
+                .ForMember(dest => dest.FavoriteStyles, opt => opt.MapFrom(src => src.UserStyles.Select(us => us.Style.Name)))
+                .ForMember(dest => dest.FavoriteStyleDetails, opt => opt.MapFrom(src => src.UserStyles.Select(us => new UserStyleInfo
+                {
+                    StyleId = us.StyleId,
+                    StyleName = us.Style.Name ?? "",
+                    StyleDescription = us.Style.Description,
+                    AddedAt = us.CreatedAt
+                })))
+                .ForMember(dest => dest.TotalBookings, opt => opt.MapFrom(src => src.Bookings.Count))
+                .ForMember(dest => dest.TotalReviews, opt => opt.MapFrom(src => src.Bookings.SelectMany(b => b.Reviews).Count()));
+
             // Photographer mappings
             CreateMap<Photographer, PhotographerResponse>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName))
@@ -24,11 +40,13 @@ namespace SnapLink_Model.DTO
                 .ForMember(dest => dest.Bio, opt => opt.MapFrom(src => src.User.Bio))
                 .ForMember(dest => dest.CreateAt, opt => opt.MapFrom(src => src.User.CreateAt))
                 .ForMember(dest => dest.UpdateAt, opt => opt.MapFrom(src => src.User.UpdateAt))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.User.Status));
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.User.Status))
+                .ForMember(dest => dest.Styles, opt => opt.MapFrom(src => src.PhotographerStyles.Select(ps => ps.Style.Name)));
 
             CreateMap<Photographer, PhotographerListResponse>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.FullName))
-                .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom(src => src.User.ProfileImage));
+                .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom(src => src.User.ProfileImage))
+                .ForMember(dest => dest.Styles, opt => opt.MapFrom(src => src.PhotographerStyles.Select(ps => ps.Style.Name)));
 
             CreateMap<Photographer, PhotographerDetailResponse>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName))
@@ -41,10 +59,32 @@ namespace SnapLink_Model.DTO
                 .ForMember(dest => dest.UpdateAt, opt => opt.MapFrom(src => src.User.UpdateAt))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.User.Status))
                 .ForMember(dest => dest.TotalBookings, opt => opt.MapFrom(src => src.Bookings.Count))
-                .ForMember(dest => dest.WalletBalance, opt => opt.MapFrom(src => src.PhotographerWallets.FirstOrDefault().Balance));
+                .ForMember(dest => dest.WalletBalance, opt => opt.MapFrom(src => src.PhotographerWallets.FirstOrDefault().Balance))
+                .ForMember(dest => dest.Styles, opt => opt.MapFrom(src => src.PhotographerStyles.Select(ps => ps.Style.Name)));
 
             CreateMap<CreatePhotographerRequest, Photographer>();
             CreateMap<UpdatePhotographerRequest, Photographer>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            // Style mappings
+            CreateMap<Style, StyleResponse>()
+                .ForMember(dest => dest.PhotographerCount, opt => opt.MapFrom(src => src.PhotographerStyles.Count));
+
+            CreateMap<Style, StyleDetailResponse>()
+                .ForMember(dest => dest.PhotographerCount, opt => opt.MapFrom(src => src.PhotographerStyles.Count))
+                .ForMember(dest => dest.Photographers, opt => opt.MapFrom(src => src.PhotographerStyles.Select(ps => new StylePhotographerInfo
+                {
+                    PhotographerId = ps.Photographer.PhotographerId,
+                    FullName = ps.Photographer.User.FullName ?? "",
+                    Specialty = ps.Photographer.Specialty,
+                    HourlyRate = ps.Photographer.HourlyRate,
+                    Rating = ps.Photographer.Rating,
+                    AvailabilityStatus = ps.Photographer.AvailabilityStatus,
+                    ProfileImage = ps.Photographer.User.ProfileImage
+                })));
+
+            CreateMap<CreateStyleRequest, Style>();
+            CreateMap<UpdateStyleRequest, Style>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             // Review mappings

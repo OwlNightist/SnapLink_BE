@@ -52,4 +52,6 @@ public partial class User
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    
+    public virtual ICollection<UserStyle> UserStyles { get; set; } = new List<UserStyle>();
 }

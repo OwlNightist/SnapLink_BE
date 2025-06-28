@@ -37,6 +37,9 @@ namespace SnapLink_Model.DTO.Request
 
         [MaxLength(30)]
         public string? VerificationStatus { get; set; }
+        
+        // Style IDs for many-to-many relationship
+        public List<int> StyleIds { get; set; } = new List<int>();
     }
 
     public class UpdatePhotographerRequest
@@ -71,5 +74,8 @@ namespace SnapLink_Model.DTO.Request
 
         [MaxLength(30)]
         public string? VerificationStatus { get; set; }
+        
+        // Style IDs for many-to-many relationship
+        public List<int> StyleIds { get; set; } = new List<int>();
     }
 } 

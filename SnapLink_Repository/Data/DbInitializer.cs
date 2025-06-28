@@ -47,6 +47,9 @@ namespace SnapLink_Repository.Data
             // Seed Photographer Styles
             SeedPhotographerStyles(context, photographers, styles);
             
+            // Seed User Styles (Favorite Styles)
+            SeedUserStyles(context, users, styles);
+            
             // Seed Photographer Wallets
             SeedPhotographerWallets(context, photographers);
             
@@ -294,6 +297,47 @@ namespace SnapLink_Repository.Data
                     CreateAt = DateTime.Now.AddDays(-90),
                     UpdateAt = DateTime.Now,
                     Status = "Active"
+                },
+                
+                // Additional users for testing favorite styles
+                new User 
+                { 
+                    UserName = "user3", 
+                    Email = "user3@example.com", 
+                    PasswordHash = "hashed_password_10",
+                    PhoneNumber = "+1234567899",
+                    FullName = "Carol White",
+                    ProfileImage = "https://example.com/user3.jpg",
+                    Bio = "Wedding planning enthusiast",
+                    CreateAt = DateTime.Now.AddDays(-80),
+                    UpdateAt = DateTime.Now,
+                    Status = "Active"
+                },
+                new User 
+                { 
+                    UserName = "user4", 
+                    Email = "user4@example.com", 
+                    PasswordHash = "hashed_password_11",
+                    PhoneNumber = "+1234567900",
+                    FullName = "David Brown",
+                    ProfileImage = "https://example.com/user4.jpg",
+                    Bio = "Nature lover and outdoor photographer",
+                    CreateAt = DateTime.Now.AddDays(-70),
+                    UpdateAt = DateTime.Now,
+                    Status = "Active"
+                },
+                new User 
+                { 
+                    UserName = "user5", 
+                    Email = "user5@example.com", 
+                    PasswordHash = "hashed_password_12",
+                    PhoneNumber = "+1234567901",
+                    FullName = "Eva Garcia",
+                    ProfileImage = "https://example.com/user5.jpg",
+                    Bio = "Fashion and lifestyle blogger",
+                    CreateAt = DateTime.Now.AddDays(-60),
+                    UpdateAt = DateTime.Now,
+                    Status = "Active"
                 }
             };
 
@@ -314,7 +358,10 @@ namespace SnapLink_Repository.Data
                 new UserRole { UserId = users[5].UserId, RoleId = roles[2].RoleId, AssignedAt = DateTime.Now },
                 new UserRole { UserId = users[6].UserId, RoleId = roles[3].RoleId, AssignedAt = DateTime.Now },
                 new UserRole { UserId = users[7].UserId, RoleId = roles[3].RoleId, AssignedAt = DateTime.Now },
-                new UserRole { UserId = users[8].UserId, RoleId = roles[4].RoleId, AssignedAt = DateTime.Now }
+                new UserRole { UserId = users[8].UserId, RoleId = roles[4].RoleId, AssignedAt = DateTime.Now },
+                new UserRole { UserId = users[9].UserId, RoleId = roles[1].RoleId, AssignedAt = DateTime.Now },
+                new UserRole { UserId = users[10].UserId, RoleId = roles[1].RoleId, AssignedAt = DateTime.Now },
+                new UserRole { UserId = users[11].UserId, RoleId = roles[1].RoleId, AssignedAt = DateTime.Now }
             };
 
             context.UserRoles.AddRange(userRoles);
@@ -908,6 +955,65 @@ namespace SnapLink_Repository.Data
             };
 
             context.WithdrawalRequests.AddRange(withdrawalRequests);
+            context.SaveChanges();
+        }
+
+        private static void SeedUserStyles(SnaplinkDbContext context, List<User> users, List<Style> styles)
+        {
+            var userStyles = new List<UserStyle>
+            {
+                // User 1 (Alice Johnson) - Photography enthusiast
+                new UserStyle { UserId = users[1].UserId, StyleId = styles[0].StyleId, CreatedAt = DateTime.Now.AddDays(-280) }, // Portrait
+                new UserStyle { UserId = users[1].UserId, StyleId = styles[4].StyleId, CreatedAt = DateTime.Now.AddDays(-275) }, // Fashion
+                new UserStyle { UserId = users[1].UserId, StyleId = styles[2].StyleId, CreatedAt = DateTime.Now.AddDays(-270) }, // Landscape
+                
+                // User 2 (Bob Smith) - Looking for professional photos
+                new UserStyle { UserId = users[2].UserId, StyleId = styles[1].StyleId, CreatedAt = DateTime.Now.AddDays(-240) }, // Wedding
+                new UserStyle { UserId = users[2].UserId, StyleId = styles[0].StyleId, CreatedAt = DateTime.Now.AddDays(-235) }, // Portrait
+                
+                // Photographer 1 (Sarah Wilson) - Also has personal style preferences
+                new UserStyle { UserId = users[3].UserId, StyleId = styles[0].StyleId, CreatedAt = DateTime.Now.AddDays(-200) }, // Portrait
+                new UserStyle { UserId = users[3].UserId, StyleId = styles[4].StyleId, CreatedAt = DateTime.Now.AddDays(-195) }, // Fashion
+                
+                // Photographer 2 (Mike Chen) - Personal style preferences
+                new UserStyle { UserId = users[4].UserId, StyleId = styles[1].StyleId, CreatedAt = DateTime.Now.AddDays(-180) }, // Wedding
+                new UserStyle { UserId = users[4].UserId, StyleId = styles[3].StyleId, CreatedAt = DateTime.Now.AddDays(-175) }, // Street
+                
+                // Photographer 3 (Emma Davis) - Personal style preferences
+                new UserStyle { UserId = users[5].UserId, StyleId = styles[2].StyleId, CreatedAt = DateTime.Now.AddDays(-150) }, // Landscape
+                new UserStyle { UserId = users[5].UserId, StyleId = styles[6].StyleId, CreatedAt = DateTime.Now.AddDays(-145) }, // Architecture
+                
+                // Location Owner 1 (Downtown Studio) - Business preferences
+                new UserStyle { UserId = users[6].UserId, StyleId = styles[0].StyleId, CreatedAt = DateTime.Now.AddDays(-120) }, // Portrait
+                new UserStyle { UserId = users[6].UserId, StyleId = styles[4].StyleId, CreatedAt = DateTime.Now.AddDays(-115) }, // Fashion
+                new UserStyle { UserId = users[6].UserId, StyleId = styles[5].StyleId, CreatedAt = DateTime.Now.AddDays(-110) }, // Product
+                
+                // Location Owner 2 (Nature Garden) - Business preferences
+                new UserStyle { UserId = users[7].UserId, StyleId = styles[2].StyleId, CreatedAt = DateTime.Now.AddDays(-100) }, // Landscape
+                new UserStyle { UserId = users[7].UserId, StyleId = styles[1].StyleId, CreatedAt = DateTime.Now.AddDays(-95) }, // Wedding
+                
+                // Moderator 1 (Lisa Moderator) - Personal preferences
+                new UserStyle { UserId = users[8].UserId, StyleId = styles[3].StyleId, CreatedAt = DateTime.Now.AddDays(-90) }, // Street
+                new UserStyle { UserId = users[8].UserId, StyleId = styles[7].StyleId, CreatedAt = DateTime.Now.AddDays(-85) }, // Documentary
+                
+                // User 3 (Carol White) - Wedding planning enthusiast
+                new UserStyle { UserId = users[9].UserId, StyleId = styles[1].StyleId, CreatedAt = DateTime.Now.AddDays(-75) }, // Wedding
+                new UserStyle { UserId = users[9].UserId, StyleId = styles[0].StyleId, CreatedAt = DateTime.Now.AddDays(-70) }, // Portrait
+                new UserStyle { UserId = users[9].UserId, StyleId = styles[4].StyleId, CreatedAt = DateTime.Now.AddDays(-65) }, // Fashion
+                
+                // User 4 (David Brown) - Nature lover and outdoor photographer
+                new UserStyle { UserId = users[10].UserId, StyleId = styles[2].StyleId, CreatedAt = DateTime.Now.AddDays(-65) }, // Landscape
+                new UserStyle { UserId = users[10].UserId, StyleId = styles[6].StyleId, CreatedAt = DateTime.Now.AddDays(-60) }, // Architecture
+                new UserStyle { UserId = users[10].UserId, StyleId = styles[7].StyleId, CreatedAt = DateTime.Now.AddDays(-55) }, // Documentary
+                
+                // User 5 (Eva Garcia) - Fashion and lifestyle blogger
+                new UserStyle { UserId = users[11].UserId, StyleId = styles[4].StyleId, CreatedAt = DateTime.Now.AddDays(-55) }, // Fashion
+                new UserStyle { UserId = users[11].UserId, StyleId = styles[0].StyleId, CreatedAt = DateTime.Now.AddDays(-50) }, // Portrait
+                new UserStyle { UserId = users[11].UserId, StyleId = styles[5].StyleId, CreatedAt = DateTime.Now.AddDays(-45) }, // Product
+                new UserStyle { UserId = users[11].UserId, StyleId = styles[3].StyleId, CreatedAt = DateTime.Now.AddDays(-40) }  // Street
+            };
+
+            context.UserStyles.AddRange(userStyles);
             context.SaveChanges();
         }
     }

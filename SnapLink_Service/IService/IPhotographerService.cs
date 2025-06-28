@@ -20,6 +20,9 @@ namespace SnapLink_Service.IService
         // Get photographers by specialty
         Task<IEnumerable<PhotographerListResponse>> GetPhotographersBySpecialtyAsync(string specialty);
         
+        // Get photographers by style
+        Task<IEnumerable<PhotographerListResponse>> GetPhotographersByStyleAsync(string styleName);
+        
         // Get available photographers
         Task<IEnumerable<PhotographerListResponse>> GetAvailablePhotographersAsync();
         
@@ -46,5 +49,10 @@ namespace SnapLink_Service.IService
         
         // Verify photographer
         Task<bool> VerifyPhotographerAsync(int id, string verificationStatus);
+        
+        // Style management methods
+        Task<bool> AddStyleToPhotographerAsync(int photographerId, int styleId);
+        Task<bool> RemoveStyleFromPhotographerAsync(int photographerId, int styleId);
+        Task<IEnumerable<string>> GetPhotographerStylesAsync(int photographerId);
     }
 }

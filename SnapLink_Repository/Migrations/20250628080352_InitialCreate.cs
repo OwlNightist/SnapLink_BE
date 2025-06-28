@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SnapLink_Repository.Migrations
 {
     /// <inheritdoc />
-    public partial class AddPaymentBookingRelationship : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -264,6 +264,31 @@ namespace SnapLink_Repository.Migrations
                         principalColumn: "roleId");
                     table.ForeignKey(
                         name: "FK_UserRole_User",
+                        column: x => x.userId,
+                        principalTable: "Users",
+                        principalColumn: "userId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserStyle",
+                columns: table => new
+                {
+                    userStyleId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    userId = table.Column<int>(type: "int", nullable: false),
+                    styleId = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__UserStyle__476AAC030CF022A8", x => x.userStyleId);
+                    table.ForeignKey(
+                        name: "FK_UserStyle_Style",
+                        column: x => x.styleId,
+                        principalTable: "Style",
+                        principalColumn: "styleId");
+                    table.ForeignKey(
+                        name: "FK_UserStyle_User",
                         column: x => x.userId,
                         principalTable: "Users",
                         principalColumn: "userId");
@@ -726,6 +751,16 @@ namespace SnapLink_Repository.Migrations
                 column: "userId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserStyle_styleId",
+                table: "UserStyle",
+                column: "styleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserStyle_userId",
+                table: "UserStyle",
+                column: "userId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_WithdrawalRequest_photographerId",
                 table: "WithdrawalRequest",
                 column: "photographerId");
@@ -771,6 +806,9 @@ namespace SnapLink_Repository.Migrations
                 name: "UserRole");
 
             migrationBuilder.DropTable(
+                name: "UserStyle");
+
+            migrationBuilder.DropTable(
                 name: "WithdrawalRequest");
 
             migrationBuilder.DropTable(
@@ -780,9 +818,6 @@ namespace SnapLink_Repository.Migrations
                 name: "Location");
 
             migrationBuilder.DropTable(
-                name: "Style");
-
-            migrationBuilder.DropTable(
                 name: "Payment");
 
             migrationBuilder.DropTable(
@@ -790,6 +825,9 @@ namespace SnapLink_Repository.Migrations
 
             migrationBuilder.DropTable(
                 name: "Roles");
+
+            migrationBuilder.DropTable(
+                name: "Style");
 
             migrationBuilder.DropTable(
                 name: "LocationOwner");

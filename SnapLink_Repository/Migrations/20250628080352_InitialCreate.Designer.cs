@@ -12,8 +12,8 @@ using SnapLink_Repository.DBContext;
 namespace SnapLink_Repository.Migrations
 {
     [DbContext(typeof(SnaplinkDbContext))]
-    [Migration("20250622153334_AddPaymentBookingRelationship")]
-    partial class AddPaymentBookingRelationship
+    [Migration("20250628080352_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1072,6 +1072,36 @@ namespace SnapLink_Repository.Migrations
                     b.ToTable("UserRole", (string)null);
                 });
 
+            modelBuilder.Entity("SnapLink_Repository.Entity.UserStyle", b =>
+                {
+                    b.Property<int>("UserStyleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("userStyleId");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserStyleId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("StyleId")
+                        .HasColumnType("int")
+                        .HasColumnName("styleId");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("userId");
+
+                    b.HasKey("UserStyleId")
+                        .HasName("PK__UserStyle__476AAC030CF022A8");
+
+                    b.HasIndex("StyleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserStyle", (string)null);
+                });
+
             modelBuilder.Entity("SnapLink_Repository.Entity.WithdrawalRequest", b =>
                 {
                     b.Property<int>("Id")
@@ -1405,6 +1435,25 @@ namespace SnapLink_Repository.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SnapLink_Repository.Entity.UserStyle", b =>
+                {
+                    b.HasOne("SnapLink_Repository.Entity.Style", "Style")
+                        .WithMany("UserStyles")
+                        .HasForeignKey("StyleId")
+                        .IsRequired()
+                        .HasConstraintName("FK_UserStyle_Style");
+
+                    b.HasOne("SnapLink_Repository.Entity.User", "User")
+                        .WithMany("UserStyles")
+                        .HasForeignKey("UserId")
+                        .IsRequired()
+                        .HasConstraintName("FK_UserStyle_User");
+
+                    b.Navigation("Style");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SnapLink_Repository.Entity.WithdrawalRequest", b =>
                 {
                     b.HasOne("SnapLink_Repository.Entity.Photographer", "Photographer")
@@ -1473,6 +1522,8 @@ namespace SnapLink_Repository.Migrations
             modelBuilder.Entity("SnapLink_Repository.Entity.Style", b =>
                 {
                     b.Navigation("PhotographerStyles");
+
+                    b.Navigation("UserStyles");
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.User", b =>
@@ -1502,6 +1553,8 @@ namespace SnapLink_Repository.Migrations
                     b.Navigation("Transactions");
 
                     b.Navigation("UserRoles");
+
+                    b.Navigation("UserStyles");
                 });
 #pragma warning restore 612, 618
         }

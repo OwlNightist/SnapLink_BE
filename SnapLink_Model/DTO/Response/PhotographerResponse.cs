@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace SnapLink_Model.DTO.Response
 {
@@ -28,6 +29,9 @@ namespace SnapLink_Model.DTO.Response
         public DateTime? CreateAt { get; set; }
         public DateTime? UpdateAt { get; set; }
         public string? Status { get; set; }
+        
+        // Styles information
+        public List<string> Styles { get; set; } = new List<string>();
     }
 
     public class PhotographerDetailResponse : PhotographerResponse
@@ -51,5 +55,8 @@ namespace SnapLink_Model.DTO.Response
         public bool? FeaturedStatus { get; set; }
         public string? ProfileImage { get; set; }
         public string? VerificationStatus { get; set; }
+        
+        // Styles information
+        public List<string> Styles { get; set; } = new List<string>();
     }
 } 

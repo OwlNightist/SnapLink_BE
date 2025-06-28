@@ -17,6 +17,5 @@ namespace SnapLink_Repository.IRepository
         Task DeleteUserAsync(User user);
         Task<List<User>> GetAllUsersAsync();
         Task<List<User>> GetUsersByRoleNameAsync(string roleName);
-        Task<User?> GetUserByIdAsyncc(int userId);
     }
 }

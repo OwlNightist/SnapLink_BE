@@ -61,6 +61,8 @@ public partial class SnaplinkDbContext : DbContext
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
+    public virtual DbSet<UserStyle> UserStyles { get; set; }
+
     public virtual DbSet<WithdrawalRequest> WithdrawalRequests { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -727,6 +729,27 @@ public partial class SnaplinkDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.UserRoles)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_UserRole_User");
+        });
+
+        modelBuilder.Entity<UserStyle>(entity =>
+        {
+            entity.HasKey(e => e.UserStyleId).HasName("PK__UserStyle__476AAC030CF022A8");
+
+            entity.ToTable("UserStyle");
+
+            entity.Property(e => e.UserStyleId).HasColumnName("userStyleId");
+            entity.Property(e => e.StyleId).HasColumnName("styleId");
+            entity.Property(e => e.UserId).HasColumnName("userId");
+
+            entity.HasOne(d => d.Style).WithMany(p => p.UserStyles)
+                .HasForeignKey(d => d.StyleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserStyle_Style");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserStyles)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserStyle_User");
         });
 
         modelBuilder.Entity<WithdrawalRequest>(entity =>

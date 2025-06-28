@@ -39,7 +39,10 @@ namespace SnapLink_Repository.Repository
         }
         public async Task<User?> GetUserByIdAsync(int userId)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            return await _context.Users
+                .Include(u => u.UserStyles)
+                    .ThenInclude(us => us.Style)
+                .FirstOrDefaultAsync(u => u.UserId == userId && u.Status != "Deleted");
         }
 
         public async Task UpdateUserAsync(User user)
@@ -56,19 +59,18 @@ namespace SnapLink_Repository.Repository
         public async Task<List<User>> GetAllUsersAsync()
         {
             return await _context.Users
+                .Include(u => u.UserStyles)
+                    .ThenInclude(us => us.Style)
                 .Where(u => u.Status != "Deleted")
                 .ToListAsync();
-        }
-
-        public async Task<User?> GetUserByIdAsyncc(int userId)
-        {
-            return await _context.Users
-                .FirstOrDefaultAsync(u => u.UserId == userId && u.Status != "Deleted");
         }
 
         public async Task<List<User>> GetUsersByRoleNameAsync(string roleName)
         {
             return await _context.UserRoles
+                .Include(ur => ur.User)
+                    .ThenInclude(u => u.UserStyles)
+                        .ThenInclude(us => us.Style)
                 .Where(ur => ur.Role.RoleName == roleName && ur.User.Status != "Deleted")
                 .Select(ur => ur.User)
                 .ToListAsync();

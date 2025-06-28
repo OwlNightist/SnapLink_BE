@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SnapLink_Model.DTO;
+using SnapLink_Model.DTO.Response;
 using SnapLink_Service.IService;
+using AutoMapper;
 
 namespace SnapLink_API.Controllers
 {
@@ -10,9 +12,12 @@ namespace SnapLink_API.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
-        public UserController(IUserService userService)
+        private readonly IMapper _mapper;
+
+        public UserController(IUserService userService, IMapper mapper)
         {
             _userService = userService;
+            _mapper = mapper;
         }
         [HttpPost("create-admin")]
         public async Task<IActionResult> CreateAdmin([FromBody] CreateUserDto dto)
@@ -66,7 +71,8 @@ namespace SnapLink_API.Controllers
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userService.GetAllUsersAsync();
-            return Ok(users);
+            var userResponses = _mapper.Map<List<UserResponse>>(users);
+            return Ok(userResponses);
         }
 
         [HttpGet("{userId}")]
@@ -74,14 +80,17 @@ namespace SnapLink_API.Controllers
         {
             var user = await _userService.GetUserByIdAsync(userId);
             if (user == null) return NotFound("User not found.");
-            return Ok(user);
+            
+            var userResponse = _mapper.Map<UserResponse>(user);
+            return Ok(userResponse);
         }
 
         [HttpGet("by-role/{roleName}")]
         public async Task<IActionResult> GetUsersByRole(string roleName)
         {
             var users = await _userService.GetUsersByRoleNameAsync(roleName);
-            return Ok(users);
+            var userResponses = _mapper.Map<List<UserResponse>>(users);
+            return Ok(userResponses);
         }
 
     }

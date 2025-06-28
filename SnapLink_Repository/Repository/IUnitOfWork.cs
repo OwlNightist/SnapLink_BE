@@ -29,6 +29,7 @@ namespace SnapLink_Repository.Repository
         IGenericRepository<Transaction> TransactionRepository { get; }
         IGenericRepository<User> UserRepository { get; }
         IGenericRepository<UserRole> UserRoleRepository { get; }
+        IGenericRepository<UserStyle> UserStyleRepository { get; }
         IGenericRepository<WithdrawalRequest> WithdrawalRequestRepository { get; }
 
         // Transaction methods

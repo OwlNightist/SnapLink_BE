@@ -13,7 +13,7 @@ public partial class Photographer
 
     public string? Equipment { get; set; }
 
-    public string? Specialty { get; set; }
+    public string? Specialty { get; set; } //style
 
     public string? PortfolioUrl { get; set; }
 

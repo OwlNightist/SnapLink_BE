@@ -92,6 +92,23 @@ namespace SnapLink_API.Controllers
         }
 
         /// <summary>
+        /// Get photographers by style
+        /// </summary>
+        [HttpGet("style/{styleName}")]
+        public async Task<IActionResult> GetPhotographersByStyle(string styleName)
+        {
+            try
+            {
+                var photographers = await _photographerService.GetPhotographersByStyleAsync(styleName);
+                return Ok(photographers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
+        /// <summary>
         /// Get available photographers
         /// </summary>
         [HttpGet("available")]
@@ -258,6 +275,65 @@ namespace SnapLink_API.Controllers
                     return NotFound(new { message = $"Photographer with ID {id} not found" });
                 }
                 return Ok(new { message = "Verification status updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get photographer styles
+        /// </summary>
+        [HttpGet("{id}/styles")]
+        public async Task<IActionResult> GetPhotographerStyles(int id)
+        {
+            try
+            {
+                var styles = await _photographerService.GetPhotographerStylesAsync(id);
+                return Ok(styles);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Add style to photographer
+        /// </summary>
+        [HttpPost("{id}/styles/{styleId}")]
+        public async Task<IActionResult> AddStyleToPhotographer(int id, int styleId)
+        {
+            try
+            {
+                var result = await _photographerService.AddStyleToPhotographerAsync(id, styleId);
+                if (!result)
+                {
+                    return BadRequest(new { message = "Failed to add style. Photographer or style not found, or style already exists." });
+                }
+                return Ok(new { message = "Style added successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Remove style from photographer
+        /// </summary>
+        [HttpDelete("{id}/styles/{styleId}")]
+        public async Task<IActionResult> RemoveStyleFromPhotographer(int id, int styleId)
+        {
+            try
+            {
+                var result = await _photographerService.RemoveStyleFromPhotographerAsync(id, styleId);
+                if (!result)
+                {
+                    return BadRequest(new { message = "Failed to remove style. Photographer or style relationship not found." });
+                }
+                return Ok(new { message = "Style removed successfully" });
             }
             catch (Exception ex)
             {
