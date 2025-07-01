@@ -16,6 +16,7 @@ namespace SnapLink_Service.IService
         Task<List<User>> GetAllUsersAsync();
         Task<User?> GetUserByIdAsync(int userId);
         Task<List<User>> GetUsersByRoleNameAsync(string roleName);
+        Task<bool> AssignRolesToUserAsync(AssignRolesDto request);
 
     }
 }

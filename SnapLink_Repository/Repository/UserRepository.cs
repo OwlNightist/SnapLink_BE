@@ -74,5 +74,26 @@ namespace SnapLink_Repository.Repository
                 .ToListAsync();
         }
 
+        public async Task<bool> AddRolesToUserAsync(int userId, List<int> roleIds)
+        {
+            foreach (var roleId in roleIds)
+            {
+                var exists = await _context.UserRoles
+                    .AnyAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+
+                if (!exists)
+                {
+                    _context.UserRoles.Add(new UserRole
+                    {
+                        UserId = userId,
+                        RoleId = roleId
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
     }
 }

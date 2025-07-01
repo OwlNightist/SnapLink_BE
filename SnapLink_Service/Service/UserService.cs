@@ -81,7 +81,10 @@ namespace SnapLink_Service.Service
             return await _repo.GetUsersByRoleNameAsync(roleName);
         }
 
-
+        public async Task<bool> AssignRolesToUserAsync(AssignRolesDto request)
+        {
+            return await _repo.AddRolesToUserAsync(request.UserId, request.RoleIds);
+        }
 
     }
 }
