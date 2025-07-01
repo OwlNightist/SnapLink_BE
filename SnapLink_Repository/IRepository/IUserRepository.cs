@@ -18,5 +18,6 @@ namespace SnapLink_Repository.IRepository
         Task<List<User>> GetAllUsersAsync();
         Task<List<User>> GetUsersByRoleNameAsync(string roleName);
         Task<User?> GetUserByIdAsyncc(int userId);
+        Task<bool> AddRolesToUserAsync(int userId, List<int> roleIds);
     }
 }

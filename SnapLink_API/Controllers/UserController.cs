@@ -83,6 +83,13 @@ namespace SnapLink_API.Controllers
             var users = await _userService.GetUsersByRoleNameAsync(roleName);
             return Ok(users);
         }
-
+        [HttpPost("assign-roles")]
+        public async Task<IActionResult> AssignRolesToUser([FromBody] AssignRolesDto request)
+        {
+            var result = await _userService.AssignRolesToUserAsync(request);
+            if (result)
+                return Ok("Roles assigned successfully.");
+            return BadRequest("Failed to assign roles.");
+        }
     }
 }
