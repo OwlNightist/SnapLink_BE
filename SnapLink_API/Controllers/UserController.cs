@@ -81,6 +81,8 @@ namespace SnapLink_API.Controllers
         public async Task<IActionResult> GetUsersByRole(string roleName)
         {
             var users = await _userService.GetUsersByRoleNameAsync(roleName);
+            if (users == null || !users.Any())
+                return NotFound("No users found for the given role.");
             return Ok(users);
         }
         [HttpPost("assign-roles")]
