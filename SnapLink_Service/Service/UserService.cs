@@ -1,4 +1,5 @@
-﻿using SnapLink_Model.DTO;
+﻿using AutoMapper;
+using SnapLink_Model.DTO;
 using SnapLink_Repository.Entity;
 using SnapLink_Repository.IRepository;
 using SnapLink_Repository.Repository;
@@ -14,9 +15,11 @@ namespace SnapLink_Service.Service
     public class UserService : IUserService
     {
         private readonly IUserRepository _repo;
-        public UserService(IUserRepository repo)
+        private readonly IMapper _mapper;
+        public UserService(IUserRepository repo, IMapper mapper)
         {
             _repo = repo;
+            _mapper = mapper;
         }
         public async Task<string> CreateUserWithRoleAsync(CreateUserDto dto, string roleName)
         {
@@ -32,6 +35,8 @@ namespace SnapLink_Service.Service
                 PhoneNumber = dto.PhoneNumber,
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow,
+                ProfileImage = dto.ProfileImage,
+                Bio = dto.Bio,
                 Status = "Active"
             };
 
@@ -76,9 +81,10 @@ namespace SnapLink_Service.Service
             return await _repo.GetUserByIdAsync(userId);
         }
 
-        public async Task<List<User>> GetUsersByRoleNameAsync(string roleName)
+        public async Task<List<UserDto>> GetUsersByRoleNameAsync(string roleName)
         {
-            return await _repo.GetUsersByRoleNameAsync(roleName);
+            var users = await _repo.GetUsersByRoleNameAsync(roleName);
+            return _mapper.Map<List<UserDto>>(users);
         }
 
         public async Task<bool> AssignRolesToUserAsync(AssignRolesDto request)

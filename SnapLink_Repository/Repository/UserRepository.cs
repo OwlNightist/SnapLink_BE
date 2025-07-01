@@ -69,8 +69,12 @@ namespace SnapLink_Repository.Repository
         public async Task<List<User>> GetUsersByRoleNameAsync(string roleName)
         {
             return await _context.UserRoles
+                .Include(ur => ur.User)
+                    .ThenInclude(u => u.UserRoles)
+                        .ThenInclude(ur => ur.Role)
                 .Where(ur => ur.Role.RoleName == roleName && ur.User.Status != "Deleted")
                 .Select(ur => ur.User)
+                .Distinct()
                 .ToListAsync();
         }
 

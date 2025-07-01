@@ -56,6 +56,10 @@ namespace SnapLink_Model.DTO
             CreateMap<CreateReviewRequest, Review>();
             CreateMap<UpdateReviewRequest, Review>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<User, UserDto>()
+           .ForMember(dest => dest.Roles,
+                      opt => opt.MapFrom(src => src.UserRoles.Select(ur => ur.Role.RoleName)));
         }
     }
 }
