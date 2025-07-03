@@ -1,0 +1,38 @@
+name: Build and Deploy to Azure Web App
+
+on:
+  push:
+    branches:
+      - main   
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'  
+        
+    - name: Restore dependencies
+      run: dotnet restore SnapLink_BE.sln
+
+    - name: Build
+      run: dotnet build SnapLink_BE.sln --configuration Release --no-restore
+
+    - name: Test
+      run: dotnet test SnapLink_BE.sln --no-build --verbosity normal
+
+    - name: Publish SnapLink_API
+      run: dotnet publish SnapLink_API/SnapLink_API.csproj --configuration Release --output ./publish
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: snaplinkApi
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ./publish
