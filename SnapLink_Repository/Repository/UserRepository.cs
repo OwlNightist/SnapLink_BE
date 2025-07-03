@@ -78,6 +78,13 @@ namespace SnapLink_Repository.Repository
                 .ToListAsync();
         }
 
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _context.Users
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.Email == email);
+        }
         public async Task<bool> AddRolesToUserAsync(int userId, List<int> roleIds)
         {
             foreach (var roleId in roleIds)

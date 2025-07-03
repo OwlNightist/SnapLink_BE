@@ -82,6 +82,20 @@ namespace SnapLink_Service.Service
         {
             return await _repo.GetUserByIdAsync(userId);
         }
+        public async Task<UserDto?> GetUserByEmailAsync(string email)
+        {
+            var user = await _repo.GetByEmailAsync(email);
+            if (user == null) return null;
+
+            return new UserDto
+            {
+                UserId = user.UserId,
+                FullName = user.FullName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Roles = user.UserRoles.Select(ur => ur.Role.RoleName).ToList()
+            };
+        }
 
         public async Task<List<UserDto>> GetUsersByRoleNameAsync(string roleName)
         {
