@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 
 namespace SnapLink_Model.DTO
 {
-    public class CreateUserDto
+    public class UserDto
     {
-        public string UserName { get; set; } = null!;
-        public string Email { get; set; } = null!;
-        public string PasswordHash { get; set; } = null!;
+        public int UserId { get; set; }
+        public string? UserName { get; set; }
+        public string? Email { get; set; }
         public string? FullName { get; set; }
         public string? PhoneNumber { get; set; }
         public string? ProfileImage { get; set; }
-        public string? Bio { get; set; }
+        public string? Status { get; set; }
+        public List<string> Roles { get; set; } = new List<string>();
     }
 }

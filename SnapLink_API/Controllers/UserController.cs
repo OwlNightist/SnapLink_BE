@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SnapLink_Model.DTO;
-using SnapLink_Model.DTO.Response;
 using SnapLink_Service.IService;
-using AutoMapper;
 
 namespace SnapLink_API.Controllers
 {
@@ -12,12 +10,9 @@ namespace SnapLink_API.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly IMapper _mapper;
-
-        public UserController(IUserService userService, IMapper mapper)
+        public UserController(IUserService userService)
         {
             _userService = userService;
-            _mapper = mapper;
         }
         [HttpPost("create-admin")]
         public async Task<IActionResult> CreateAdmin([FromBody] CreateUserDto dto)
@@ -71,8 +66,14 @@ namespace SnapLink_API.Controllers
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userService.GetAllUsersAsync();
-            var userResponses = _mapper.Map<List<UserResponse>>(users);
-            return Ok(userResponses);
+            return Ok(users);
+        }
+        [HttpGet("GetUserByEmail")]
+        public async Task<IActionResult> GetUserByEmail([FromQuery] string email)
+        {
+            var user = await _userService.GetUserByEmailAsync(email);
+            if (user == null) return NotFound($"User with email '{email}' not found");
+            return Ok(user);
         }
 
         [HttpGet("{userId}")]
@@ -80,18 +81,24 @@ namespace SnapLink_API.Controllers
         {
             var user = await _userService.GetUserByIdAsync(userId);
             if (user == null) return NotFound("User not found.");
-            
-            var userResponse = _mapper.Map<UserResponse>(user);
-            return Ok(userResponse);
+            return Ok(user);
         }
 
         [HttpGet("by-role/{roleName}")]
         public async Task<IActionResult> GetUsersByRole(string roleName)
         {
             var users = await _userService.GetUsersByRoleNameAsync(roleName);
-            var userResponses = _mapper.Map<List<UserResponse>>(users);
-            return Ok(userResponses);
+            if (users == null || !users.Any())
+                return NotFound("No users found for the given role.");
+            return Ok(users);
         }
-
+        [HttpPost("assign-roles")]
+        public async Task<IActionResult> AssignRolesToUser([FromBody] AssignRolesDto request)
+        {
+            var result = await _userService.AssignRolesToUserAsync(request);
+            if (result)
+                return Ok("Roles assigned successfully.");
+            return BadRequest("Failed to assign roles.");
+        }
     }
 }

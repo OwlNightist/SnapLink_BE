@@ -39,6 +39,12 @@ builder.Services.AddAuthentication(options =>
 // Add services to the container.
 builder.Services.AddDbContext<SnaplinkDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
 
 // Configure JSON serialization to handle circular references
 builder.Services.AddControllers()

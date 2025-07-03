@@ -15,7 +15,9 @@ namespace SnapLink_Service.IService
         Task<string> DeleteUserAsync(int userId);
         Task<List<User>> GetAllUsersAsync();
         Task<User?> GetUserByIdAsync(int userId);
-        Task<List<User>> GetUsersByRoleNameAsync(string roleName);
+        Task<List<UserDto>> GetUsersByRoleNameAsync(string roleName);
+        Task<UserDto?> GetUserByEmailAsync(string email);
+        Task<bool> AssignRolesToUserAsync(AssignRolesDto request);
 
     }
 }
