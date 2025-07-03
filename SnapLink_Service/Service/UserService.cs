@@ -53,6 +53,8 @@ namespace SnapLink_Service.Service
             if (!string.IsNullOrEmpty(dto.FullName)) user.FullName = dto.FullName;
             if (!string.IsNullOrEmpty(dto.PhoneNumber)) user.PhoneNumber = dto.PhoneNumber;
             if (!string.IsNullOrEmpty(dto.PasswordHash)) user.PasswordHash = dto.PasswordHash;
+            if (!string.IsNullOrEmpty(dto.ProfileImage)) user.ProfileImage = dto.ProfileImage;
+            if (!string.IsNullOrEmpty(dto.Bio)) user.Bio = dto.Bio;
             user.UpdateAt = DateTime.UtcNow;
 
             await _repo.UpdateUserAsync(user);
