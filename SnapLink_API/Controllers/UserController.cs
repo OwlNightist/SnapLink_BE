@@ -68,6 +68,13 @@ namespace SnapLink_API.Controllers
             var users = await _userService.GetAllUsersAsync();
             return Ok(users);
         }
+        [HttpGet("GetUserByEmail")]
+        public async Task<IActionResult> GetUserByEmail([FromQuery] string email)
+        {
+            var user = await _userService.GetUserByEmailAsync(email);
+            if (user == null) return NotFound($"User with email '{email}' not found");
+            return Ok(user);
+        }
 
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetUserById(int userId)
