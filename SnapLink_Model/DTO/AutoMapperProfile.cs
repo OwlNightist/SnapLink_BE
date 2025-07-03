@@ -60,6 +60,7 @@ namespace SnapLink_Model.DTO
             CreateMap<User, UserDto>()
            .ForMember(dest => dest.Roles,
                       opt => opt.MapFrom(src => src.UserRoles.Select(ur => ur.Role.RoleName)));
+            CreateMap<Location, LocationDto>();
         }
     }
 }

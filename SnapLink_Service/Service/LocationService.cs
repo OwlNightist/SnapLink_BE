@@ -1,4 +1,5 @@
-﻿using SnapLink_Model.DTO;
+﻿using AutoMapper;
+using SnapLink_Model.DTO;
 using SnapLink_Repository.Entity;
 using SnapLink_Repository.IRepository;
 using SnapLink_Service.IService;
@@ -13,10 +14,12 @@ namespace SnapLink_Service.Service
     public class LocationService : ILocationService
     {
         private readonly ILocationRepository _repo;
+        private readonly IMapper _mapper;
 
-        public LocationService(ILocationRepository repo)
+        public LocationService(ILocationRepository repo, IMapper mapper)
         {
             _repo = repo;
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<Location>> GetAllAsync() => await _repo.GetAllAsync();
