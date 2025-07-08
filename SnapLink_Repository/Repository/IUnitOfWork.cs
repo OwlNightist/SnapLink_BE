@@ -31,6 +31,9 @@ namespace SnapLink_Repository.Repository
         IGenericRepository<UserRole> UserRoleRepository { get; }
         IGenericRepository<UserStyle> UserStyleRepository { get; }
         IGenericRepository<WithdrawalRequest> WithdrawalRequestRepository { get; }
+        IGenericRepository<PhotographerEvent> PhotographerEventRepository { get; }
+        IGenericRepository<PhotographerImage> PhotographerImageRepository { get; }
+        IGenericRepository<PhotographerEventLocation> PhotographerEventLocationRepository { get; }
 
         // Transaction methods
         Task<int> SaveChangesAsync();

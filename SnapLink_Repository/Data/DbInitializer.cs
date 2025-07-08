@@ -53,6 +53,9 @@ namespace SnapLink_Repository.Data
             // Seed Photographer Wallets
             SeedPhotographerWallets(context, photographers);
             
+            // Seed Photographer Images
+            SeedPhotographerImages(context, photographers);
+            
             // Seed Location Owners
             var locationOwners = SeedLocationOwners(context, users);
             
@@ -62,11 +65,17 @@ namespace SnapLink_Repository.Data
             // Seed Location Images
             SeedLocationImages(context, locations);
             
+            // Seed Photographer Events
+            var photographerEvents = SeedPhotographerEvents(context, photographers);
+            
+            // Seed Photographer Event Locations
+            SeedPhotographerEventLocations(context, photographerEvents, locations);
+            
             // Seed Advertisements
             SeedAdvertisements(context, locations);
             
             // Seed Bookings
-            var bookings = SeedBookings(context, users, photographers, locations);
+            var bookings = SeedBookings(context, users, photographers, locations, photographerEvents);
             
             // Seed Reviews
             SeedReviews(context, bookings);
@@ -484,6 +493,101 @@ namespace SnapLink_Repository.Data
             context.SaveChanges();
         }
 
+        private static void SeedPhotographerImages(SnaplinkDbContext context, List<Photographer> photographers)
+        {
+            var photographerImages = new List<PhotographerImage>
+            {
+                // Sarah Wilson's portfolio images
+                new PhotographerImage 
+                { 
+                    PhotographerId = photographers[0].PhotographerId,
+                    ImageUrl = "https://example.com/sarah-portfolio-1.jpg",
+                    Caption = "Professional portrait session",
+                    IsPrimary = true,
+                    UploadedAt = DateTime.Now.AddDays(-180)
+                },
+                new PhotographerImage 
+                { 
+                    PhotographerId = photographers[0].PhotographerId,
+                    ImageUrl = "https://example.com/sarah-portfolio-2.jpg",
+                    Caption = "Fashion photography shoot",
+                    IsPrimary = false,
+                    UploadedAt = DateTime.Now.AddDays(-175)
+                },
+                new PhotographerImage 
+                { 
+                    PhotographerId = photographers[0].PhotographerId,
+                    ImageUrl = "https://example.com/sarah-portfolio-3.jpg",
+                    Caption = "Studio portrait with natural lighting",
+                    IsPrimary = false,
+                    UploadedAt = DateTime.Now.AddDays(-170)
+                },
+                
+                // Mike Chen's portfolio images
+                new PhotographerImage 
+                { 
+                    PhotographerId = photographers[1].PhotographerId,
+                    ImageUrl = "https://example.com/mike-portfolio-1.jpg",
+                    Caption = "Wedding ceremony capture",
+                    IsPrimary = true,
+                    UploadedAt = DateTime.Now.AddDays(-160)
+                },
+                new PhotographerImage 
+                { 
+                    PhotographerId = photographers[1].PhotographerId,
+                    ImageUrl = "https://example.com/mike-portfolio-2.jpg",
+                    Caption = "Candid wedding moments",
+                    IsPrimary = false,
+                    UploadedAt = DateTime.Now.AddDays(-155)
+                },
+                new PhotographerImage 
+                { 
+                    PhotographerId = photographers[1].PhotographerId,
+                    ImageUrl = "https://example.com/mike-portfolio-3.jpg",
+                    Caption = "Reception photography",
+                    IsPrimary = false,
+                    UploadedAt = DateTime.Now.AddDays(-150)
+                },
+                new PhotographerImage 
+                { 
+                    PhotographerId = photographers[1].PhotographerId,
+                    ImageUrl = "https://example.com/mike-portfolio-4.jpg",
+                    Caption = "Outdoor wedding ceremony",
+                    IsPrimary = false,
+                    UploadedAt = DateTime.Now.AddDays(-145)
+                },
+                
+                // Emma Davis's portfolio images
+                new PhotographerImage 
+                { 
+                    PhotographerId = photographers[2].PhotographerId,
+                    ImageUrl = "https://example.com/emma-portfolio-1.jpg",
+                    Caption = "Mountain landscape at sunset",
+                    IsPrimary = true,
+                    UploadedAt = DateTime.Now.AddDays(-140)
+                },
+                new PhotographerImage 
+                { 
+                    PhotographerId = photographers[2].PhotographerId,
+                    ImageUrl = "https://example.com/emma-portfolio-2.jpg",
+                    Caption = "Urban architecture photography",
+                    IsPrimary = false,
+                    UploadedAt = DateTime.Now.AddDays(-135)
+                },
+                new PhotographerImage 
+                { 
+                    PhotographerId = photographers[2].PhotographerId,
+                    ImageUrl = "https://example.com/emma-portfolio-3.jpg",
+                    Caption = "Nature and wildlife",
+                    IsPrimary = false,
+                    UploadedAt = DateTime.Now.AddDays(-130)
+                }
+            };
+
+            context.PhotographerImages.AddRange(photographerImages);
+            context.SaveChanges();
+        }
+
         private static List<LocationOwner> SeedLocationOwners(SnaplinkDbContext context, List<User> users)
         {
             var locationOwners = new List<LocationOwner>
@@ -623,6 +727,171 @@ namespace SnapLink_Repository.Data
             context.SaveChanges();
         }
 
+        private static List<PhotographerEvent> SeedPhotographerEvents(SnaplinkDbContext context, List<Photographer> photographers)
+        {
+            var photographerEvents = new List<PhotographerEvent>
+            {
+                // Sarah Wilson's events
+                new PhotographerEvent 
+                { 
+                    PhotographerId = photographers[0].PhotographerId,
+                    Title = "Portrait Photography Special",
+                    Description = "Professional portrait session with natural lighting. Perfect for headshots, family portraits, and personal branding.",
+                    OriginalPrice = 300.00m,
+                    DiscountedPrice = 225.00m,
+                    DiscountPercentage = 25.00m,
+                    StartDate = DateTime.Now.AddDays(5),
+                    EndDate = DateTime.Now.AddDays(30),
+                    MaxBookings = 10,
+                    CurrentBookings = 2,
+                    Status = "Active",
+                    CreatedAt = DateTime.Now.AddDays(-10),
+                    UpdatedAt = DateTime.Now.AddDays(-5)
+                },
+                new PhotographerEvent 
+                { 
+                    PhotographerId = photographers[0].PhotographerId,
+                    Title = "Fashion Photography Package",
+                    Description = "Complete fashion photography session including wardrobe consultation and post-processing.",
+                    OriginalPrice = 500.00m,
+                    DiscountedPrice = 400.00m,
+                    DiscountPercentage = 20.00m,
+                    StartDate = DateTime.Now.AddDays(15),
+                    EndDate = DateTime.Now.AddDays(45),
+                    MaxBookings = 5,
+                    CurrentBookings = 1,
+                    Status = "Active",
+                    CreatedAt = DateTime.Now.AddDays(-8),
+                    UpdatedAt = DateTime.Now.AddDays(-3)
+                },
+                
+                // Mike Chen's events
+                new PhotographerEvent 
+                { 
+                    PhotographerId = photographers[1].PhotographerId,
+                    Title = "Wedding Photography Premium",
+                    Description = "Complete wedding day coverage including ceremony, reception, and candid moments. Includes engagement shoot.",
+                    OriginalPrice = 2000.00m,
+                    DiscountedPrice = 1600.00m,
+                    DiscountPercentage = 20.00m,
+                    StartDate = DateTime.Now.AddDays(20),
+                    EndDate = DateTime.Now.AddDays(90),
+                    MaxBookings = 3,
+                    CurrentBookings = 1,
+                    Status = "Active",
+                    CreatedAt = DateTime.Now.AddDays(-12),
+                    UpdatedAt = DateTime.Now.AddDays(-7)
+                },
+                new PhotographerEvent 
+                { 
+                    PhotographerId = photographers[1].PhotographerId,
+                    Title = "Engagement Photo Session",
+                    Description = "Romantic engagement photography session at beautiful outdoor locations.",
+                    OriginalPrice = 400.00m,
+                    DiscountedPrice = 320.00m,
+                    DiscountPercentage = 20.00m,
+                    StartDate = DateTime.Now.AddDays(10),
+                    EndDate = DateTime.Now.AddDays(60),
+                    MaxBookings = 8,
+                    CurrentBookings = 3,
+                    Status = "Active",
+                    CreatedAt = DateTime.Now.AddDays(-6),
+                    UpdatedAt = DateTime.Now.AddDays(-2)
+                },
+                
+                // Emma Davis's events
+                new PhotographerEvent 
+                { 
+                    PhotographerId = photographers[2].PhotographerId,
+                    Title = "Landscape Photography Workshop",
+                    Description = "Learn landscape photography techniques while exploring beautiful natural locations.",
+                    OriginalPrice = 250.00m,
+                    DiscountedPrice = 200.00m,
+                    DiscountPercentage = 20.00m,
+                    StartDate = DateTime.Now.AddDays(25),
+                    EndDate = DateTime.Now.AddDays(35),
+                    MaxBookings = 6,
+                    CurrentBookings = 2,
+                    Status = "Active",
+                    CreatedAt = DateTime.Now.AddDays(-15),
+                    UpdatedAt = DateTime.Now.AddDays(-10)
+                },
+                new PhotographerEvent 
+                { 
+                    PhotographerId = photographers[2].PhotographerId,
+                    Title = "Architecture Photography Tour",
+                    Description = "Professional architecture photography session in the city's most iconic buildings.",
+                    OriginalPrice = 180.00m,
+                    DiscountedPrice = 150.00m,
+                    DiscountPercentage = 16.67m,
+                    StartDate = DateTime.Now.AddDays(7),
+                    EndDate = DateTime.Now.AddDays(40),
+                    MaxBookings = 4,
+                    CurrentBookings = 0,
+                    Status = "Active",
+                    CreatedAt = DateTime.Now.AddDays(-4),
+                    UpdatedAt = DateTime.Now.AddDays(-1)
+                },
+                
+                // Expired event for testing
+                new PhotographerEvent 
+                { 
+                    PhotographerId = photographers[0].PhotographerId,
+                    Title = "Holiday Portrait Special",
+                    Description = "Special holiday-themed portrait sessions.",
+                    OriginalPrice = 200.00m,
+                    DiscountedPrice = 150.00m,
+                    DiscountPercentage = 25.00m,
+                    StartDate = DateTime.Now.AddDays(-30),
+                    EndDate = DateTime.Now.AddDays(-5),
+                    MaxBookings = 15,
+                    CurrentBookings = 15,
+                    Status = "Expired",
+                    CreatedAt = DateTime.Now.AddDays(-45),
+                    UpdatedAt = DateTime.Now.AddDays(-5)
+                }
+            };
+
+            context.PhotographerEvents.AddRange(photographerEvents);
+            context.SaveChanges();
+            return photographerEvents;
+        }
+
+        private static void SeedPhotographerEventLocations(SnaplinkDbContext context, List<PhotographerEvent> photographerEvents, List<Location> locations)
+        {
+            var photographerEventLocations = new List<PhotographerEventLocation>
+            {
+                // Portrait Photography Special - Available at both downtown studios
+                new PhotographerEventLocation { EventId = photographerEvents[0].EventId, LocationId = locations[0].LocationId },
+                new PhotographerEventLocation { EventId = photographerEvents[0].EventId, LocationId = locations[1].LocationId },
+                
+                // Fashion Photography Package - Downtown studios
+                new PhotographerEventLocation { EventId = photographerEvents[1].EventId, LocationId = locations[0].LocationId },
+                new PhotographerEventLocation { EventId = photographerEvents[1].EventId, LocationId = locations[1].LocationId },
+                
+                // Wedding Photography Premium - Garden pavilion
+                new PhotographerEventLocation { EventId = photographerEvents[2].EventId, LocationId = locations[2].LocationId },
+                
+                // Engagement Photo Session - Garden pavilion
+                new PhotographerEventLocation { EventId = photographerEvents[3].EventId, LocationId = locations[2].LocationId },
+                
+                // Landscape Photography Workshop - Garden pavilion  
+                new PhotographerEventLocation { EventId = photographerEvents[4].EventId, LocationId = locations[2].LocationId },
+                
+                // Architecture Photography Tour - Downtown studios
+                new PhotographerEventLocation { EventId = photographerEvents[5].EventId, LocationId = locations[0].LocationId },
+                new PhotographerEventLocation { EventId = photographerEvents[5].EventId, LocationId = locations[1].LocationId },
+                
+                // Expired Holiday Portrait Special - All locations
+                new PhotographerEventLocation { EventId = photographerEvents[6].EventId, LocationId = locations[0].LocationId },
+                new PhotographerEventLocation { EventId = photographerEvents[6].EventId, LocationId = locations[1].LocationId },
+                new PhotographerEventLocation { EventId = photographerEvents[6].EventId, LocationId = locations[2].LocationId }
+            };
+
+            context.PhotographerEventLocations.AddRange(photographerEventLocations);
+            context.SaveChanges();
+        }
+
         private static void SeedAdvertisements(SnaplinkDbContext context, List<Location> locations)
         {
             var advertisements = new List<Advertisement>
@@ -655,15 +924,17 @@ namespace SnapLink_Repository.Data
             context.SaveChanges();
         }
 
-        private static List<Booking> SeedBookings(SnaplinkDbContext context, List<User> users, List<Photographer> photographers, List<Location> locations)
+        private static List<Booking> SeedBookings(SnaplinkDbContext context, List<User> users, List<Photographer> photographers, List<Location> locations, List<PhotographerEvent> photographerEvents)
         {
             var bookings = new List<Booking>
             {
+                // Regular booking without event
                 new Booking 
                 { 
                     UserId = users[1].UserId,
                     PhotographerId = photographers[0].PhotographerId,
                     LocationId = locations[0].LocationId,
+                    EventId = null,
                     StartDatetime = DateTime.Now.AddDays(7),
                     EndDatetime = DateTime.Now.AddDays(7).AddHours(2),
                     TotalPrice = 460.00m,
@@ -672,24 +943,62 @@ namespace SnapLink_Repository.Data
                     CreatedAt = DateTime.Now.AddDays(-5),
                     UpdatedAt = DateTime.Now.AddDays(-5)
                 },
+                
+                // Event-based booking - Portrait Photography Special
+                new Booking 
+                { 
+                    UserId = users[9].UserId, // Carol White
+                    PhotographerId = photographers[0].PhotographerId, // Sarah Wilson
+                    LocationId = locations[0].LocationId, // Downtown Studio A
+                    EventId = photographerEvents[0].EventId, // Portrait Photography Special
+                    StartDatetime = DateTime.Now.AddDays(12),
+                    EndDatetime = DateTime.Now.AddDays(12).AddHours(1.5),
+                    TotalPrice = 305.00m, // Discounted price + location fee
+                    Status = "Confirmed",
+                    SpecialRequests = "Professional headshots for LinkedIn",
+                    CreatedAt = DateTime.Now.AddDays(-3),
+                    UpdatedAt = DateTime.Now.AddDays(-3)
+                },
+                
+                // Event-based booking - Wedding Photography Premium
                 new Booking 
                 { 
                     UserId = users[2].UserId,
                     PhotographerId = photographers[1].PhotographerId,
                     LocationId = locations[2].LocationId,
-                    StartDatetime = DateTime.Now.AddDays(14),
-                    EndDatetime = DateTime.Now.AddDays(14).AddHours(3),
-                    TotalPrice = 780.00m,
+                    EventId = photographerEvents[2].EventId, // Wedding Photography Premium
+                    StartDatetime = DateTime.Now.AddDays(45),
+                    EndDatetime = DateTime.Now.AddDays(45).AddHours(8),
+                    TotalPrice = 2080.00m, // Event price + location fee
                     Status = "Confirmed",
-                    SpecialRequests = "Outdoor wedding photos",
-                    CreatedAt = DateTime.Now.AddDays(-3),
-                    UpdatedAt = DateTime.Now.AddDays(-3)
+                    SpecialRequests = "Outdoor wedding ceremony and reception coverage",
+                    CreatedAt = DateTime.Now.AddDays(-2),
+                    UpdatedAt = DateTime.Now.AddDays(-2)
                 },
+                
+                // Event-based booking - Engagement Photo Session
+                new Booking 
+                { 
+                    UserId = users[11].UserId, // Eva Garcia
+                    PhotographerId = photographers[1].PhotographerId, // Mike Chen
+                    LocationId = locations[2].LocationId, // Garden Pavilion
+                    EventId = photographerEvents[3].EventId, // Engagement Photo Session
+                    StartDatetime = DateTime.Now.AddDays(18),
+                    EndDatetime = DateTime.Now.AddDays(18).AddHours(2),
+                    TotalPrice = 440.00m, // Event price + location fee
+                    Status = "Confirmed",
+                    SpecialRequests = "Romantic sunset engagement photos",
+                    CreatedAt = DateTime.Now.AddDays(-1),
+                    UpdatedAt = DateTime.Now.AddDays(-1)
+                },
+                
+                // Completed booking for reviews
                 new Booking 
                 { 
                     UserId = users[1].UserId,
                     PhotographerId = photographers[2].PhotographerId,
                     LocationId = locations[2].LocationId,
+                    EventId = null,
                     StartDatetime = DateTime.Now.AddDays(-10),
                     EndDatetime = DateTime.Now.AddDays(-10).AddHours(2),
                     TotalPrice = 360.00m,
@@ -697,6 +1006,22 @@ namespace SnapLink_Repository.Data
                     SpecialRequests = "Landscape photography",
                     CreatedAt = DateTime.Now.AddDays(-15),
                     UpdatedAt = DateTime.Now.AddDays(-10)
+                },
+                
+                // Event-based booking - Landscape Photography Workshop
+                new Booking 
+                { 
+                    UserId = users[10].UserId, // David Brown
+                    PhotographerId = photographers[2].PhotographerId, // Emma Davis
+                    LocationId = locations[2].LocationId, // Garden Pavilion
+                    EventId = photographerEvents[4].EventId, // Landscape Photography Workshop
+                    StartDatetime = DateTime.Now.AddDays(28),
+                    EndDatetime = DateTime.Now.AddDays(28).AddHours(4),
+                    TotalPrice = 440.00m, // Event price + location fee
+                    Status = "Confirmed",
+                    SpecialRequests = "Interested in learning advanced techniques",
+                    CreatedAt = DateTime.Now.AddHours(-6),
+                    UpdatedAt = DateTime.Now.AddHours(-6)
                 }
             };
 
@@ -709,6 +1034,31 @@ namespace SnapLink_Repository.Data
         {
             var reviews = new List<Review>
             {
+                // Review for completed landscape photography booking
+                new Review 
+                { 
+                    BookingId = bookings[4].BookingId,
+                    ReviewerId = bookings[4].UserId,
+                    RevieweeId = bookings[4].PhotographerId,
+                    RevieweeType = "Photographer",
+                    Rating = 5,
+                    Comment = "Excellent landscape photography! Emma captured the beauty of nature perfectly.",
+                    CreatedAt = DateTime.Now.AddDays(-8),
+                    UpdatedAt = DateTime.Now.AddDays(-8)
+                },
+                // Review for Portrait Photography Special event booking
+                new Review 
+                { 
+                    BookingId = bookings[1].BookingId,
+                    ReviewerId = bookings[1].UserId,
+                    RevieweeId = bookings[1].PhotographerId,
+                    RevieweeType = "Photographer",
+                    Rating = 5,
+                    Comment = "Amazing portrait session! Sarah's discounted event package was incredible value. Professional headshots turned out perfect!",
+                    CreatedAt = DateTime.Now.AddDays(-2),
+                    UpdatedAt = DateTime.Now.AddDays(-2)
+                },
+                // Review for Wedding Photography Premium event booking
                 new Review 
                 { 
                     BookingId = bookings[2].BookingId,
@@ -716,9 +1066,9 @@ namespace SnapLink_Repository.Data
                     RevieweeId = bookings[2].PhotographerId,
                     RevieweeType = "Photographer",
                     Rating = 5,
-                    Comment = "Excellent landscape photography! Emma captured the beauty of nature perfectly.",
-                    CreatedAt = DateTime.Now.AddDays(-8),
-                    UpdatedAt = DateTime.Now.AddDays(-8)
+                    Comment = "Mike's wedding photography premium package exceeded our expectations! The event pricing made it affordable and the quality was outstanding.",
+                    CreatedAt = DateTime.Now.AddDays(-1),
+                    UpdatedAt = DateTime.Now.AddDays(-1)
                 }
             };
 
@@ -730,6 +1080,7 @@ namespace SnapLink_Repository.Data
         {
             var payments = new List<Payment>
             {
+                // Payment for regular booking
                 new Payment 
                 { 
                     BookingId = bookings[0].BookingId,
@@ -743,31 +1094,75 @@ namespace SnapLink_Repository.Data
                     CreatedAt = DateTime.Now.AddDays(-5),
                     UpdatedAt = DateTime.Now.AddDays(-5)
                 },
+                // Payment for Portrait Photography Special event booking
                 new Payment 
                 { 
                     BookingId = bookings[1].BookingId,
-                    Amount = 780.00m,
+                    Amount = 305.00m,
                     PaymentMethod = "PayPal",
                     Status = "Completed",
                     TransactionId = "TXN002",
-                    PlatformFee = 39.00m,
-                    PhotographerPayoutAmount = 585.00m,
-                    LocationOwnerPayoutAmount = 156.00m,
+                    PlatformFee = 15.25m,
+                    PhotographerPayoutAmount = 225.00m, // Event discounted price
+                    LocationOwnerPayoutAmount = 64.75m,
                     CreatedAt = DateTime.Now.AddDays(-3),
                     UpdatedAt = DateTime.Now.AddDays(-3)
                 },
+                // Payment for Wedding Photography Premium event booking
                 new Payment 
                 { 
                     BookingId = bookings[2].BookingId,
-                    Amount = 360.00m,
+                    Amount = 2080.00m,
                     PaymentMethod = "Credit Card",
                     Status = "Completed",
                     TransactionId = "TXN003",
+                    PlatformFee = 104.00m,
+                    PhotographerPayoutAmount = 1600.00m, // Event discounted price
+                    LocationOwnerPayoutAmount = 376.00m,
+                    CreatedAt = DateTime.Now.AddDays(-2),
+                    UpdatedAt = DateTime.Now.AddDays(-2)
+                },
+                // Payment for Engagement Photo Session event booking
+                new Payment 
+                { 
+                    BookingId = bookings[3].BookingId,
+                    Amount = 440.00m,
+                    PaymentMethod = "Credit Card",
+                    Status = "Completed",
+                    TransactionId = "TXN004",
+                    PlatformFee = 22.00m,
+                    PhotographerPayoutAmount = 320.00m, // Event discounted price
+                    LocationOwnerPayoutAmount = 98.00m,
+                    CreatedAt = DateTime.Now.AddDays(-1),
+                    UpdatedAt = DateTime.Now.AddDays(-1)
+                },
+                // Payment for completed landscape photography booking
+                new Payment 
+                { 
+                    BookingId = bookings[4].BookingId,
+                    Amount = 360.00m,
+                    PaymentMethod = "Credit Card",
+                    Status = "Completed",
+                    TransactionId = "TXN005",
                     PlatformFee = 18.00m,
                     PhotographerPayoutAmount = 270.00m,
                     LocationOwnerPayoutAmount = 72.00m,
                     CreatedAt = DateTime.Now.AddDays(-15),
                     UpdatedAt = DateTime.Now.AddDays(-10)
+                },
+                // Payment for Landscape Photography Workshop event booking
+                new Payment 
+                { 
+                    BookingId = bookings[5].BookingId,
+                    Amount = 440.00m,
+                    PaymentMethod = "PayPal",
+                    Status = "Completed",
+                    TransactionId = "TXN006",
+                    PlatformFee = 22.00m,
+                    PhotographerPayoutAmount = 200.00m, // Event discounted price
+                    LocationOwnerPayoutAmount = 218.00m,
+                    CreatedAt = DateTime.Now.AddHours(-6),
+                    UpdatedAt = DateTime.Now.AddHours(-6)
                 }
             };
 
@@ -836,6 +1231,7 @@ namespace SnapLink_Repository.Data
         {
             var notifications = new List<Notification>
             {
+                // Regular booking notifications
                 new Notification 
                 { 
                     UserId = users[1].UserId,
@@ -848,16 +1244,6 @@ namespace SnapLink_Repository.Data
                 },
                 new Notification 
                 { 
-                    UserId = users[2].UserId,
-                    Title = "Payment Successful",
-                    Content = "Your payment of $780.00 has been processed successfully.",
-                    NotificationType = "Payment",
-                    ReferenceId = 2,
-                    ReadStatus = true,
-                    CreatedAt = DateTime.Now.AddDays(-3)
-                },
-                new Notification 
-                { 
                     UserId = users[3].UserId,
                     Title = "New Booking Request",
                     Content = "You have received a new booking request from Alice Johnson.",
@@ -865,6 +1251,90 @@ namespace SnapLink_Repository.Data
                     ReferenceId = 1,
                     ReadStatus = false,
                     CreatedAt = DateTime.Now.AddDays(-5)
+                },
+                
+                // Event-related notifications
+                new Notification 
+                { 
+                    UserId = users[9].UserId, // Carol White
+                    Title = "Event Booking Confirmed",
+                    Content = "Your booking for 'Portrait Photography Special' event with Sarah Wilson has been confirmed!",
+                    NotificationType = "EventBooking",
+                    ReferenceId = 2,
+                    ReadStatus = false,
+                    CreatedAt = DateTime.Now.AddDays(-3)
+                },
+                new Notification 
+                { 
+                    UserId = users[2].UserId,
+                    Title = "Event Payment Successful",
+                    Content = "Your payment of $2,080.00 for 'Wedding Photography Premium' event has been processed successfully.",
+                    NotificationType = "Payment",
+                    ReferenceId = 3,
+                    ReadStatus = true,
+                    CreatedAt = DateTime.Now.AddDays(-2)
+                },
+                new Notification 
+                { 
+                    UserId = users[11].UserId, // Eva Garcia
+                    Title = "Event Booking Confirmed",
+                    Content = "Your booking for 'Engagement Photo Session' event with Mike Chen has been confirmed!",
+                    NotificationType = "EventBooking",
+                    ReferenceId = 4,
+                    ReadStatus = false,
+                    CreatedAt = DateTime.Now.AddDays(-1)
+                },
+                new Notification 
+                { 
+                    UserId = users[3].UserId, // Sarah Wilson
+                    Title = "New Event Booking",
+                    Content = "Carol White has booked your 'Portrait Photography Special' event.",
+                    NotificationType = "EventBooking",
+                    ReferenceId = 2,
+                    ReadStatus = false,
+                    CreatedAt = DateTime.Now.AddDays(-3)
+                },
+                new Notification 
+                { 
+                    UserId = users[4].UserId, // Mike Chen
+                    Title = "New Event Booking",
+                    Content = "Bob Smith has booked your 'Wedding Photography Premium' event.",
+                    NotificationType = "EventBooking",
+                    ReferenceId = 3,
+                    ReadStatus = true,
+                    CreatedAt = DateTime.Now.AddDays(-2)
+                },
+                new Notification 
+                { 
+                    UserId = users[10].UserId, // David Brown
+                    Title = "Event Booking Confirmed",
+                    Content = "Your booking for 'Landscape Photography Workshop' event with Emma Davis has been confirmed!",
+                    NotificationType = "EventBooking",
+                    ReferenceId = 6,
+                    ReadStatus = false,
+                    CreatedAt = DateTime.Now.AddHours(-6)
+                },
+                
+                // Event creation notifications
+                new Notification 
+                { 
+                    UserId = users[3].UserId, // Sarah Wilson
+                    Title = "Event Created Successfully",
+                    Content = "Your 'Portrait Photography Special' event has been created and is now active!",
+                    NotificationType = "Event",
+                    ReferenceId = 1,
+                    ReadStatus = true,
+                    CreatedAt = DateTime.Now.AddDays(-10)
+                },
+                new Notification 
+                { 
+                    UserId = users[4].UserId, // Mike Chen
+                    Title = "Event Created Successfully",
+                    Content = "Your 'Wedding Photography Premium' event has been created and is now active!",
+                    NotificationType = "Event",
+                    ReferenceId = 3,
+                    ReadStatus = true,
+                    CreatedAt = DateTime.Now.AddDays(-12)
                 }
             };
 

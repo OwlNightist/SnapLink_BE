@@ -40,4 +40,6 @@ public partial class Location
     public virtual ICollection<LocationImage> LocationImages { get; set; } = new List<LocationImage>();
 
     public virtual LocationOwner LocationOwner { get; set; } = null!;
+
+    public virtual ICollection<PhotographerEventLocation> PhotographerEventLocations { get; set; } = new List<PhotographerEventLocation>();
 }

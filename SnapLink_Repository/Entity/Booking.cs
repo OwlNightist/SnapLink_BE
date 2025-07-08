@@ -13,6 +13,8 @@ public partial class Booking
 
     public int LocationId { get; set; }
 
+    public int? EventId { get; set; }
+
     public DateTime? StartDatetime { get; set; }
 
     public DateTime? EndDatetime { get; set; }
@@ -36,4 +38,6 @@ public partial class Booking
     public virtual User User { get; set; } = null!;
 
     public virtual Payment? Payment { get; set; }
+
+    public virtual PhotographerEvent? Event { get; set; }
 }

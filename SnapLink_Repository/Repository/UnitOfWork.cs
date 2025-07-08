@@ -36,6 +36,9 @@ namespace SnapLink_Repository.Repository
         private IGenericRepository<UserRole> _userRoleRepository;
         private IGenericRepository<UserStyle> _userStyleRepository;
         private IGenericRepository<WithdrawalRequest> _withdrawalRequestRepository;
+        private IGenericRepository<PhotographerEvent> _photographerEventRepository;
+        private IGenericRepository<PhotographerImage> _photographerImageRepository;
+        private IGenericRepository<PhotographerEventLocation> _photographerEventLocationRepository;
 
         public UnitOfWork(SnaplinkDbContext context)
         {
@@ -114,6 +117,15 @@ namespace SnapLink_Repository.Repository
 
         public IGenericRepository<WithdrawalRequest> WithdrawalRequestRepository => 
             _withdrawalRequestRepository ??= new GenericRepository<WithdrawalRequest>(_context);
+
+        public IGenericRepository<PhotographerEvent> PhotographerEventRepository => 
+            _photographerEventRepository ??= new GenericRepository<PhotographerEvent>(_context);
+
+        public IGenericRepository<PhotographerImage> PhotographerImageRepository => 
+            _photographerImageRepository ??= new GenericRepository<PhotographerImage>(_context);
+
+        public IGenericRepository<PhotographerEventLocation> PhotographerEventLocationRepository => 
+            _photographerEventLocationRepository ??= new GenericRepository<PhotographerEventLocation>(_context);
 
         // Transaction methods
         public async Task<int> SaveChangesAsync()

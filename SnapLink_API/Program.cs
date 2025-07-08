@@ -117,10 +117,12 @@ builder.Services.AddSingleton<PayOS>(provider =>
 
 // Add Services
 builder.Services.AddScoped<IPhotographerService, PhotographerService>();
+builder.Services.AddScoped<IPhotographerImageService, PhotographerImageService>();
 builder.Services.AddScoped<IStyleService, StyleService>();
 builder.Services.AddScoped<IUserStyleService, UserStyleService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IPhotographerEventService, PhotographerEventService>();
 
 
 builder.Services.AddCors(opts =>

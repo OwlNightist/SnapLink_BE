@@ -40,4 +40,8 @@ public partial class Photographer
     public virtual User User { get; set; } = null!;
 
     public virtual ICollection<WithdrawalRequest> WithdrawalRequests { get; set; } = new List<WithdrawalRequest>();
+
+    public virtual ICollection<PhotographerEvent> PhotographerEvents { get; set; } = new List<PhotographerEvent>();
+
+    public virtual ICollection<PhotographerImage> PhotographerImages { get; set; } = new List<PhotographerImage>();
 }

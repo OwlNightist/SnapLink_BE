@@ -32,6 +32,9 @@ namespace SnapLink_Model.DTO.Response
         
         // Styles information
         public List<string> Styles { get; set; } = new List<string>();
+
+        // Images information
+        public List<PhotographerImageResponse> Images { get; set; } = new List<PhotographerImageResponse>();
     }
 
     public class PhotographerDetailResponse : PhotographerResponse
