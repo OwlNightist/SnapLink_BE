@@ -41,10 +41,10 @@ namespace SnapLink_Model.DTO
                 .ForMember(dest => dest.CreateAt, opt => opt.MapFrom(src => src.User.CreateAt))
                 .ForMember(dest => dest.UpdateAt, opt => opt.MapFrom(src => src.User.UpdateAt))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.User.Status))
-                .ForMember(dest => dest.Styles, opt => opt.MapFrom(src => src.PhotographerStyles.Select(ps => ps.Style.Name)))
-                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.PhotographerImages));
+                .ForMember(dest => dest.Styles, opt => opt.MapFrom(src => src.PhotographerStyles.Select(ps => ps.Style.Name)));
 
             CreateMap<Photographer, PhotographerListResponse>()
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.FullName))
                 .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom(src => src.User.ProfileImage))
                 .ForMember(dest => dest.Styles, opt => opt.MapFrom(src => src.PhotographerStyles.Select(ps => ps.Style.Name)));
@@ -61,8 +61,7 @@ namespace SnapLink_Model.DTO
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.User.Status))
                 .ForMember(dest => dest.TotalBookings, opt => opt.MapFrom(src => src.Bookings.Count))
                 .ForMember(dest => dest.WalletBalance, opt => opt.MapFrom(src => src.PhotographerWallets.FirstOrDefault().Balance))
-                .ForMember(dest => dest.Styles, opt => opt.MapFrom(src => src.PhotographerStyles.Select(ps => ps.Style.Name)))
-                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.PhotographerImages));
+                .ForMember(dest => dest.Styles, opt => opt.MapFrom(src => src.PhotographerStyles.Select(ps => ps.Style.Name)));
 
             CreateMap<CreatePhotographerRequest, Photographer>();
             CreateMap<UpdatePhotographerRequest, Photographer>()
