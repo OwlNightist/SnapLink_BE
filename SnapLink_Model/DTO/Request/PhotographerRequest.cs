@@ -12,12 +12,6 @@ namespace SnapLink_Model.DTO.Request
         [MaxLength(500)]
         public string? Equipment { get; set; }
 
-        [MaxLength(255)]
-        public string? Specialty { get; set; }
-
-        [MaxLength(255)]
-        public string? PortfolioUrl { get; set; }
-
         [Range(0, double.MaxValue)]
         public decimal? HourlyRate { get; set; }
 
@@ -48,12 +42,6 @@ namespace SnapLink_Model.DTO.Request
 
         [MaxLength(500)]
         public string? Equipment { get; set; }
-
-        [MaxLength(255)]
-        public string? Specialty { get; set; }
-
-        [MaxLength(255)]
-        public string? PortfolioUrl { get; set; }
 
         [Range(0, double.MaxValue)]
         public decimal? HourlyRate { get; set; }

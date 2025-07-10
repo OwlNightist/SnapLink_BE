@@ -58,15 +58,6 @@ namespace SnapLink_Service.Service
             return _mapper.Map<PhotographerDetailResponse>(photographerEntity);
         }
 
-        public async Task<IEnumerable<PhotographerListResponse>> GetPhotographersBySpecialtyAsync(string specialty)
-        {
-            var photographers = await _unitOfWork.PhotographerRepository.GetAsync(
-                filter: p => p.Specialty != null && p.Specialty.Contains(specialty),
-                includeProperties: "User,PhotographerStyles.Style"
-            );
-            return _mapper.Map<IEnumerable<PhotographerListResponse>>(photographers);
-        }
-
         public async Task<IEnumerable<PhotographerListResponse>> GetPhotographersByStyleAsync(string styleName)
         {
             var photographers = await _unitOfWork.PhotographerRepository.GetAsync(

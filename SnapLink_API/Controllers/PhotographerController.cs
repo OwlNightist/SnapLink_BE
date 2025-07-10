@@ -75,25 +75,10 @@ namespace SnapLink_API.Controllers
         }
 
         /// <summary>
-        /// Get photographers by specialty
-        /// </summary>
-        [HttpGet("specialty/{specialty}")]
-        public async Task<IActionResult> GetPhotographersBySpecialty(string specialty)
-        {
-            try
-            {
-                var photographers = await _photographerService.GetPhotographersBySpecialtyAsync(specialty);
-                return Ok(photographers);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
-            }
-        }
-
-        /// <summary>
         /// Get photographers by style
         /// </summary>
+        /// <param name="styleName">Style name to filter by</param>
+        /// <returns>List of photographers with the specified style</returns>
         [HttpGet("style/{styleName}")]
         public async Task<IActionResult> GetPhotographersByStyle(string styleName)
         {

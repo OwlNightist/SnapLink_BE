@@ -67,10 +67,10 @@ namespace SnapLink_Model.DTO
             CreateMap<UpdatePhotographerRequest, Photographer>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            // PhotographerImage mappings
-            CreateMap<PhotographerImage, PhotographerImageResponse>();
-            CreateMap<CreatePhotographerImageRequest, PhotographerImage>();
-            CreateMap<UpdatePhotographerImageRequest, PhotographerImage>()
+            // Image mappings
+            CreateMap<Image, ImageResponse>();
+            CreateMap<CreateImageRequest, Image>();
+            CreateMap<UpdateImageRequest, Image>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             // Style mappings
@@ -83,7 +83,6 @@ namespace SnapLink_Model.DTO
                 {
                     PhotographerId = ps.Photographer.PhotographerId,
                     FullName = ps.Photographer.User.FullName ?? "",
-                    Specialty = ps.Photographer.Specialty,
                     HourlyRate = ps.Photographer.HourlyRate,
                     Rating = ps.Photographer.Rating,
                     AvailabilityStatus = ps.Photographer.AvailabilityStatus,
@@ -108,8 +107,6 @@ namespace SnapLink_Model.DTO
            .ForMember(dest => dest.Roles,
                       opt => opt.MapFrom(src => src.UserRoles.Select(ur => ur.Role.RoleName)));
             CreateMap<Location, LocationDto>();
-
-            CreateMap<PhotographerImage, PhotographerImageResponse>();
 
             // PhotographerEvent mappings
             CreateMap<PhotographerEvent, PhotographerEventResponse>()

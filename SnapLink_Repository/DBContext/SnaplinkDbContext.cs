@@ -27,7 +27,7 @@ public partial class SnaplinkDbContext : DbContext
 
     public virtual DbSet<Location> Locations { get; set; }
 
-    public virtual DbSet<LocationImage> LocationImages { get; set; }
+    public virtual DbSet<Image> Images { get; set; }
 
     public virtual DbSet<LocationOwner> LocationOwners { get; set; }
 
@@ -68,8 +68,6 @@ public partial class SnaplinkDbContext : DbContext
     public virtual DbSet<PhotographerEvent> PhotographerEvents { get; set; }
 
     public virtual DbSet<PhotographerEventLocation> PhotographerEventLocations { get; set; }
-
-    public virtual DbSet<PhotographerImage> PhotographerImages { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer(GetConnectionString());
@@ -286,32 +284,16 @@ public partial class SnaplinkDbContext : DbContext
                 .HasConstraintName("FK_Location_LocationOwner");
         });
 
-        modelBuilder.Entity<LocationImage>(entity =>
+        modelBuilder.Entity<Image>(entity =>
         {
-            entity.HasKey(e => e.LocationImageId).HasName("PK__Location__97A1AA49A2A64C5E");
-
-            entity.ToTable("LocationImage");
-
-            entity.Property(e => e.LocationImageId).HasColumnName("locationImageId");
-            entity.Property(e => e.Caption)
-                .HasMaxLength(255)
-                .HasColumnName("caption");
-            entity.Property(e => e.ImageUrl)
-                .HasMaxLength(255)
-                .HasColumnName("imageUrl");
-            entity.Property(e => e.IsPrimary)
-                .HasDefaultValue(false)
-                .HasColumnName("isPrimary");
-            entity.Property(e => e.LocationId).HasColumnName("locationId");
-            entity.Property(e => e.UploadedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("uploadedAt");
-
-            entity.HasOne(d => d.Location).WithMany(p => p.LocationImages)
-                .HasForeignKey(d => d.LocationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_LocationImage_Location");
+            entity.HasKey(e => e.Id).HasName("PK_Image_Id");
+            entity.ToTable("Image");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Url).HasMaxLength(255).HasColumnName("url");
+            entity.Property(e => e.Type).HasMaxLength(50).HasColumnName("type");
+            entity.Property(e => e.RefId).HasColumnName("ref_id");
+            entity.Property(e => e.IsPrimary).HasDefaultValue(false).HasColumnName("is_primary");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())").HasColumnType("datetime").HasColumnName("created_at");
         });
 
         modelBuilder.Entity<LocationOwner>(entity =>
@@ -471,9 +453,6 @@ public partial class SnaplinkDbContext : DbContext
             entity.Property(e => e.HourlyRate)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("hourlyRate");
-            entity.Property(e => e.PortfolioUrl)
-                .HasMaxLength(255)
-                .HasColumnName("portfolioUrl");
             entity.Property(e => e.Rating)
                 .HasColumnType("decimal(3, 2)")
                 .HasColumnName("rating");
@@ -482,9 +461,6 @@ public partial class SnaplinkDbContext : DbContext
                 .HasColumnName("ratingSum");
             entity.Property(e => e.RatingCount)
                 .HasColumnName("ratingCount");
-            entity.Property(e => e.Specialty)
-                .HasMaxLength(255)
-                .HasColumnName("specialty");
             entity.Property(e => e.UserId).HasColumnName("userId");
             entity.Property(e => e.VerificationStatus)
                 .HasMaxLength(30)
@@ -868,34 +844,6 @@ public partial class SnaplinkDbContext : DbContext
                 .HasForeignKey(d => d.LocationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PhotographerEventLocation_Location");
-        });
-
-        modelBuilder.Entity<PhotographerImage>(entity =>
-        {
-            entity.HasKey(e => e.PhotographerImageId).HasName("PK__PhotographerImage__PhotographerImageId");
-
-            entity.ToTable("PhotographerImage");
-
-            entity.Property(e => e.PhotographerImageId).HasColumnName("photographerImageId");
-            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
-            entity.Property(e => e.ImageUrl)
-                .HasMaxLength(255)
-                .HasColumnName("imageUrl");
-            entity.Property(e => e.Caption)
-                .HasMaxLength(255)
-                .HasColumnName("caption");
-            entity.Property(e => e.IsPrimary)
-                .HasDefaultValue(false)
-                .HasColumnName("isPrimary");
-            entity.Property(e => e.UploadedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("uploadedAt");
-
-            entity.HasOne(d => d.Photographer).WithMany(p => p.PhotographerImages)
-                .HasForeignKey(d => d.PhotographerId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PhotographerImage_Photographer");
         });
 
         OnModelCreatingPartial(modelBuilder);

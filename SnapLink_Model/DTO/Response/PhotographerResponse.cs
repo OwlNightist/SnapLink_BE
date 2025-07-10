@@ -10,7 +10,6 @@ namespace SnapLink_Model.DTO.Response
         public int UserId { get; set; }
         public int? YearsExperience { get; set; }
         public string? Equipment { get; set; }
-        public string? Specialty { get; set; }
         public decimal? HourlyRate { get; set; }
         public string? AvailabilityStatus { get; set; }
         public decimal? Rating { get; set; }
@@ -47,7 +46,6 @@ namespace SnapLink_Model.DTO.Response
         public int PhotographerId { get; set; }
         public int UserId { get; set; }
         public string? FullName { get; set; }
-        public string? Specialty { get; set; }
         public decimal? HourlyRate { get; set; }
         public decimal? Rating { get; set; }
         public decimal? RatingSum { get; set; }

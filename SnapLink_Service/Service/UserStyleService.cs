@@ -173,7 +173,6 @@ namespace SnapLink_Service.Service
                             {
                                 PhotographerId = ps.Photographer.PhotographerId,
                                 FullName = ps.Photographer.User.FullName ?? "",
-                                Specialty = ps.Photographer.Specialty,
                                 HourlyRate = ps.Photographer.HourlyRate,
                                 Rating = ps.Photographer.Rating,
                                 AvailabilityStatus = ps.Photographer.AvailabilityStatus,
@@ -205,7 +204,6 @@ namespace SnapLink_Service.Service
                         {
                             PhotographerId = ps.Photographer.PhotographerId,
                             FullName = ps.Photographer.User.FullName ?? "",
-                            Specialty = ps.Photographer.Specialty,
                             HourlyRate = ps.Photographer.HourlyRate,
                             Rating = ps.Photographer.Rating,
                             AvailabilityStatus = ps.Photographer.AvailabilityStatus,
@@ -240,7 +238,6 @@ namespace SnapLink_Service.Service
                     {
                         PhotographerId = p.PhotographerId,
                         FullName = p.User.FullName ?? "",
-                        Specialty = p.Specialty,
                         HourlyRate = p.HourlyRate,
                         Rating = p.Rating,
                         AvailabilityStatus = p.AvailabilityStatus,
@@ -270,7 +267,6 @@ namespace SnapLink_Service.Service
                 {
                     PhotographerId = x.Photographer.PhotographerId,
                     FullName = x.Photographer.User.FullName ?? "",
-                    Specialty = x.Photographer.Specialty,
                     HourlyRate = x.Photographer.HourlyRate,
                     Rating = x.Photographer.Rating,
                     AvailabilityStatus = x.Photographer.AvailabilityStatus,

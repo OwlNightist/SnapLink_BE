@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using SnapLink_Repository.DBContext;
 using SnapLink_Repository.Entity;
 
@@ -11,1480 +9,498 @@ namespace SnapLink_Repository.Data
     {
         public static void Initialize(SnaplinkDbContext context)
         {
-            // Ensure database is created
             context.Database.EnsureCreated();
 
-            // Check if data already exists
-            if (context.Users.Any())
+            // Seed Roles
+            if (!context.Roles.Any())
             {
-                return; // Database has been seeded
+                var roles = new[]
+                {
+                    new Role { RoleName = "Admin", RoleDescription = "Administrator" },
+                    new Role { RoleName = "Photographer", RoleDescription = "Professional Photographer" },
+                    new Role { RoleName = "User", RoleDescription = "Regular User" },
+                    new Role { RoleName = "Moderator", RoleDescription = "Moderator" },
+                    new Role { RoleName = "Owner", RoleDescription = "Location Owner" }
+                };
+                context.Roles.AddRange(roles);
+                context.SaveChanges();
             }
 
-            // Seed Roles
-            var roles = SeedRoles(context);
-            
-            // Seed Styles
-            var styles = SeedStyles(context);
-            
-            // Seed Premium Packages
-            var packages = SeedPremiumPackages(context);
-            
             // Seed Users
-            var users = SeedUsers(context);
-            
-            // Seed User Roles
-            SeedUserRoles(context, users, roles);
-            
-            // Seed Administrators
-            SeedAdministrators(context, users);
-            
-            // Seed Moderators
-            SeedModerators(context, users);
-            
+            if (!context.Users.Any())
+            {
+                var users = new[]
+                {
+                    new User { UserName = "alice", Email = "alice@example.com", PasswordHash = "hash1", PhoneNumber = "1234567890", FullName = "Alice Smith", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "bob", Email = "bob@example.com", PasswordHash = "hash2", PhoneNumber = "1234567891", FullName = "Bob Johnson", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "carol", Email = "carol@example.com", PasswordHash = "hash3", PhoneNumber = "1234567892", FullName = "Carol White", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "dave", Email = "dave@example.com", PasswordHash = "hash4", PhoneNumber = "1234567893", FullName = "Dave Brown", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "eve", Email = "eve@example.com", PasswordHash = "hash5", PhoneNumber = "1234567894", FullName = "Eve Black", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "frank", Email = "frank@example.com", PasswordHash = "hash6", PhoneNumber = "1234567895", FullName = "Frank Miller", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "grace", Email = "grace@example.com", PasswordHash = "hash7", PhoneNumber = "1234567896", FullName = "Grace Lee", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "henry", Email = "henry@example.com", PasswordHash = "hash8", PhoneNumber = "1234567897", FullName = "Henry Wilson", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "iris", Email = "iris@example.com", PasswordHash = "hash9", PhoneNumber = "1234567898", FullName = "Iris Davis", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "jack", Email = "jack@example.com", PasswordHash = "hash10", PhoneNumber = "1234567899", FullName = "Jack Taylor", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "kate", Email = "kate@example.com", PasswordHash = "hash11", PhoneNumber = "1234567900", FullName = "Kate Anderson", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "leo", Email = "leo@example.com", PasswordHash = "hash12", PhoneNumber = "1234567901", FullName = "Leo Martinez", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "maya", Email = "maya@example.com", PasswordHash = "hash13", PhoneNumber = "1234567902", FullName = "Maya Rodriguez", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "nina", Email = "nina@example.com", PasswordHash = "hash14", PhoneNumber = "1234567903", FullName = "Nina Thompson", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "oscar", Email = "oscar@example.com", PasswordHash = "hash15", PhoneNumber = "1234567904", FullName = "Oscar Garcia", Status = "Active", CreateAt = DateTime.Now }
+                };
+                context.Users.AddRange(users);
+                context.SaveChanges();
+            }
+
+            // Seed UserRoles
+            if (!context.UserRoles.Any())
+            {
+                var userRoles = new[]
+                {
+                    new UserRole { UserId = context.Users.First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Admin").RoleId },
+                    new UserRole { UserId = context.Users.Skip(1).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Photographer").RoleId },
+                    new UserRole { UserId = context.Users.Skip(2).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "User").RoleId },
+                    new UserRole { UserId = context.Users.Skip(3).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Moderator").RoleId },
+                    new UserRole { UserId = context.Users.Skip(4).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId }
+                };
+                context.UserRoles.AddRange(userRoles);
+                context.SaveChanges();
+            }
+
+            // Seed Styles
+            if (!context.Styles.Any())
+            {
+                var styles = new[]
+                {
+                    new Style { Name = "Portrait", Description = "Portrait photography" },
+                    new Style { Name = "Landscape", Description = "Landscape photography" },
+                    new Style { Name = "Wedding", Description = "Wedding photography" },
+                    new Style { Name = "Event", Description = "Event photography" },
+                    new Style { Name = "Fashion", Description = "Fashion photography" }
+                };
+                context.Styles.AddRange(styles);
+                context.SaveChanges();
+            }
+
             // Seed Photographers
-            var photographers = SeedPhotographers(context, users);
-            
-            // Seed Photographer Styles
-            SeedPhotographerStyles(context, photographers, styles);
-            
-            // Seed User Styles (Favorite Styles)
-            SeedUserStyles(context, users, styles);
-            
-            // Seed Photographer Wallets
-            SeedPhotographerWallets(context, photographers);
-            
-            // Seed Photographer Images
-            SeedPhotographerImages(context, photographers);
-            
-            // Seed Location Owners
-            var locationOwners = SeedLocationOwners(context, users);
-            
+            if (!context.Photographers.Any())
+            {
+                var users = context.Users.Take(15).ToList();
+                var photographers = new[]
+                {
+                    new Photographer { UserId = users[0].UserId, YearsExperience = 5, Equipment = "Canon EOS R5", HourlyRate = 100, AvailabilityStatus = "Available", Rating = 4.8M },
+                    new Photographer { UserId = users[1].UserId, YearsExperience = 3, Equipment = "Nikon D850", HourlyRate = 80, AvailabilityStatus = "Available", Rating = 4.5M },
+                    new Photographer { UserId = users[2].UserId, YearsExperience = 7, Equipment = "Sony A7 III", HourlyRate = 120, AvailabilityStatus = "Busy", Rating = 4.9M },
+                    new Photographer { UserId = users[3].UserId, YearsExperience = 2, Equipment = "Fujifilm X-T4", HourlyRate = 70, AvailabilityStatus = "Available", Rating = 4.3M },
+                    new Photographer { UserId = users[4].UserId, YearsExperience = 4, Equipment = "Olympus OM-D E-M1", HourlyRate = 90, AvailabilityStatus = "Available", Rating = 4.7M },
+                    new Photographer { UserId = users[5].UserId, YearsExperience = 6, Equipment = "Canon EOS R6", HourlyRate = 110, AvailabilityStatus = "Available", Rating = 4.6M },
+                    new Photographer { UserId = users[6].UserId, YearsExperience = 4, Equipment = "Nikon Z6", HourlyRate = 85, AvailabilityStatus = "Available", Rating = 4.4M },
+                    new Photographer { UserId = users[7].UserId, YearsExperience = 8, Equipment = "Sony A7R IV", HourlyRate = 130, AvailabilityStatus = "Busy", Rating = 4.9M },
+                    new Photographer { UserId = users[8].UserId, YearsExperience = 3, Equipment = "Fujifilm X-T3", HourlyRate = 75, AvailabilityStatus = "Available", Rating = 4.2M },
+                    new Photographer { UserId = users[9].UserId, YearsExperience = 5, Equipment = "Canon EOS 5D", HourlyRate = 95, AvailabilityStatus = "Available", Rating = 4.5M },
+                    new Photographer { UserId = users[10].UserId, YearsExperience = 7, Equipment = "Nikon D750", HourlyRate = 105, AvailabilityStatus = "Available", Rating = 4.7M },
+                    new Photographer { UserId = users[11].UserId, YearsExperience = 2, Equipment = "Sony A6400", HourlyRate = 65, AvailabilityStatus = "Available", Rating = 4.1M },
+                    new Photographer { UserId = users[12].UserId, YearsExperience = 6, Equipment = "Canon EOS 90D", HourlyRate = 115, AvailabilityStatus = "Busy", Rating = 4.8M },
+                    new Photographer { UserId = users[13].UserId, YearsExperience = 4, Equipment = "Nikon Z50", HourlyRate = 80, AvailabilityStatus = "Available", Rating = 4.3M },
+                    new Photographer { UserId = users[14].UserId, YearsExperience = 9, Equipment = "Sony A9", HourlyRate = 140, AvailabilityStatus = "Available", Rating = 4.9M }
+                };
+                context.Photographers.AddRange(photographers);
+                context.SaveChanges();
+            }
+
+            // Seed PhotographerStyles
+            if (!context.PhotographerStyles.Any())
+            {
+                var photographers = context.Photographers.Take(15).ToList();
+                var styles = context.Styles.Take(5).ToList();
+                var photographerStyles = new[]
+                {
+                    // Photographer 1 (Alice) - Portrait specialist
+                    new PhotographerStyle { PhotographerId = photographers[0].PhotographerId, StyleId = styles[0].StyleId },
+                    
+                    // Photographer 2 (Bob) - Landscape specialist  
+                    new PhotographerStyle { PhotographerId = photographers[1].PhotographerId, StyleId = styles[1].StyleId },
+                    
+                    // Photographer 3 (Carol) - Wedding specialist
+                    new PhotographerStyle { PhotographerId = photographers[2].PhotographerId, StyleId = styles[2].StyleId },
+                    
+                    // Photographer 4 (Dave) - Event specialist
+                    new PhotographerStyle { PhotographerId = photographers[3].PhotographerId, StyleId = styles[3].StyleId },
+                    
+                    // Photographer 5 (Eve) - Fashion specialist
+                    new PhotographerStyle { PhotographerId = photographers[4].PhotographerId, StyleId = styles[4].StyleId },
+                    
+                    // Photographer 6 (Frank) - Portrait + Fashion (2 styles)
+                    new PhotographerStyle { PhotographerId = photographers[5].PhotographerId, StyleId = styles[0].StyleId },
+                    new PhotographerStyle { PhotographerId = photographers[5].PhotographerId, StyleId = styles[4].StyleId },
+                    
+                    // Photographer 7 (Grace) - Landscape + Event (2 styles)
+                    new PhotographerStyle { PhotographerId = photographers[6].PhotographerId, StyleId = styles[1].StyleId },
+                    new PhotographerStyle { PhotographerId = photographers[6].PhotographerId, StyleId = styles[3].StyleId },
+                    
+                    // Photographer 8 (Henry) - Wedding + Portrait + Event (3 styles)
+                    new PhotographerStyle { PhotographerId = photographers[7].PhotographerId, StyleId = styles[2].StyleId },
+                    new PhotographerStyle { PhotographerId = photographers[7].PhotographerId, StyleId = styles[0].StyleId },
+                    new PhotographerStyle { PhotographerId = photographers[7].PhotographerId, StyleId = styles[3].StyleId },
+                    
+                    // Photographer 9 (Iris) - Event specialist
+                    new PhotographerStyle { PhotographerId = photographers[8].PhotographerId, StyleId = styles[3].StyleId },
+                    
+                    // Photographer 10 (Jack) - Fashion + Portrait (2 styles)
+                    new PhotographerStyle { PhotographerId = photographers[9].PhotographerId, StyleId = styles[4].StyleId },
+                    new PhotographerStyle { PhotographerId = photographers[9].PhotographerId, StyleId = styles[0].StyleId },
+                    
+                    // Photographer 11 (Kate) - Portrait + Wedding (2 styles)
+                    new PhotographerStyle { PhotographerId = photographers[10].PhotographerId, StyleId = styles[0].StyleId },
+                    new PhotographerStyle { PhotographerId = photographers[10].PhotographerId, StyleId = styles[2].StyleId },
+                    
+                    // Photographer 12 (Leo) - Landscape specialist
+                    new PhotographerStyle { PhotographerId = photographers[11].PhotographerId, StyleId = styles[1].StyleId },
+                    
+                    // Photographer 13 (Maya) - Wedding + Fashion + Event (3 styles)
+                    new PhotographerStyle { PhotographerId = photographers[12].PhotographerId, StyleId = styles[2].StyleId },
+                    new PhotographerStyle { PhotographerId = photographers[12].PhotographerId, StyleId = styles[4].StyleId },
+                    new PhotographerStyle { PhotographerId = photographers[12].PhotographerId, StyleId = styles[3].StyleId },
+                    
+                    // Photographer 14 (Nina) - Event + Landscape (2 styles)
+                    new PhotographerStyle { PhotographerId = photographers[13].PhotographerId, StyleId = styles[3].StyleId },
+                    new PhotographerStyle { PhotographerId = photographers[13].PhotographerId, StyleId = styles[1].StyleId },
+                    
+                    // Photographer 15 (Oscar) - Fashion + Portrait + Wedding (3 styles)
+                    new PhotographerStyle { PhotographerId = photographers[14].PhotographerId, StyleId = styles[4].StyleId },
+                    new PhotographerStyle { PhotographerId = photographers[14].PhotographerId, StyleId = styles[0].StyleId },
+                    new PhotographerStyle { PhotographerId = photographers[14].PhotographerId, StyleId = styles[2].StyleId }
+                };
+                context.PhotographerStyles.AddRange(photographerStyles);
+                context.SaveChanges();
+            }
+
+            // Seed LocationOwners
+            if (!context.LocationOwners.Any())
+            {
+                var users = context.Users.Take(5).ToList();
+                var owners = new[]
+                {
+                    new LocationOwner { UserId = users[0].UserId, BusinessName = "VenueCo", BusinessAddress = "venueco@example.com" },
+                    new LocationOwner { UserId = users[1].UserId, BusinessName = "EventSpaces", BusinessAddress = "eventspaces@example.com" },
+                    new LocationOwner { UserId = users[2].UserId, BusinessName = "PhotoStudios", BusinessAddress = "photostudios@example.com" },
+                    new LocationOwner { UserId = users[3].UserId, BusinessName = "UrbanVenues", BusinessAddress = "urbanvenues@example.com" },
+                    new LocationOwner { UserId = users[4].UserId, BusinessName = "NatureSpots", BusinessAddress = "naturespots@example.com" }
+                };
+                context.LocationOwners.AddRange(owners);
+                context.SaveChanges();
+            }
+
             // Seed Locations
-            var locations = SeedLocations(context, locationOwners);
-            
-            // Seed Location Images
-            SeedLocationImages(context, locations);
-            
-            // Seed Photographer Events
-            var photographerEvents = SeedPhotographerEvents(context, photographers);
-            
-            // Seed Photographer Event Locations
-            SeedPhotographerEventLocations(context, photographerEvents, locations);
-            
-            // Seed Advertisements
-            SeedAdvertisements(context, locations);
-            
+            if (!context.Locations.Any())
+            {
+                var owners = context.LocationOwners.Take(5).ToList();
+                var locations = new[]
+                {
+                    new Location { LocationOwnerId = owners[0].LocationOwnerId, Name = "Central Park Studio", Address = "123 Main St", Description = "Spacious studio downtown", HourlyRate = 50, Capacity = 20, Indoor = true, Outdoor = false, AvailabilityStatus = "Available", CreatedAt = DateTime.Now },
+                    new Location { LocationOwnerId = owners[1].LocationOwnerId, Name = "Riverside Venue", Address = "456 River Rd", Description = "Beautiful riverside location", HourlyRate = 70, Capacity = 50, Indoor = false, Outdoor = true, AvailabilityStatus = "Available", CreatedAt = DateTime.Now },
+                    new Location { LocationOwnerId = owners[2].LocationOwnerId, Name = "Urban Loft", Address = "789 City Ave", Description = "Modern loft in city center", HourlyRate = 60, Capacity = 30, Indoor = true, Outdoor = false, AvailabilityStatus = "Busy", CreatedAt = DateTime.Now },
+                    new Location { LocationOwnerId = owners[3].LocationOwnerId, Name = "Garden Spot", Address = "321 Garden Ln", Description = "Lush garden for outdoor shoots", HourlyRate = 40, Capacity = 15, Indoor = false, Outdoor = true, AvailabilityStatus = "Available", CreatedAt = DateTime.Now },
+                    new Location { LocationOwnerId = owners[4].LocationOwnerId, Name = "Mountain View", Address = "654 Hill Rd", Description = "Scenic mountain backdrop", HourlyRate = 80, Capacity = 25, Indoor = false, Outdoor = true, AvailabilityStatus = "Available", CreatedAt = DateTime.Now }
+                };
+                context.Locations.AddRange(locations);
+                context.SaveChanges();
+            }
+
             // Seed Bookings
-            var bookings = SeedBookings(context, users, photographers, locations, photographerEvents);
-            
+            if (!context.Bookings.Any())
+            {
+                var users = context.Users.Take(5).ToList();
+                var photographers = context.Photographers.Take(5).ToList();
+                var locations = context.Locations.Take(5).ToList();
+                var bookings = new[]
+                {
+                    new Booking { UserId = users[0].UserId, PhotographerId = photographers[0].PhotographerId, LocationId = locations[0].LocationId, StartDatetime = DateTime.Now.AddDays(1), EndDatetime = DateTime.Now.AddDays(1).AddHours(2), Status = "Confirmed", TotalPrice = 200, CreatedAt = DateTime.Now },
+                    new Booking { UserId = users[1].UserId, PhotographerId = photographers[1].PhotographerId, LocationId = locations[1].LocationId, StartDatetime = DateTime.Now.AddDays(2), EndDatetime = DateTime.Now.AddDays(2).AddHours(3), Status = "Pending", TotalPrice = 240, CreatedAt = DateTime.Now },
+                    new Booking { UserId = users[2].UserId, PhotographerId = photographers[2].PhotographerId, LocationId = locations[2].LocationId, StartDatetime = DateTime.Now.AddDays(3), EndDatetime = DateTime.Now.AddDays(3).AddHours(1), Status = "Confirmed", TotalPrice = 120, CreatedAt = DateTime.Now },
+                    new Booking { UserId = users[3].UserId, PhotographerId = photographers[3].PhotographerId, LocationId = locations[3].LocationId, StartDatetime = DateTime.Now.AddDays(4), EndDatetime = DateTime.Now.AddDays(4).AddHours(2), Status = "Cancelled", TotalPrice = 140, CreatedAt = DateTime.Now },
+                    new Booking { UserId = users[4].UserId, PhotographerId = photographers[4].PhotographerId, LocationId = locations[4].LocationId, StartDatetime = DateTime.Now.AddDays(5), EndDatetime = DateTime.Now.AddDays(5).AddHours(2), Status = "Confirmed", TotalPrice = 180, CreatedAt = DateTime.Now }
+                };
+                context.Bookings.AddRange(bookings);
+                context.SaveChanges();
+            }
+
             // Seed Reviews
-            SeedReviews(context, bookings);
-            
+            if (!context.Reviews.Any())
+            {
+                var bookings = context.Bookings.Take(5).ToList();
+                var reviews = new[]
+                {
+                    new Review { BookingId = bookings[0].BookingId, Rating = 5, Comment = "Excellent!", CreatedAt = DateTime.Now },
+                    new Review { BookingId = bookings[1].BookingId, Rating = 4, Comment = "Very good", CreatedAt = DateTime.Now },
+                    new Review { BookingId = bookings[2].BookingId, Rating = 5, Comment = "Outstanding service", CreatedAt = DateTime.Now },
+                    new Review { BookingId = bookings[3].BookingId, Rating = 3, Comment = "Average", CreatedAt = DateTime.Now },
+                    new Review { BookingId = bookings[4].BookingId, Rating = 4, Comment = "Good experience", CreatedAt = DateTime.Now }
+                };
+                context.Reviews.AddRange(reviews);
+                context.SaveChanges();
+            }
+
             // Seed Payments
-            var payments = SeedPayments(context, bookings);
-            
-            // Seed Premium Subscriptions
-            SeedPremiumSubscriptions(context, users, packages, payments);
-            
-            // Seed Transactions
-            SeedTransactions(context, users);
-            
+            if (!context.Payments.Any())
+            {
+                var bookings = context.Bookings.Take(5).ToList();
+                var payments = new[]
+                {
+                    new Payment { BookingId = bookings[0].BookingId, Amount = 200, Status = "Paid", CreatedAt = DateTime.Now },
+                    new Payment { BookingId = bookings[1].BookingId, Amount = 240, Status = "Pending", CreatedAt = DateTime.Now },
+                    new Payment { BookingId = bookings[2].BookingId, Amount = 120, Status = "Paid", CreatedAt = DateTime.Now },
+                    new Payment { BookingId = bookings[3].BookingId, Amount = 140, Status = "Refunded", CreatedAt = DateTime.Now },
+                    new Payment { BookingId = bookings[4].BookingId, Amount = 180, Status = "Paid", CreatedAt = DateTime.Now }
+                };
+                context.Payments.AddRange(payments);
+                context.SaveChanges();
+            }
+
             // Seed Notifications
-            SeedNotifications(context, users);
-            
-            // Seed Messages
-            SeedMessages(context, users);
-            
+            if (!context.Notifications.Any())
+            {
+                var users = context.Users.Take(5).ToList();
+                var notifications = new[]
+                {
+                    new Notification { UserId = users[0].UserId, Content = "Welcome to SnapLink!", CreatedAt = DateTime.Now },
+                    new Notification { UserId = users[1].UserId, Content = "Your booking is confirmed.", CreatedAt = DateTime.Now },
+                    new Notification { UserId = users[2].UserId, Content = "Payment received.", CreatedAt = DateTime.Now },
+                    new Notification { UserId = users[3].UserId, Content = "Review submitted.", CreatedAt = DateTime.Now },
+                    new Notification { UserId = users[4].UserId, Content = "Profile updated.", CreatedAt = DateTime.Now }
+                };
+                context.Notifications.AddRange(notifications);
+                context.SaveChanges();
+            }
+
+            // Seed Administrators
+            if (!context.Administrators.Any())
+            {
+                var users = context.Users.Take(5).ToList();
+                var admins = new[]
+                {
+                    new Administrator { UserId = users[0].UserId, AccessLevel = "Super", Department = "IT" },
+                    new Administrator { UserId = users[1].UserId, AccessLevel = "Standard", Department = "Support" },
+                    new Administrator { UserId = users[2].UserId, AccessLevel = "Super", Department = "HR" },
+                    new Administrator { UserId = users[3].UserId, AccessLevel = "Standard", Department = "Finance" },
+                    new Administrator { UserId = users[4].UserId, AccessLevel = "Standard", Department = "Marketing" }
+                };
+                context.Administrators.AddRange(admins);
+                context.SaveChanges();
+            }
+
+            // Seed Moderators
+            if (!context.Moderators.Any())
+            {
+                var users = context.Users.Take(5).ToList();
+                var moderators = new[]
+                {
+                    new Moderator { UserId = users[0].UserId, AreasOfFocus = "Abuse" },
+                    new Moderator { UserId = users[1].UserId, AreasOfFocus = "Spam" },
+                    new Moderator { UserId = users[2].UserId, AreasOfFocus = "Payments" },
+                    new Moderator { UserId = users[3].UserId, AreasOfFocus = "Bookings" },
+                    new Moderator { UserId = users[4].UserId, AreasOfFocus = "General" }
+                };
+                context.Moderators.AddRange(moderators);
+                context.SaveChanges();
+            }
+
+            // Seed Messagess
+            if (!context.Messagesses.Any())
+            {
+                var users = context.Users.Take(5).ToList();
+                var messages = new[]
+                {
+                    new Messagess { SenderId = users[0].UserId, RecipientId = users[1].UserId, Content = "Hi Bob!", CreatedAt = DateTime.Now },
+                    new Messagess { SenderId = users[1].UserId, RecipientId = users[2].UserId, Content = "Hello Carol!", CreatedAt = DateTime.Now },
+                    new Messagess { SenderId = users[2].UserId, RecipientId = users[3].UserId, Content = "Hey Dave!", CreatedAt = DateTime.Now },
+                    new Messagess { SenderId = users[3].UserId, RecipientId = users[4].UserId, Content = "Hi Eve!", CreatedAt = DateTime.Now },
+                    new Messagess { SenderId = users[4].UserId, RecipientId = users[0].UserId, Content = "Hello Alice!", CreatedAt = DateTime.Now }
+                };
+                context.Messagesses.AddRange(messages);
+                context.SaveChanges();
+            }
+
+            // Seed PremiumPackages
+            if (!context.PremiumPackages.Any())
+            {
+                var packages = new[]
+                {
+                    new PremiumPackage { Name = "Basic", Description = "Basic features", Price = 9.99M, DurationDays = 30, Features = "Standard support", ApplicableTo = "User" },
+                    new PremiumPackage { Name = "Pro", Description = "Pro features", Price = 19.99M, DurationDays = 30, Features = "Priority support", ApplicableTo = "Photographer" },
+                    new PremiumPackage { Name = "Elite", Description = "Elite features", Price = 29.99M, DurationDays = 90, Features = "All features", ApplicableTo = "User" },
+                    new PremiumPackage { Name = "Business", Description = "Business features", Price = 49.99M, DurationDays = 180, Features = "Business tools", ApplicableTo = "Owner" },
+                    new PremiumPackage { Name = "Annual", Description = "Annual plan", Price = 99.99M, DurationDays = 365, Features = "All inclusive", ApplicableTo = "All" }
+                };
+                context.PremiumPackages.AddRange(packages);
+                context.SaveChanges();
+            }
+
+            // Seed PremiumSubscriptions
+            if (!context.PremiumSubscriptions.Any())
+            {
+                var users = context.Users.Take(5).ToList();
+                var packages = context.PremiumPackages.Take(5).ToList();
+                var subscriptions = new[]
+                {
+                    new PremiumSubscription { UserId = users[0].UserId, PackageId = packages[0].PackageId, StartDate = DateTime.Now.AddDays(-10), EndDate = DateTime.Now.AddDays(20), Status = "Active" },
+                    new PremiumSubscription { UserId = users[1].UserId, PackageId = packages[1].PackageId, StartDate = DateTime.Now.AddDays(-20), EndDate = DateTime.Now.AddDays(10), Status = "Expired" },
+                    new PremiumSubscription { UserId = users[2].UserId, PackageId = packages[2].PackageId, StartDate = DateTime.Now.AddDays(-5), EndDate = DateTime.Now.AddDays(25), Status = "Active" },
+                    new PremiumSubscription { UserId = users[3].UserId, PackageId = packages[3].PackageId, StartDate = DateTime.Now.AddDays(-15), EndDate = DateTime.Now.AddDays(15), Status = "Active" },
+                    new PremiumSubscription { UserId = users[4].UserId, PackageId = packages[4].PackageId, StartDate = DateTime.Now.AddDays(-30), EndDate = DateTime.Now.AddDays(5), Status = "Expired" }
+                };
+                context.PremiumSubscriptions.AddRange(subscriptions);
+                context.SaveChanges();
+            }
+
+            // Seed Transactions
+            if (!context.Transactions.Any())
+            {
+                var users = context.Users.Take(5).ToList();
+                var transactions = new[]
+                {
+                    new Transaction { UserId = users[0].UserId, Amount = 100, Type = "Credit", Description = "Deposit", Status = "Completed", CreatedAt = DateTime.Now },
+                    new Transaction { UserId = users[1].UserId, Amount = 50, Type = "Debit", Description = "Withdrawal", Status = "Completed", CreatedAt = DateTime.Now },
+                    new Transaction { UserId = users[2].UserId, Amount = 75, Type = "Credit", Description = "Refund", Status = "Completed", CreatedAt = DateTime.Now },
+                    new Transaction { UserId = users[3].UserId, Amount = 120, Type = "Debit", Description = "Payment", Status = "Pending", CreatedAt = DateTime.Now },
+                    new Transaction { UserId = users[4].UserId, Amount = 200, Type = "Credit", Description = "Bonus", Status = "Completed", CreatedAt = DateTime.Now }
+                };
+                context.Transactions.AddRange(transactions);
+                context.SaveChanges();
+            }
+
+            // Seed PhotographerWallets
+            if (!context.PhotographerWallets.Any())
+            {
+                var photographers = context.Photographers.Take(5).ToList();
+                var wallets = new[]
+                {
+                    new PhotographerWallet { PhotographerId = photographers[0].PhotographerId, Balance = 500, UpdatedAt = DateTime.Now },
+                    new PhotographerWallet { PhotographerId = photographers[1].PhotographerId, Balance = 300, UpdatedAt = DateTime.Now },
+                    new PhotographerWallet { PhotographerId = photographers[2].PhotographerId, Balance = 700, UpdatedAt = DateTime.Now },
+                    new PhotographerWallet { PhotographerId = photographers[3].PhotographerId, Balance = 200, UpdatedAt = DateTime.Now },
+                    new PhotographerWallet { PhotographerId = photographers[4].PhotographerId, Balance = 400, UpdatedAt = DateTime.Now }
+                };
+                context.PhotographerWallets.AddRange(wallets);
+                context.SaveChanges();
+            }
+
+            // Seed WithdrawalRequests
+            if (!context.WithdrawalRequests.Any())
+            {
+                var photographers = context.Photographers.Take(5).ToList();
+                var requests = new[]
+                {
+                    new WithdrawalRequest { PhotographerId = photographers[0].PhotographerId, Amount = 100, BankAccountNumber = "111111", BankAccountName = "Alice Smith", BankName = "Bank A", RequestStatus = "Pending", RequestedAt = DateTime.Now },
+                    new WithdrawalRequest { PhotographerId = photographers[1].PhotographerId, Amount = 200, BankAccountNumber = "222222", BankAccountName = "Bob Johnson", BankName = "Bank B", RequestStatus = "Approved", RequestedAt = DateTime.Now },
+                    new WithdrawalRequest { PhotographerId = photographers[2].PhotographerId, Amount = 150, BankAccountNumber = "333333", BankAccountName = "Carol White", BankName = "Bank C", RequestStatus = "Rejected", RequestedAt = DateTime.Now },
+                    new WithdrawalRequest { PhotographerId = photographers[3].PhotographerId, Amount = 120, BankAccountNumber = "444444", BankAccountName = "Dave Brown", BankName = "Bank D", RequestStatus = "Pending", RequestedAt = DateTime.Now },
+                    new WithdrawalRequest { PhotographerId = photographers[4].PhotographerId, Amount = 180, BankAccountNumber = "555555", BankAccountName = "Eve Black", BankName = "Bank E", RequestStatus = "Approved", RequestedAt = DateTime.Now }
+                };
+                context.WithdrawalRequests.AddRange(requests);
+                context.SaveChanges();
+            }
+
             // Seed Complaints
-            SeedComplaints(context, users, bookings);
-            
-            // Seed Withdrawal Requests
-            SeedWithdrawalRequests(context, photographers);
-
-            context.SaveChanges();
-        }
-
-        private static List<Role> SeedRoles(SnaplinkDbContext context)
-        {
-            var roles = new List<Role>
+            if (!context.Complaints.Any())
             {
-                new Role { RoleName = "Admin", RoleDescription = "System Administrator with full access" },
-                new Role { RoleName = "User", RoleDescription = "Regular user with basic access" },
-                new Role { RoleName = "Photographer", RoleDescription = "Professional photographer" },
-                new Role { RoleName = "LocationOwner", RoleDescription = "Owner of photography locations" },
-                new Role { RoleName = "Moderator", RoleDescription = "Content moderator" }
-            };
+                var users = context.Users.Take(5).ToList();
+                var bookings = context.Bookings.Take(5).ToList();
+                var moderators = context.Moderators.Take(5).ToList();
+                var complaints = new[]
+                {
+                    new Complaint { ReporterId = users[0].UserId, ReportedUserId = users[1].UserId, BookingId = bookings[0].BookingId, ComplaintType = "Service", Description = "Late arrival", Status = "Open", AssignedModeratorId = moderators[0].ModeratorId, CreatedAt = DateTime.Now },
+                    new Complaint { ReporterId = users[1].UserId, ReportedUserId = users[2].UserId, BookingId = bookings[1].BookingId, ComplaintType = "Payment", Description = "Overcharged", Status = "Closed", AssignedModeratorId = moderators[1].ModeratorId, CreatedAt = DateTime.Now },
+                    new Complaint { ReporterId = users[2].UserId, ReportedUserId = users[3].UserId, BookingId = bookings[2].BookingId, ComplaintType = "Behavior", Description = "Rude behavior", Status = "Open", AssignedModeratorId = moderators[2].ModeratorId, CreatedAt = DateTime.Now },
+                    new Complaint { ReporterId = users[3].UserId, ReportedUserId = users[4].UserId, BookingId = bookings[3].BookingId, ComplaintType = "Quality", Description = "Low quality photos", Status = "Closed", AssignedModeratorId = moderators[3].ModeratorId, CreatedAt = DateTime.Now },
+                    new Complaint { ReporterId = users[4].UserId, ReportedUserId = users[0].UserId, BookingId = bookings[4].BookingId, ComplaintType = "Other", Description = "Other issue", Status = "Open", AssignedModeratorId = moderators[4].ModeratorId, CreatedAt = DateTime.Now }
+                };
+                context.Complaints.AddRange(complaints);
+                context.SaveChanges();
+            }
 
-            context.Roles.AddRange(roles);
-            context.SaveChanges();
-            return roles;
-        }
-
-        private static List<Style> SeedStyles(SnaplinkDbContext context)
-        {
-            var styles = new List<Style>
+            // Seed Advertisements
+            if (!context.Advertisements.Any())
             {
-                new Style { Name = "Portrait", Description = "Professional portrait photography" },
-                new Style { Name = "Wedding", Description = "Wedding and event photography" },
-                new Style { Name = "Landscape", Description = "Nature and landscape photography" },
-                new Style { Name = "Street", Description = "Urban and street photography" },
-                new Style { Name = "Fashion", Description = "Fashion and editorial photography" },
-                new Style { Name = "Product", Description = "Commercial product photography" },
-                new Style { Name = "Architecture", Description = "Architectural photography" },
-                new Style { Name = "Documentary", Description = "Documentary and photojournalism" }
-            };
+                var locations = context.Locations.Take(5).ToList();
+                var payments = context.Payments.Take(5).ToList();
+                var ads = new[]
+                {
+                    new Advertisement { LocationId = locations[0].LocationId, Title = "Grand Opening", Description = "Special offer for new customers", ImageUrl = "url1.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30), Status = "Active", Cost = 100, PaymentId = payments[0].PaymentId },
+                    new Advertisement { LocationId = locations[1].LocationId, Title = "Summer Sale", Description = "Discounts on bookings", ImageUrl = "url2.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(15), Status = "Active", Cost = 80, PaymentId = payments[1].PaymentId },
+                    new Advertisement { LocationId = locations[2].LocationId, Title = "Wedding Season", Description = "Book now for weddings", ImageUrl = "url3.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(45), Status = "Inactive", Cost = 120, PaymentId = payments[2].PaymentId },
+                    new Advertisement { LocationId = locations[3].LocationId, Title = "Photo Contest", Description = "Join and win prizes", ImageUrl = "url4.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(10), Status = "Active", Cost = 60, PaymentId = payments[3].PaymentId },
+                    new Advertisement { LocationId = locations[4].LocationId, Title = "Holiday Shoots", Description = "Special holiday packages", ImageUrl = "url5.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(20), Status = "Active", Cost = 90, PaymentId = payments[4].PaymentId }
+                };
+                context.Advertisements.AddRange(ads);
+                context.SaveChanges();
+            }
 
-            context.Styles.AddRange(styles);
-            context.SaveChanges();
-            return styles;
-        }
-
-        private static List<PremiumPackage> SeedPremiumPackages(SnaplinkDbContext context)
-        {
-            var packages = new List<PremiumPackage>
+            // Seed PhotographerEvents
+            if (!context.PhotographerEvents.Any())
             {
-                new PremiumPackage 
-                { 
-                    Name = "Basic Premium", 
-                    Description = "Basic premium features for photographers",
-                    Price = 29.99m,
-                    DurationDays = 30,
-                    Features = "Priority listing, Basic analytics, Email support",
-                    ApplicableTo = "Photographer"
-                },
-                new PremiumPackage 
-                { 
-                    Name = "Professional Premium", 
-                    Description = "Professional features for serious photographers",
-                    Price = 79.99m,
-                    DurationDays = 30,
-                    Features = "Priority listing, Advanced analytics, Phone support, Featured profile",
-                    ApplicableTo = "Photographer"
-                },
-                new PremiumPackage 
-                { 
-                    Name = "Location Owner Premium", 
-                    Description = "Premium features for location owners",
-                    Price = 49.99m,
-                    DurationDays = 30,
-                    Features = "Priority listing, Analytics, Customer management",
-                    ApplicableTo = "LocationOwner"
-                }
-            };
+                var photographers = context.Photographers.Take(5).ToList();
+                var events = new[]
+                {
+                    new PhotographerEvent { PhotographerId = photographers[0].PhotographerId, Title = "Spring Mini Sessions", Description = "Short sessions for families", OriginalPrice = 200, DiscountedPrice = 150, DiscountPercentage = 25, StartDate = DateTime.Now.AddDays(5), EndDate = DateTime.Now.AddDays(10), MaxBookings = 10, CurrentBookings = 2, Status = "Active", CreatedAt = DateTime.Now },
+                    new PhotographerEvent { PhotographerId = photographers[1].PhotographerId, Title = "Wedding Expo", Description = "Meet top wedding photographers", OriginalPrice = 500, DiscountedPrice = 400, DiscountPercentage = 20, StartDate = DateTime.Now.AddDays(15), EndDate = DateTime.Now.AddDays(20), MaxBookings = 20, CurrentBookings = 5, Status = "Active", CreatedAt = DateTime.Now },
+                    new PhotographerEvent { PhotographerId = photographers[2].PhotographerId, Title = "Landscape Workshop", Description = "Learn landscape photography", OriginalPrice = 300, DiscountedPrice = 250, DiscountPercentage = 17, StartDate = DateTime.Now.AddDays(25), EndDate = DateTime.Now.AddDays(30), MaxBookings = 15, CurrentBookings = 3, Status = "Inactive", CreatedAt = DateTime.Now },
+                    new PhotographerEvent { PhotographerId = photographers[3].PhotographerId, Title = "Fashion Shoot", Description = "Fashion photography for models", OriginalPrice = 400, DiscountedPrice = 350, DiscountPercentage = 12, StartDate = DateTime.Now.AddDays(35), EndDate = DateTime.Now.AddDays(40), MaxBookings = 8, CurrentBookings = 1, Status = "Active", CreatedAt = DateTime.Now },
+                    new PhotographerEvent { PhotographerId = photographers[4].PhotographerId, Title = "Event Coverage", Description = "Book for your event", OriginalPrice = 250, DiscountedPrice = 200, DiscountPercentage = 20, StartDate = DateTime.Now.AddDays(45), EndDate = DateTime.Now.AddDays(50), MaxBookings = 12, CurrentBookings = 4, Status = "Active", CreatedAt = DateTime.Now }
+                };
+                context.PhotographerEvents.AddRange(events);
+                context.SaveChanges();
+            }
 
-            context.PremiumPackages.AddRange(packages);
-            context.SaveChanges();
-            return packages;
-        }
-
-        private static List<User> SeedUsers(SnaplinkDbContext context)
-        {
-            var users = new List<User>
+            // Seed PhotographerEventLocations
+            if (!context.PhotographerEventLocations.Any())
             {
-                // Admin users
-                new User 
-                { 
-                    UserName = "admin1", 
-                    Email = "admin1@snaplink.com", 
-                    PasswordHash = "hashed_password_1",
-                    PhoneNumber = "+1234567890",
-                    FullName = "John Admin",
-                    ProfileImage = "https://example.com/admin1.jpg",
-                    Bio = "System Administrator",
-                    CreateAt = DateTime.Now.AddDays(-365),
-                    UpdateAt = DateTime.Now,
-                    Status = "Active"
-                },
-                
-                // Regular users
-                new User 
-                { 
-                    UserName = "user1", 
-                    Email = "user1@example.com", 
-                    PasswordHash = "hashed_password_2",
-                    PhoneNumber = "+1234567891",
-                    FullName = "Alice Johnson",
-                    ProfileImage = "https://example.com/user1.jpg",
-                    Bio = "Photography enthusiast",
-                    CreateAt = DateTime.Now.AddDays(-300),
-                    UpdateAt = DateTime.Now,
-                    Status = "Active"
-                },
-                new User 
-                { 
-                    UserName = "user2", 
-                    Email = "user2@example.com", 
-                    PasswordHash = "hashed_password_3",
-                    PhoneNumber = "+1234567892",
-                    FullName = "Bob Smith",
-                    ProfileImage = "https://example.com/user2.jpg",
-                    Bio = "Looking for professional photos",
-                    CreateAt = DateTime.Now.AddDays(-250),
-                    UpdateAt = DateTime.Now,
-                    Status = "Active"
-                },
-                
-                // Photographers
-                new User 
-                { 
-                    UserName = "photographer1", 
-                    Email = "sarah@photography.com", 
-                    PasswordHash = "hashed_password_4",
-                    PhoneNumber = "+1234567893",
-                    FullName = "Sarah Wilson",
-                    ProfileImage = "https://example.com/photographer1.jpg",
-                    Bio = "Professional portrait photographer with 8 years of experience",
-                    CreateAt = DateTime.Now.AddDays(-200),
-                    UpdateAt = DateTime.Now,
-                    Status = "Active"
-                },
-                new User 
-                { 
-                    UserName = "photographer2", 
-                    Email = "mike@photography.com", 
-                    PasswordHash = "hashed_password_5",
-                    PhoneNumber = "+1234567894",
-                    FullName = "Mike Chen",
-                    ProfileImage = "https://example.com/photographer2.jpg",
-                    Bio = "Wedding and event photographer specializing in candid moments",
-                    CreateAt = DateTime.Now.AddDays(-180),
-                    UpdateAt = DateTime.Now,
-                    Status = "Active"
-                },
-                new User 
-                { 
-                    UserName = "photographer3", 
-                    Email = "emma@photography.com", 
-                    PasswordHash = "hashed_password_6",
-                    PhoneNumber = "+1234567895",
-                    FullName = "Emma Davis",
-                    ProfileImage = "https://example.com/photographer3.jpg",
-                    Bio = "Landscape and nature photographer",
-                    CreateAt = DateTime.Now.AddDays(-150),
-                    UpdateAt = DateTime.Now,
-                    Status = "Active"
-                },
-                
-                // Location Owners
-                new User 
-                { 
-                    UserName = "locationowner1", 
-                    Email = "studio@downtown.com", 
-                    PasswordHash = "hashed_password_7",
-                    PhoneNumber = "+1234567896",
-                    FullName = "Downtown Studio",
-                    ProfileImage = "https://example.com/studio1.jpg",
-                    Bio = "Professional photography studio in downtown",
-                    CreateAt = DateTime.Now.AddDays(-120),
-                    UpdateAt = DateTime.Now,
-                    Status = "Active"
-                },
-                new User 
-                { 
-                    UserName = "locationowner2", 
-                    Email = "garden@nature.com", 
-                    PasswordHash = "hashed_password_8",
-                    PhoneNumber = "+1234567897",
-                    FullName = "Nature Garden",
-                    ProfileImage = "https://example.com/garden1.jpg",
-                    Bio = "Beautiful garden location for outdoor photography",
-                    CreateAt = DateTime.Now.AddDays(-100),
-                    UpdateAt = DateTime.Now,
-                    Status = "Active"
-                },
-                
-                // Moderators
-                new User 
-                { 
-                    UserName = "moderator1", 
-                    Email = "moderator@snaplink.com", 
-                    PasswordHash = "hashed_password_9",
-                    PhoneNumber = "+1234567898",
-                    FullName = "Lisa Moderator",
-                    ProfileImage = "https://example.com/moderator1.jpg",
-                    Bio = "Content moderator",
-                    CreateAt = DateTime.Now.AddDays(-90),
-                    UpdateAt = DateTime.Now,
-                    Status = "Active"
-                },
-                
-                // Additional users for testing favorite styles
-                new User 
-                { 
-                    UserName = "user3", 
-                    Email = "user3@example.com", 
-                    PasswordHash = "hashed_password_10",
-                    PhoneNumber = "+1234567899",
-                    FullName = "Carol White",
-                    ProfileImage = "https://example.com/user3.jpg",
-                    Bio = "Wedding planning enthusiast",
-                    CreateAt = DateTime.Now.AddDays(-80),
-                    UpdateAt = DateTime.Now,
-                    Status = "Active"
-                },
-                new User 
-                { 
-                    UserName = "user4", 
-                    Email = "user4@example.com", 
-                    PasswordHash = "hashed_password_11",
-                    PhoneNumber = "+1234567900",
-                    FullName = "David Brown",
-                    ProfileImage = "https://example.com/user4.jpg",
-                    Bio = "Nature lover and outdoor photographer",
-                    CreateAt = DateTime.Now.AddDays(-70),
-                    UpdateAt = DateTime.Now,
-                    Status = "Active"
-                },
-                new User 
-                { 
-                    UserName = "user5", 
-                    Email = "user5@example.com", 
-                    PasswordHash = "hashed_password_12",
-                    PhoneNumber = "+1234567901",
-                    FullName = "Eva Garcia",
-                    ProfileImage = "https://example.com/user5.jpg",
-                    Bio = "Fashion and lifestyle blogger",
-                    CreateAt = DateTime.Now.AddDays(-60),
-                    UpdateAt = DateTime.Now,
-                    Status = "Active"
-                }
-            };
+                var events = context.PhotographerEvents.Take(5).ToList();
+                var locations = context.Locations.Take(5).ToList();
+                var eventLocations = new[]
+                {
+                    new PhotographerEventLocation { EventId = events[0].EventId, LocationId = locations[0].LocationId },
+                    new PhotographerEventLocation { EventId = events[1].EventId, LocationId = locations[1].LocationId },
+                    new PhotographerEventLocation { EventId = events[2].EventId, LocationId = locations[2].LocationId },
+                    new PhotographerEventLocation { EventId = events[3].EventId, LocationId = locations[3].LocationId },
+                    new PhotographerEventLocation { EventId = events[4].EventId, LocationId = locations[4].LocationId }
+                };
+                context.PhotographerEventLocations.AddRange(eventLocations);
+                context.SaveChanges();
+            }
 
-            context.Users.AddRange(users);
-            context.SaveChanges();
-            return users;
-        }
-
-        private static void SeedUserRoles(SnaplinkDbContext context, List<User> users, List<Role> roles)
-        {
-            var userRoles = new List<UserRole>
+            // Seed Images
+            if (!context.Images.Any())
             {
-                new UserRole { UserId = users[0].UserId, RoleId = roles[0].RoleId, AssignedAt = DateTime.Now },
-                new UserRole { UserId = users[1].UserId, RoleId = roles[1].RoleId, AssignedAt = DateTime.Now },
-                new UserRole { UserId = users[2].UserId, RoleId = roles[1].RoleId, AssignedAt = DateTime.Now },
-                new UserRole { UserId = users[3].UserId, RoleId = roles[2].RoleId, AssignedAt = DateTime.Now },
-                new UserRole { UserId = users[4].UserId, RoleId = roles[2].RoleId, AssignedAt = DateTime.Now },
-                new UserRole { UserId = users[5].UserId, RoleId = roles[2].RoleId, AssignedAt = DateTime.Now },
-                new UserRole { UserId = users[6].UserId, RoleId = roles[3].RoleId, AssignedAt = DateTime.Now },
-                new UserRole { UserId = users[7].UserId, RoleId = roles[3].RoleId, AssignedAt = DateTime.Now },
-                new UserRole { UserId = users[8].UserId, RoleId = roles[4].RoleId, AssignedAt = DateTime.Now },
-                new UserRole { UserId = users[9].UserId, RoleId = roles[1].RoleId, AssignedAt = DateTime.Now },
-                new UserRole { UserId = users[10].UserId, RoleId = roles[1].RoleId, AssignedAt = DateTime.Now },
-                new UserRole { UserId = users[11].UserId, RoleId = roles[1].RoleId, AssignedAt = DateTime.Now }
-            };
+                var photographers = context.Photographers.Take(5).ToList();
+                var locations = context.Locations.Take(5).ToList();
+                var images = new[]
+                {
+                    new Image { Url = "photographer1.jpg", Type = "photographer", RefId = photographers[0].PhotographerId, IsPrimary = true, Caption = "Photographer 1", CreatedAt = DateTime.Now },
+                    new Image { Url = "photographer2.jpg", Type = "photographer", RefId = photographers[1].PhotographerId, IsPrimary = true, Caption = "Photographer 2", CreatedAt = DateTime.Now },
+                    new Image { Url = "location1.jpg", Type = "location", RefId = locations[0].LocationId, IsPrimary = true, Caption = "Location 1", CreatedAt = DateTime.Now },
+                    new Image { Url = "location2.jpg", Type = "location", RefId = locations[1].LocationId, IsPrimary = true, Caption = "Location 2", CreatedAt = DateTime.Now },
+                    new Image { Url = "location3.jpg", Type = "location", RefId = locations[2].LocationId, IsPrimary = false, Caption = "Location 3", CreatedAt = DateTime.Now }
+                };
+                context.Images.AddRange(images);
+                context.SaveChanges();
+            }
 
-            context.UserRoles.AddRange(userRoles);
-            context.SaveChanges();
-        }
-
-        private static void SeedAdministrators(SnaplinkDbContext context, List<User> users)
-        {
-            var administrators = new List<Administrator>
+            // Seed UserStyles
+            if (!context.UserStyles.Any())
             {
-                new Administrator 
-                { 
-                    UserId = users[0].UserId, 
-                    AccessLevel = "SuperAdmin", 
-                    Department = "IT" 
-                }
-            };
-
-            context.Administrators.AddRange(administrators);
-            context.SaveChanges();
-        }
-
-        private static void SeedModerators(SnaplinkDbContext context, List<User> users)
-        {
-            var moderators = new List<Moderator>
-            {
-                new Moderator 
-                { 
-                    UserId = users[8].UserId, 
-                    AreasOfFocus = "Content Moderation, User Support" 
-                }
-            };
-
-            context.Moderators.AddRange(moderators);
-            context.SaveChanges();
-        }
-
-        private static List<Photographer> SeedPhotographers(SnaplinkDbContext context, List<User> users)
-        {
-            var photographers = new List<Photographer>
-            {
-                new Photographer 
-                { 
-                    UserId = users[3].UserId,
-                    YearsExperience = 8,
-                    Equipment = "Canon EOS R5, 24-70mm f/2.8, 85mm f/1.4",
-                    Specialty = "Portrait Photography",
-                    PortfolioUrl = "https://sarahwilson.photography",
-                    HourlyRate = 150.00m,
-                    AvailabilityStatus = "Available",
-                    Rating = 4.8m,
-                    RatingSum = 24.0m,
-                    RatingCount = 5,
-                    FeaturedStatus = true,
-                    VerificationStatus = "Verified"
-                },
-                new Photographer 
-                { 
-                    UserId = users[4].UserId,
-                    YearsExperience = 5,
-                    Equipment = "Sony A7III, 35mm f/1.4, 70-200mm f/2.8",
-                    Specialty = "Wedding Photography",
-                    PortfolioUrl = "https://mikechen.photography",
-                    HourlyRate = 200.00m,
-                    AvailabilityStatus = "Available",
-                    Rating = 4.9m,
-                    RatingSum = 49.0m,
-                    RatingCount = 10,
-                    FeaturedStatus = true,
-                    VerificationStatus = "Verified"
-                },
-                new Photographer 
-                { 
-                    UserId = users[5].UserId,
-                    YearsExperience = 3,
-                    Equipment = "Nikon Z6, 14-24mm f/2.8, 24-70mm f/2.8",
-                    Specialty = "Landscape Photography",
-                    PortfolioUrl = "https://emmadavis.photography",
-                    HourlyRate = 120.00m,
-                    AvailabilityStatus = "Available",
-                    Rating = 4.6m,
-                    RatingSum = 23.0m,
-                    RatingCount = 5,
-                    FeaturedStatus = false,
-                    VerificationStatus = "Pending"
-                }
-            };
-
-            context.Photographers.AddRange(photographers);
-            context.SaveChanges();
-            return photographers;
-        }
-
-        private static void SeedPhotographerStyles(SnaplinkDbContext context, List<Photographer> photographers, List<Style> styles)
-        {
-            var photographerStyles = new List<PhotographerStyle>
-            {
-                new PhotographerStyle { PhotographerId = photographers[0].PhotographerId, StyleId = styles[0].StyleId },
-                new PhotographerStyle { PhotographerId = photographers[0].PhotographerId, StyleId = styles[4].StyleId },
-                new PhotographerStyle { PhotographerId = photographers[1].PhotographerId, StyleId = styles[1].StyleId },
-                new PhotographerStyle { PhotographerId = photographers[1].PhotographerId, StyleId = styles[0].StyleId },
-                new PhotographerStyle { PhotographerId = photographers[2].PhotographerId, StyleId = styles[2].StyleId },
-                new PhotographerStyle { PhotographerId = photographers[2].PhotographerId, StyleId = styles[6].StyleId }
-            };
-
-            context.PhotographerStyles.AddRange(photographerStyles);
-            context.SaveChanges();
-        }
-
-        private static void SeedPhotographerWallets(SnaplinkDbContext context, List<Photographer> photographers)
-        {
-            var wallets = new List<PhotographerWallet>
-            {
-                new PhotographerWallet { PhotographerId = photographers[0].PhotographerId, Balance = 1250.00m, UpdatedAt = DateTime.Now },
-                new PhotographerWallet { PhotographerId = photographers[1].PhotographerId, Balance = 2100.00m, UpdatedAt = DateTime.Now },
-                new PhotographerWallet { PhotographerId = photographers[2].PhotographerId, Balance = 750.00m, UpdatedAt = DateTime.Now }
-            };
-
-            context.PhotographerWallets.AddRange(wallets);
-            context.SaveChanges();
-        }
-
-        private static void SeedPhotographerImages(SnaplinkDbContext context, List<Photographer> photographers)
-        {
-            var photographerImages = new List<PhotographerImage>
-            {
-                // Sarah Wilson's portfolio images
-                new PhotographerImage 
-                { 
-                    PhotographerId = photographers[0].PhotographerId,
-                    ImageUrl = "https://example.com/sarah-portfolio-1.jpg",
-                    Caption = "Professional portrait session",
-                    IsPrimary = true,
-                    UploadedAt = DateTime.Now.AddDays(-180)
-                },
-                new PhotographerImage 
-                { 
-                    PhotographerId = photographers[0].PhotographerId,
-                    ImageUrl = "https://example.com/sarah-portfolio-2.jpg",
-                    Caption = "Fashion photography shoot",
-                    IsPrimary = false,
-                    UploadedAt = DateTime.Now.AddDays(-175)
-                },
-                new PhotographerImage 
-                { 
-                    PhotographerId = photographers[0].PhotographerId,
-                    ImageUrl = "https://example.com/sarah-portfolio-3.jpg",
-                    Caption = "Studio portrait with natural lighting",
-                    IsPrimary = false,
-                    UploadedAt = DateTime.Now.AddDays(-170)
-                },
-                
-                // Mike Chen's portfolio images
-                new PhotographerImage 
-                { 
-                    PhotographerId = photographers[1].PhotographerId,
-                    ImageUrl = "https://example.com/mike-portfolio-1.jpg",
-                    Caption = "Wedding ceremony capture",
-                    IsPrimary = true,
-                    UploadedAt = DateTime.Now.AddDays(-160)
-                },
-                new PhotographerImage 
-                { 
-                    PhotographerId = photographers[1].PhotographerId,
-                    ImageUrl = "https://example.com/mike-portfolio-2.jpg",
-                    Caption = "Candid wedding moments",
-                    IsPrimary = false,
-                    UploadedAt = DateTime.Now.AddDays(-155)
-                },
-                new PhotographerImage 
-                { 
-                    PhotographerId = photographers[1].PhotographerId,
-                    ImageUrl = "https://example.com/mike-portfolio-3.jpg",
-                    Caption = "Reception photography",
-                    IsPrimary = false,
-                    UploadedAt = DateTime.Now.AddDays(-150)
-                },
-                new PhotographerImage 
-                { 
-                    PhotographerId = photographers[1].PhotographerId,
-                    ImageUrl = "https://example.com/mike-portfolio-4.jpg",
-                    Caption = "Outdoor wedding ceremony",
-                    IsPrimary = false,
-                    UploadedAt = DateTime.Now.AddDays(-145)
-                },
-                
-                // Emma Davis's portfolio images
-                new PhotographerImage 
-                { 
-                    PhotographerId = photographers[2].PhotographerId,
-                    ImageUrl = "https://example.com/emma-portfolio-1.jpg",
-                    Caption = "Mountain landscape at sunset",
-                    IsPrimary = true,
-                    UploadedAt = DateTime.Now.AddDays(-140)
-                },
-                new PhotographerImage 
-                { 
-                    PhotographerId = photographers[2].PhotographerId,
-                    ImageUrl = "https://example.com/emma-portfolio-2.jpg",
-                    Caption = "Urban architecture photography",
-                    IsPrimary = false,
-                    UploadedAt = DateTime.Now.AddDays(-135)
-                },
-                new PhotographerImage 
-                { 
-                    PhotographerId = photographers[2].PhotographerId,
-                    ImageUrl = "https://example.com/emma-portfolio-3.jpg",
-                    Caption = "Nature and wildlife",
-                    IsPrimary = false,
-                    UploadedAt = DateTime.Now.AddDays(-130)
-                }
-            };
-
-            context.PhotographerImages.AddRange(photographerImages);
-            context.SaveChanges();
-        }
-
-        private static List<LocationOwner> SeedLocationOwners(SnaplinkDbContext context, List<User> users)
-        {
-            var locationOwners = new List<LocationOwner>
-            {
-                new LocationOwner 
-                { 
-                    UserId = users[6].UserId,
-                    BusinessName = "Downtown Photography Studio",
-                    BusinessAddress = "123 Main St, Downtown, City",
-                    BusinessRegistrationNumber = "BUS123456",
-                    VerificationStatus = "Verified"
-                },
-                new LocationOwner 
-                { 
-                    UserId = users[7].UserId,
-                    BusinessName = "Nature Garden Photography",
-                    BusinessAddress = "456 Garden Ave, Suburb, City",
-                    BusinessRegistrationNumber = "BUS789012",
-                    VerificationStatus = "Verified"
-                }
-            };
-
-            context.LocationOwners.AddRange(locationOwners);
-            context.SaveChanges();
-            return locationOwners;
-        }
-
-        private static List<Location> SeedLocations(SnaplinkDbContext context, List<LocationOwner> locationOwners)
-        {
-            var locations = new List<Location>
-            {
-                new Location 
-                { 
-                    LocationOwnerId = locationOwners[0].LocationOwnerId,
-                    Name = "Downtown Studio A",
-                    Description = "Professional photography studio with natural lighting",
-                    Address = "123 Main St, Downtown, City",
-                    Capacity = 20,
-                    HourlyRate = 80.00m,
-                    Indoor = true,
-                    Outdoor = false,
-                    Amenities = "Professional lighting, Backdrops, Changing room, WiFi",
-                    AvailabilityStatus = "Available",
-                    VerificationStatus = "Verified",
-                    FeaturedStatus = true,
-                    CreatedAt = DateTime.Now.AddDays(-80),
-                    UpdatedAt = DateTime.Now
-                },
-                new Location 
-                { 
-                    LocationOwnerId = locationOwners[0].LocationOwnerId,
-                    Name = "Downtown Studio B",
-                    Description = "Large studio space for group photography",
-                    Address = "123 Main St, Downtown, City",
-                    Capacity = 50,
-                    HourlyRate = 120.00m,
-                    Indoor = true,
-                    Outdoor = false,
-                    Amenities = "Professional lighting, Multiple backdrops, Green screen, WiFi",
-                    AvailabilityStatus = "Available",
-                    VerificationStatus = "Verified",
-                    FeaturedStatus = false,
-                    CreatedAt = DateTime.Now.AddDays(-70),
-                    UpdatedAt = DateTime.Now
-                },
-                new Location 
-                { 
-                    LocationOwnerId = locationOwners[1].LocationOwnerId,
-                    Name = "Garden Pavilion",
-                    Description = "Beautiful outdoor garden with natural scenery",
-                    Address = "456 Garden Ave, Suburb, City",
-                    Capacity = 30,
-                    HourlyRate = 60.00m,
-                    Indoor = false,
-                    Outdoor = true,
-                    Amenities = "Garden paths, Water features, Seating areas, Parking",
-                    AvailabilityStatus = "Available",
-                    VerificationStatus = "Verified",
-                    FeaturedStatus = true,
-                    CreatedAt = DateTime.Now.AddDays(-60),
-                    UpdatedAt = DateTime.Now
-                }
-            };
-
-            context.Locations.AddRange(locations);
-            context.SaveChanges();
-            return locations;
-        }
-
-        private static void SeedLocationImages(SnaplinkDbContext context, List<Location> locations)
-        {
-            var locationImages = new List<LocationImage>
-            {
-                new LocationImage 
-                { 
-                    LocationId = locations[0].LocationId,
-                    ImageUrl = "https://example.com/studio-a-1.jpg",
-                    Caption = "Main studio area",
-                    IsPrimary = true,
-                    UploadedAt = DateTime.Now.AddDays(-75)
-                },
-                new LocationImage 
-                { 
-                    LocationId = locations[0].LocationId,
-                    ImageUrl = "https://example.com/studio-a-2.jpg",
-                    Caption = "Lighting setup",
-                    IsPrimary = false,
-                    UploadedAt = DateTime.Now.AddDays(-74)
-                },
-                new LocationImage 
-                { 
-                    LocationId = locations[1].LocationId,
-                    ImageUrl = "https://example.com/studio-b-1.jpg",
-                    Caption = "Large studio space",
-                    IsPrimary = true,
-                    UploadedAt = DateTime.Now.AddDays(-65)
-                },
-                new LocationImage 
-                { 
-                    LocationId = locations[2].LocationId,
-                    ImageUrl = "https://example.com/garden-1.jpg",
-                    Caption = "Garden entrance",
-                    IsPrimary = true,
-                    UploadedAt = DateTime.Now.AddDays(-55)
-                },
-                new LocationImage 
-                { 
-                    LocationId = locations[2].LocationId,
-                    ImageUrl = "https://example.com/garden-2.jpg",
-                    Caption = "Water feature area",
-                    IsPrimary = false,
-                    UploadedAt = DateTime.Now.AddDays(-54)
-                }
-            };
-
-            context.LocationImages.AddRange(locationImages);
-            context.SaveChanges();
-        }
-
-        private static List<PhotographerEvent> SeedPhotographerEvents(SnaplinkDbContext context, List<Photographer> photographers)
-        {
-            var photographerEvents = new List<PhotographerEvent>
-            {
-                // Sarah Wilson's events
-                new PhotographerEvent 
-                { 
-                    PhotographerId = photographers[0].PhotographerId,
-                    Title = "Portrait Photography Special",
-                    Description = "Professional portrait session with natural lighting. Perfect for headshots, family portraits, and personal branding.",
-                    OriginalPrice = 300.00m,
-                    DiscountedPrice = 225.00m,
-                    DiscountPercentage = 25.00m,
-                    StartDate = DateTime.Now.AddDays(5),
-                    EndDate = DateTime.Now.AddDays(30),
-                    MaxBookings = 10,
-                    CurrentBookings = 2,
-                    Status = "Active",
-                    CreatedAt = DateTime.Now.AddDays(-10),
-                    UpdatedAt = DateTime.Now.AddDays(-5)
-                },
-                new PhotographerEvent 
-                { 
-                    PhotographerId = photographers[0].PhotographerId,
-                    Title = "Fashion Photography Package",
-                    Description = "Complete fashion photography session including wardrobe consultation and post-processing.",
-                    OriginalPrice = 500.00m,
-                    DiscountedPrice = 400.00m,
-                    DiscountPercentage = 20.00m,
-                    StartDate = DateTime.Now.AddDays(15),
-                    EndDate = DateTime.Now.AddDays(45),
-                    MaxBookings = 5,
-                    CurrentBookings = 1,
-                    Status = "Active",
-                    CreatedAt = DateTime.Now.AddDays(-8),
-                    UpdatedAt = DateTime.Now.AddDays(-3)
-                },
-                
-                // Mike Chen's events
-                new PhotographerEvent 
-                { 
-                    PhotographerId = photographers[1].PhotographerId,
-                    Title = "Wedding Photography Premium",
-                    Description = "Complete wedding day coverage including ceremony, reception, and candid moments. Includes engagement shoot.",
-                    OriginalPrice = 2000.00m,
-                    DiscountedPrice = 1600.00m,
-                    DiscountPercentage = 20.00m,
-                    StartDate = DateTime.Now.AddDays(20),
-                    EndDate = DateTime.Now.AddDays(90),
-                    MaxBookings = 3,
-                    CurrentBookings = 1,
-                    Status = "Active",
-                    CreatedAt = DateTime.Now.AddDays(-12),
-                    UpdatedAt = DateTime.Now.AddDays(-7)
-                },
-                new PhotographerEvent 
-                { 
-                    PhotographerId = photographers[1].PhotographerId,
-                    Title = "Engagement Photo Session",
-                    Description = "Romantic engagement photography session at beautiful outdoor locations.",
-                    OriginalPrice = 400.00m,
-                    DiscountedPrice = 320.00m,
-                    DiscountPercentage = 20.00m,
-                    StartDate = DateTime.Now.AddDays(10),
-                    EndDate = DateTime.Now.AddDays(60),
-                    MaxBookings = 8,
-                    CurrentBookings = 3,
-                    Status = "Active",
-                    CreatedAt = DateTime.Now.AddDays(-6),
-                    UpdatedAt = DateTime.Now.AddDays(-2)
-                },
-                
-                // Emma Davis's events
-                new PhotographerEvent 
-                { 
-                    PhotographerId = photographers[2].PhotographerId,
-                    Title = "Landscape Photography Workshop",
-                    Description = "Learn landscape photography techniques while exploring beautiful natural locations.",
-                    OriginalPrice = 250.00m,
-                    DiscountedPrice = 200.00m,
-                    DiscountPercentage = 20.00m,
-                    StartDate = DateTime.Now.AddDays(25),
-                    EndDate = DateTime.Now.AddDays(35),
-                    MaxBookings = 6,
-                    CurrentBookings = 2,
-                    Status = "Active",
-                    CreatedAt = DateTime.Now.AddDays(-15),
-                    UpdatedAt = DateTime.Now.AddDays(-10)
-                },
-                new PhotographerEvent 
-                { 
-                    PhotographerId = photographers[2].PhotographerId,
-                    Title = "Architecture Photography Tour",
-                    Description = "Professional architecture photography session in the city's most iconic buildings.",
-                    OriginalPrice = 180.00m,
-                    DiscountedPrice = 150.00m,
-                    DiscountPercentage = 16.67m,
-                    StartDate = DateTime.Now.AddDays(7),
-                    EndDate = DateTime.Now.AddDays(40),
-                    MaxBookings = 4,
-                    CurrentBookings = 0,
-                    Status = "Active",
-                    CreatedAt = DateTime.Now.AddDays(-4),
-                    UpdatedAt = DateTime.Now.AddDays(-1)
-                },
-                
-                // Expired event for testing
-                new PhotographerEvent 
-                { 
-                    PhotographerId = photographers[0].PhotographerId,
-                    Title = "Holiday Portrait Special",
-                    Description = "Special holiday-themed portrait sessions.",
-                    OriginalPrice = 200.00m,
-                    DiscountedPrice = 150.00m,
-                    DiscountPercentage = 25.00m,
-                    StartDate = DateTime.Now.AddDays(-30),
-                    EndDate = DateTime.Now.AddDays(-5),
-                    MaxBookings = 15,
-                    CurrentBookings = 15,
-                    Status = "Expired",
-                    CreatedAt = DateTime.Now.AddDays(-45),
-                    UpdatedAt = DateTime.Now.AddDays(-5)
-                }
-            };
-
-            context.PhotographerEvents.AddRange(photographerEvents);
-            context.SaveChanges();
-            return photographerEvents;
-        }
-
-        private static void SeedPhotographerEventLocations(SnaplinkDbContext context, List<PhotographerEvent> photographerEvents, List<Location> locations)
-        {
-            var photographerEventLocations = new List<PhotographerEventLocation>
-            {
-                // Portrait Photography Special - Available at both downtown studios
-                new PhotographerEventLocation { EventId = photographerEvents[0].EventId, LocationId = locations[0].LocationId },
-                new PhotographerEventLocation { EventId = photographerEvents[0].EventId, LocationId = locations[1].LocationId },
-                
-                // Fashion Photography Package - Downtown studios
-                new PhotographerEventLocation { EventId = photographerEvents[1].EventId, LocationId = locations[0].LocationId },
-                new PhotographerEventLocation { EventId = photographerEvents[1].EventId, LocationId = locations[1].LocationId },
-                
-                // Wedding Photography Premium - Garden pavilion
-                new PhotographerEventLocation { EventId = photographerEvents[2].EventId, LocationId = locations[2].LocationId },
-                
-                // Engagement Photo Session - Garden pavilion
-                new PhotographerEventLocation { EventId = photographerEvents[3].EventId, LocationId = locations[2].LocationId },
-                
-                // Landscape Photography Workshop - Garden pavilion  
-                new PhotographerEventLocation { EventId = photographerEvents[4].EventId, LocationId = locations[2].LocationId },
-                
-                // Architecture Photography Tour - Downtown studios
-                new PhotographerEventLocation { EventId = photographerEvents[5].EventId, LocationId = locations[0].LocationId },
-                new PhotographerEventLocation { EventId = photographerEvents[5].EventId, LocationId = locations[1].LocationId },
-                
-                // Expired Holiday Portrait Special - All locations
-                new PhotographerEventLocation { EventId = photographerEvents[6].EventId, LocationId = locations[0].LocationId },
-                new PhotographerEventLocation { EventId = photographerEvents[6].EventId, LocationId = locations[1].LocationId },
-                new PhotographerEventLocation { EventId = photographerEvents[6].EventId, LocationId = locations[2].LocationId }
-            };
-
-            context.PhotographerEventLocations.AddRange(photographerEventLocations);
-            context.SaveChanges();
-        }
-
-        private static void SeedAdvertisements(SnaplinkDbContext context, List<Location> locations)
-        {
-            var advertisements = new List<Advertisement>
-            {
-                new Advertisement 
-                { 
-                    LocationId = locations[0].LocationId,
-                    Title = "Professional Studio Available",
-                    Description = "Book our professional studio for your next photo shoot",
-                    ImageUrl = "https://example.com/studio-ad.jpg",
-                    StartDate = DateTime.Now.AddDays(-30),
-                    EndDate = DateTime.Now.AddDays(30),
-                    Cost = 500.00m,
-                    Status = "Active"
-                },
-                new Advertisement 
-                { 
-                    LocationId = locations[2].LocationId,
-                    Title = "Garden Photography Special",
-                    Description = "Beautiful outdoor location for nature photography",
-                    ImageUrl = "https://example.com/garden-ad.jpg",
-                    StartDate = DateTime.Now.AddDays(-20),
-                    EndDate = DateTime.Now.AddDays(40),
-                    Cost = 300.00m,
-                    Status = "Active"
-                }
-            };
-
-            context.Advertisements.AddRange(advertisements);
-            context.SaveChanges();
-        }
-
-        private static List<Booking> SeedBookings(SnaplinkDbContext context, List<User> users, List<Photographer> photographers, List<Location> locations, List<PhotographerEvent> photographerEvents)
-        {
-            var bookings = new List<Booking>
-            {
-                // Regular booking without event
-                new Booking 
-                { 
-                    UserId = users[1].UserId,
-                    PhotographerId = photographers[0].PhotographerId,
-                    LocationId = locations[0].LocationId,
-                    EventId = null,
-                    StartDatetime = DateTime.Now.AddDays(7),
-                    EndDatetime = DateTime.Now.AddDays(7).AddHours(2),
-                    TotalPrice = 460.00m,
-                    Status = "Confirmed",
-                    SpecialRequests = "Natural lighting preferred",
-                    CreatedAt = DateTime.Now.AddDays(-5),
-                    UpdatedAt = DateTime.Now.AddDays(-5)
-                },
-                
-                // Event-based booking - Portrait Photography Special
-                new Booking 
-                { 
-                    UserId = users[9].UserId, // Carol White
-                    PhotographerId = photographers[0].PhotographerId, // Sarah Wilson
-                    LocationId = locations[0].LocationId, // Downtown Studio A
-                    EventId = photographerEvents[0].EventId, // Portrait Photography Special
-                    StartDatetime = DateTime.Now.AddDays(12),
-                    EndDatetime = DateTime.Now.AddDays(12).AddHours(1.5),
-                    TotalPrice = 305.00m, // Discounted price + location fee
-                    Status = "Confirmed",
-                    SpecialRequests = "Professional headshots for LinkedIn",
-                    CreatedAt = DateTime.Now.AddDays(-3),
-                    UpdatedAt = DateTime.Now.AddDays(-3)
-                },
-                
-                // Event-based booking - Wedding Photography Premium
-                new Booking 
-                { 
-                    UserId = users[2].UserId,
-                    PhotographerId = photographers[1].PhotographerId,
-                    LocationId = locations[2].LocationId,
-                    EventId = photographerEvents[2].EventId, // Wedding Photography Premium
-                    StartDatetime = DateTime.Now.AddDays(45),
-                    EndDatetime = DateTime.Now.AddDays(45).AddHours(8),
-                    TotalPrice = 2080.00m, // Event price + location fee
-                    Status = "Confirmed",
-                    SpecialRequests = "Outdoor wedding ceremony and reception coverage",
-                    CreatedAt = DateTime.Now.AddDays(-2),
-                    UpdatedAt = DateTime.Now.AddDays(-2)
-                },
-                
-                // Event-based booking - Engagement Photo Session
-                new Booking 
-                { 
-                    UserId = users[11].UserId, // Eva Garcia
-                    PhotographerId = photographers[1].PhotographerId, // Mike Chen
-                    LocationId = locations[2].LocationId, // Garden Pavilion
-                    EventId = photographerEvents[3].EventId, // Engagement Photo Session
-                    StartDatetime = DateTime.Now.AddDays(18),
-                    EndDatetime = DateTime.Now.AddDays(18).AddHours(2),
-                    TotalPrice = 440.00m, // Event price + location fee
-                    Status = "Confirmed",
-                    SpecialRequests = "Romantic sunset engagement photos",
-                    CreatedAt = DateTime.Now.AddDays(-1),
-                    UpdatedAt = DateTime.Now.AddDays(-1)
-                },
-                
-                // Completed booking for reviews
-                new Booking 
-                { 
-                    UserId = users[1].UserId,
-                    PhotographerId = photographers[2].PhotographerId,
-                    LocationId = locations[2].LocationId,
-                    EventId = null,
-                    StartDatetime = DateTime.Now.AddDays(-10),
-                    EndDatetime = DateTime.Now.AddDays(-10).AddHours(2),
-                    TotalPrice = 360.00m,
-                    Status = "Completed",
-                    SpecialRequests = "Landscape photography",
-                    CreatedAt = DateTime.Now.AddDays(-15),
-                    UpdatedAt = DateTime.Now.AddDays(-10)
-                },
-                
-                // Event-based booking - Landscape Photography Workshop
-                new Booking 
-                { 
-                    UserId = users[10].UserId, // David Brown
-                    PhotographerId = photographers[2].PhotographerId, // Emma Davis
-                    LocationId = locations[2].LocationId, // Garden Pavilion
-                    EventId = photographerEvents[4].EventId, // Landscape Photography Workshop
-                    StartDatetime = DateTime.Now.AddDays(28),
-                    EndDatetime = DateTime.Now.AddDays(28).AddHours(4),
-                    TotalPrice = 440.00m, // Event price + location fee
-                    Status = "Confirmed",
-                    SpecialRequests = "Interested in learning advanced techniques",
-                    CreatedAt = DateTime.Now.AddHours(-6),
-                    UpdatedAt = DateTime.Now.AddHours(-6)
-                }
-            };
-
-            context.Bookings.AddRange(bookings);
-            context.SaveChanges();
-            return bookings;
-        }
-
-        private static void SeedReviews(SnaplinkDbContext context, List<Booking> bookings)
-        {
-            var reviews = new List<Review>
-            {
-                // Review for completed landscape photography booking
-                new Review 
-                { 
-                    BookingId = bookings[4].BookingId,
-                    ReviewerId = bookings[4].UserId,
-                    RevieweeId = bookings[4].PhotographerId,
-                    RevieweeType = "Photographer",
-                    Rating = 5,
-                    Comment = "Excellent landscape photography! Emma captured the beauty of nature perfectly.",
-                    CreatedAt = DateTime.Now.AddDays(-8),
-                    UpdatedAt = DateTime.Now.AddDays(-8)
-                },
-                // Review for Portrait Photography Special event booking
-                new Review 
-                { 
-                    BookingId = bookings[1].BookingId,
-                    ReviewerId = bookings[1].UserId,
-                    RevieweeId = bookings[1].PhotographerId,
-                    RevieweeType = "Photographer",
-                    Rating = 5,
-                    Comment = "Amazing portrait session! Sarah's discounted event package was incredible value. Professional headshots turned out perfect!",
-                    CreatedAt = DateTime.Now.AddDays(-2),
-                    UpdatedAt = DateTime.Now.AddDays(-2)
-                },
-                // Review for Wedding Photography Premium event booking
-                new Review 
-                { 
-                    BookingId = bookings[2].BookingId,
-                    ReviewerId = bookings[2].UserId,
-                    RevieweeId = bookings[2].PhotographerId,
-                    RevieweeType = "Photographer",
-                    Rating = 5,
-                    Comment = "Mike's wedding photography premium package exceeded our expectations! The event pricing made it affordable and the quality was outstanding.",
-                    CreatedAt = DateTime.Now.AddDays(-1),
-                    UpdatedAt = DateTime.Now.AddDays(-1)
-                }
-            };
-
-            context.Reviews.AddRange(reviews);
-            context.SaveChanges();
-        }
-
-        private static List<Payment> SeedPayments(SnaplinkDbContext context, List<Booking> bookings)
-        {
-            var payments = new List<Payment>
-            {
-                // Payment for regular booking
-                new Payment 
-                { 
-                    BookingId = bookings[0].BookingId,
-                    Amount = 460.00m,
-                    PaymentMethod = "Credit Card",
-                    Status = "Completed",
-                    TransactionId = "TXN001",
-                    PlatformFee = 23.00m,
-                    PhotographerPayoutAmount = 350.00m,
-                    LocationOwnerPayoutAmount = 87.00m,
-                    CreatedAt = DateTime.Now.AddDays(-5),
-                    UpdatedAt = DateTime.Now.AddDays(-5)
-                },
-                // Payment for Portrait Photography Special event booking
-                new Payment 
-                { 
-                    BookingId = bookings[1].BookingId,
-                    Amount = 305.00m,
-                    PaymentMethod = "PayPal",
-                    Status = "Completed",
-                    TransactionId = "TXN002",
-                    PlatformFee = 15.25m,
-                    PhotographerPayoutAmount = 225.00m, // Event discounted price
-                    LocationOwnerPayoutAmount = 64.75m,
-                    CreatedAt = DateTime.Now.AddDays(-3),
-                    UpdatedAt = DateTime.Now.AddDays(-3)
-                },
-                // Payment for Wedding Photography Premium event booking
-                new Payment 
-                { 
-                    BookingId = bookings[2].BookingId,
-                    Amount = 2080.00m,
-                    PaymentMethod = "Credit Card",
-                    Status = "Completed",
-                    TransactionId = "TXN003",
-                    PlatformFee = 104.00m,
-                    PhotographerPayoutAmount = 1600.00m, // Event discounted price
-                    LocationOwnerPayoutAmount = 376.00m,
-                    CreatedAt = DateTime.Now.AddDays(-2),
-                    UpdatedAt = DateTime.Now.AddDays(-2)
-                },
-                // Payment for Engagement Photo Session event booking
-                new Payment 
-                { 
-                    BookingId = bookings[3].BookingId,
-                    Amount = 440.00m,
-                    PaymentMethod = "Credit Card",
-                    Status = "Completed",
-                    TransactionId = "TXN004",
-                    PlatformFee = 22.00m,
-                    PhotographerPayoutAmount = 320.00m, // Event discounted price
-                    LocationOwnerPayoutAmount = 98.00m,
-                    CreatedAt = DateTime.Now.AddDays(-1),
-                    UpdatedAt = DateTime.Now.AddDays(-1)
-                },
-                // Payment for completed landscape photography booking
-                new Payment 
-                { 
-                    BookingId = bookings[4].BookingId,
-                    Amount = 360.00m,
-                    PaymentMethod = "Credit Card",
-                    Status = "Completed",
-                    TransactionId = "TXN005",
-                    PlatformFee = 18.00m,
-                    PhotographerPayoutAmount = 270.00m,
-                    LocationOwnerPayoutAmount = 72.00m,
-                    CreatedAt = DateTime.Now.AddDays(-15),
-                    UpdatedAt = DateTime.Now.AddDays(-10)
-                },
-                // Payment for Landscape Photography Workshop event booking
-                new Payment 
-                { 
-                    BookingId = bookings[5].BookingId,
-                    Amount = 440.00m,
-                    PaymentMethod = "PayPal",
-                    Status = "Completed",
-                    TransactionId = "TXN006",
-                    PlatformFee = 22.00m,
-                    PhotographerPayoutAmount = 200.00m, // Event discounted price
-                    LocationOwnerPayoutAmount = 218.00m,
-                    CreatedAt = DateTime.Now.AddHours(-6),
-                    UpdatedAt = DateTime.Now.AddHours(-6)
-                }
-            };
-
-            context.Payments.AddRange(payments);
-            context.SaveChanges();
-            return payments;
-        }
-
-        private static void SeedPremiumSubscriptions(SnaplinkDbContext context, List<User> users, List<PremiumPackage> packages, List<Payment> payments)
-        {
-            var subscriptions = new List<PremiumSubscription>
-            {
-                new PremiumSubscription 
-                { 
-                    UserId = users[3].UserId,
-                    PackageId = packages[1].PackageId,
-                    PaymentId = null,
-                    StartDate = DateTime.Now.AddDays(-30),
-                    EndDate = DateTime.Now.AddDays(30),
-                    Status = "Active"
-                },
-                new PremiumSubscription 
-                { 
-                    UserId = users[4].UserId,
-                    PackageId = packages[1].PackageId,
-                    PaymentId = null,
-                    StartDate = DateTime.Now.AddDays(-15),
-                    EndDate = DateTime.Now.AddDays(15),
-                    Status = "Active"
-                }
-            };
-
-            context.PremiumSubscriptions.AddRange(subscriptions);
-            context.SaveChanges();
-        }
-
-        private static void SeedTransactions(SnaplinkDbContext context, List<User> users)
-        {
-            var transactions = new List<Transaction>
-            {
-                new Transaction 
-                { 
-                    UserId = users[1].UserId,
-                    Amount = 460.00m,
-                    Type = "Payment",
-                    Status = "Completed",
-                    Description = "Payment for photography booking",
-                    CreatedAt = DateTime.Now.AddDays(-5)
-                },
-                new Transaction 
-                { 
-                    UserId = users[2].UserId,
-                    Amount = 780.00m,
-                    Type = "Payment",
-                    Status = "Completed",
-                    Description = "Payment for wedding photography",
-                    CreatedAt = DateTime.Now.AddDays(-3)
-                }
-            };
-
-            context.Transactions.AddRange(transactions);
-            context.SaveChanges();
-        }
-
-        private static void SeedNotifications(SnaplinkDbContext context, List<User> users)
-        {
-            var notifications = new List<Notification>
-            {
-                // Regular booking notifications
-                new Notification 
-                { 
-                    UserId = users[1].UserId,
-                    Title = "Booking Confirmed",
-                    Content = "Your booking with Sarah Wilson has been confirmed for next week.",
-                    NotificationType = "Booking",
-                    ReferenceId = 1,
-                    ReadStatus = false,
-                    CreatedAt = DateTime.Now.AddDays(-5)
-                },
-                new Notification 
-                { 
-                    UserId = users[3].UserId,
-                    Title = "New Booking Request",
-                    Content = "You have received a new booking request from Alice Johnson.",
-                    NotificationType = "Booking",
-                    ReferenceId = 1,
-                    ReadStatus = false,
-                    CreatedAt = DateTime.Now.AddDays(-5)
-                },
-                
-                // Event-related notifications
-                new Notification 
-                { 
-                    UserId = users[9].UserId, // Carol White
-                    Title = "Event Booking Confirmed",
-                    Content = "Your booking for 'Portrait Photography Special' event with Sarah Wilson has been confirmed!",
-                    NotificationType = "EventBooking",
-                    ReferenceId = 2,
-                    ReadStatus = false,
-                    CreatedAt = DateTime.Now.AddDays(-3)
-                },
-                new Notification 
-                { 
-                    UserId = users[2].UserId,
-                    Title = "Event Payment Successful",
-                    Content = "Your payment of $2,080.00 for 'Wedding Photography Premium' event has been processed successfully.",
-                    NotificationType = "Payment",
-                    ReferenceId = 3,
-                    ReadStatus = true,
-                    CreatedAt = DateTime.Now.AddDays(-2)
-                },
-                new Notification 
-                { 
-                    UserId = users[11].UserId, // Eva Garcia
-                    Title = "Event Booking Confirmed",
-                    Content = "Your booking for 'Engagement Photo Session' event with Mike Chen has been confirmed!",
-                    NotificationType = "EventBooking",
-                    ReferenceId = 4,
-                    ReadStatus = false,
-                    CreatedAt = DateTime.Now.AddDays(-1)
-                },
-                new Notification 
-                { 
-                    UserId = users[3].UserId, // Sarah Wilson
-                    Title = "New Event Booking",
-                    Content = "Carol White has booked your 'Portrait Photography Special' event.",
-                    NotificationType = "EventBooking",
-                    ReferenceId = 2,
-                    ReadStatus = false,
-                    CreatedAt = DateTime.Now.AddDays(-3)
-                },
-                new Notification 
-                { 
-                    UserId = users[4].UserId, // Mike Chen
-                    Title = "New Event Booking",
-                    Content = "Bob Smith has booked your 'Wedding Photography Premium' event.",
-                    NotificationType = "EventBooking",
-                    ReferenceId = 3,
-                    ReadStatus = true,
-                    CreatedAt = DateTime.Now.AddDays(-2)
-                },
-                new Notification 
-                { 
-                    UserId = users[10].UserId, // David Brown
-                    Title = "Event Booking Confirmed",
-                    Content = "Your booking for 'Landscape Photography Workshop' event with Emma Davis has been confirmed!",
-                    NotificationType = "EventBooking",
-                    ReferenceId = 6,
-                    ReadStatus = false,
-                    CreatedAt = DateTime.Now.AddHours(-6)
-                },
-                
-                // Event creation notifications
-                new Notification 
-                { 
-                    UserId = users[3].UserId, // Sarah Wilson
-                    Title = "Event Created Successfully",
-                    Content = "Your 'Portrait Photography Special' event has been created and is now active!",
-                    NotificationType = "Event",
-                    ReferenceId = 1,
-                    ReadStatus = true,
-                    CreatedAt = DateTime.Now.AddDays(-10)
-                },
-                new Notification 
-                { 
-                    UserId = users[4].UserId, // Mike Chen
-                    Title = "Event Created Successfully",
-                    Content = "Your 'Wedding Photography Premium' event has been created and is now active!",
-                    NotificationType = "Event",
-                    ReferenceId = 3,
-                    ReadStatus = true,
-                    CreatedAt = DateTime.Now.AddDays(-12)
-                }
-            };
-
-            context.Notifications.AddRange(notifications);
-            context.SaveChanges();
-        }
-
-        private static void SeedMessages(SnaplinkDbContext context, List<User> users)
-        {
-            var messages = new List<Messagess>
-            {
-                new Messagess 
-                { 
-                    SenderId = users[1].UserId,
-                    RecipientId = users[3].UserId,
-                    Content = "Hi Sarah, I'm looking forward to our photo session next week!",
-                    ReadStatus = false,
-                    CreatedAt = DateTime.Now.AddDays(-4)
-                },
-                new Messagess 
-                { 
-                    SenderId = users[3].UserId,
-                    RecipientId = users[1].UserId,
-                    Content = "Hi Alice! I'm excited too. I'll bring some great lighting equipment.",
-                    ReadStatus = true,
-                    CreatedAt = DateTime.Now.AddDays(-3)
-                },
-                new Messagess 
-                { 
-                    SenderId = users[2].UserId,
-                    RecipientId = users[4].UserId,
-                    Content = "Mike, can we discuss the wedding photography details?",
-                    ReadStatus = false,
-                    CreatedAt = DateTime.Now.AddDays(-2)
-                }
-            };
-
-            context.Messagesses.AddRange(messages);
-            context.SaveChanges();
-        }
-
-        private static void SeedComplaints(SnaplinkDbContext context, List<User> users, List<Booking> bookings)
-        {
-            var complaints = new List<Complaint>
-            {
-                new Complaint 
-                { 
-                    ReporterId = users[1].UserId,
-                    ReportedUserId = users[3].UserId,
-                    BookingId = bookings[0].BookingId,
-                    ComplaintType = "Service Quality",
-                    Description = "Photographer arrived late to the session",
-                    Status = "Under Review",
-                    CreatedAt = DateTime.Now.AddDays(-1),
-                    UpdatedAt = DateTime.Now.AddDays(-1)
-                }
-            };
-
-            context.Complaints.AddRange(complaints);
-            context.SaveChanges();
-        }
-
-        private static void SeedWithdrawalRequests(SnaplinkDbContext context, List<Photographer> photographers)
-        {
-            var withdrawalRequests = new List<WithdrawalRequest>
-            {
-                new WithdrawalRequest 
-                { 
-                    PhotographerId = photographers[0].PhotographerId,
-                    Amount = 500.00m,
-                    BankName = "City Bank",
-                    BankAccountName = "Sarah Wilson",
-                    BankAccountNumber = "1234567890",
-                    RequestStatus = "Pending",
-                    RequestedAt = DateTime.Now.AddDays(-2)
-                },
-                new WithdrawalRequest 
-                { 
-                    PhotographerId = photographers[1].PhotographerId,
-                    Amount = 1000.00m,
-                    BankName = "National Bank",
-                    BankAccountName = "Mike Chen",
-                    BankAccountNumber = "0987654321",
-                    RequestStatus = "Approved",
-                    RequestedAt = DateTime.Now.AddDays(-5),
-                    ProcessedAt = DateTime.Now.AddDays(-3)
-                }
-            };
-
-            context.WithdrawalRequests.AddRange(withdrawalRequests);
-            context.SaveChanges();
-        }
-
-        private static void SeedUserStyles(SnaplinkDbContext context, List<User> users, List<Style> styles)
-        {
-            var userStyles = new List<UserStyle>
-            {
-                // User 1 (Alice Johnson) - Photography enthusiast
-                new UserStyle { UserId = users[1].UserId, StyleId = styles[0].StyleId, CreatedAt = DateTime.Now.AddDays(-280) }, // Portrait
-                new UserStyle { UserId = users[1].UserId, StyleId = styles[4].StyleId, CreatedAt = DateTime.Now.AddDays(-275) }, // Fashion
-                new UserStyle { UserId = users[1].UserId, StyleId = styles[2].StyleId, CreatedAt = DateTime.Now.AddDays(-270) }, // Landscape
-                
-                // User 2 (Bob Smith) - Looking for professional photos
-                new UserStyle { UserId = users[2].UserId, StyleId = styles[1].StyleId, CreatedAt = DateTime.Now.AddDays(-240) }, // Wedding
-                new UserStyle { UserId = users[2].UserId, StyleId = styles[0].StyleId, CreatedAt = DateTime.Now.AddDays(-235) }, // Portrait
-                
-                // Photographer 1 (Sarah Wilson) - Also has personal style preferences
-                new UserStyle { UserId = users[3].UserId, StyleId = styles[0].StyleId, CreatedAt = DateTime.Now.AddDays(-200) }, // Portrait
-                new UserStyle { UserId = users[3].UserId, StyleId = styles[4].StyleId, CreatedAt = DateTime.Now.AddDays(-195) }, // Fashion
-                
-                // Photographer 2 (Mike Chen) - Personal style preferences
-                new UserStyle { UserId = users[4].UserId, StyleId = styles[1].StyleId, CreatedAt = DateTime.Now.AddDays(-180) }, // Wedding
-                new UserStyle { UserId = users[4].UserId, StyleId = styles[3].StyleId, CreatedAt = DateTime.Now.AddDays(-175) }, // Street
-                
-                // Photographer 3 (Emma Davis) - Personal style preferences
-                new UserStyle { UserId = users[5].UserId, StyleId = styles[2].StyleId, CreatedAt = DateTime.Now.AddDays(-150) }, // Landscape
-                new UserStyle { UserId = users[5].UserId, StyleId = styles[6].StyleId, CreatedAt = DateTime.Now.AddDays(-145) }, // Architecture
-                
-                // Location Owner 1 (Downtown Studio) - Business preferences
-                new UserStyle { UserId = users[6].UserId, StyleId = styles[0].StyleId, CreatedAt = DateTime.Now.AddDays(-120) }, // Portrait
-                new UserStyle { UserId = users[6].UserId, StyleId = styles[4].StyleId, CreatedAt = DateTime.Now.AddDays(-115) }, // Fashion
-                new UserStyle { UserId = users[6].UserId, StyleId = styles[5].StyleId, CreatedAt = DateTime.Now.AddDays(-110) }, // Product
-                
-                // Location Owner 2 (Nature Garden) - Business preferences
-                new UserStyle { UserId = users[7].UserId, StyleId = styles[2].StyleId, CreatedAt = DateTime.Now.AddDays(-100) }, // Landscape
-                new UserStyle { UserId = users[7].UserId, StyleId = styles[1].StyleId, CreatedAt = DateTime.Now.AddDays(-95) }, // Wedding
-                
-                // Moderator 1 (Lisa Moderator) - Personal preferences
-                new UserStyle { UserId = users[8].UserId, StyleId = styles[3].StyleId, CreatedAt = DateTime.Now.AddDays(-90) }, // Street
-                new UserStyle { UserId = users[8].UserId, StyleId = styles[7].StyleId, CreatedAt = DateTime.Now.AddDays(-85) }, // Documentary
-                
-                // User 3 (Carol White) - Wedding planning enthusiast
-                new UserStyle { UserId = users[9].UserId, StyleId = styles[1].StyleId, CreatedAt = DateTime.Now.AddDays(-75) }, // Wedding
-                new UserStyle { UserId = users[9].UserId, StyleId = styles[0].StyleId, CreatedAt = DateTime.Now.AddDays(-70) }, // Portrait
-                new UserStyle { UserId = users[9].UserId, StyleId = styles[4].StyleId, CreatedAt = DateTime.Now.AddDays(-65) }, // Fashion
-                
-                // User 4 (David Brown) - Nature lover and outdoor photographer
-                new UserStyle { UserId = users[10].UserId, StyleId = styles[2].StyleId, CreatedAt = DateTime.Now.AddDays(-65) }, // Landscape
-                new UserStyle { UserId = users[10].UserId, StyleId = styles[6].StyleId, CreatedAt = DateTime.Now.AddDays(-60) }, // Architecture
-                new UserStyle { UserId = users[10].UserId, StyleId = styles[7].StyleId, CreatedAt = DateTime.Now.AddDays(-55) }, // Documentary
-                
-                // User 5 (Eva Garcia) - Fashion and lifestyle blogger
-                new UserStyle { UserId = users[11].UserId, StyleId = styles[4].StyleId, CreatedAt = DateTime.Now.AddDays(-55) }, // Fashion
-                new UserStyle { UserId = users[11].UserId, StyleId = styles[0].StyleId, CreatedAt = DateTime.Now.AddDays(-50) }, // Portrait
-                new UserStyle { UserId = users[11].UserId, StyleId = styles[5].StyleId, CreatedAt = DateTime.Now.AddDays(-45) }, // Product
-                new UserStyle { UserId = users[11].UserId, StyleId = styles[3].StyleId, CreatedAt = DateTime.Now.AddDays(-40) }  // Street
-            };
-
-            context.UserStyles.AddRange(userStyles);
-            context.SaveChanges();
+                var users = context.Users.Take(5).ToList();
+                var styles = context.Styles.Take(5).ToList();
+                var userStyles = new[]
+                {
+                    new UserStyle { UserId = users[0].UserId, StyleId = styles[0].StyleId, CreatedAt = DateTime.Now },
+                    new UserStyle { UserId = users[1].UserId, StyleId = styles[1].StyleId, CreatedAt = DateTime.Now },
+                    new UserStyle { UserId = users[2].UserId, StyleId = styles[2].StyleId, CreatedAt = DateTime.Now },
+                    new UserStyle { UserId = users[3].UserId, StyleId = styles[3].StyleId, CreatedAt = DateTime.Now },
+                    new UserStyle { UserId = users[4].UserId, StyleId = styles[4].StyleId, CreatedAt = DateTime.Now }
+                };
+                context.UserStyles.AddRange(userStyles);
+                context.SaveChanges();
+            }
         }
     }
-} 
+}

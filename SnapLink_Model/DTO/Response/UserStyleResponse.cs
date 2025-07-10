@@ -41,7 +41,6 @@ namespace SnapLink_Model.DTO.Response
     {
         public int PhotographerId { get; set; }
         public string FullName { get; set; } = string.Empty;
-        public string? Specialty { get; set; }
         public decimal? HourlyRate { get; set; }
         public decimal? Rating { get; set; }
         public string? AvailabilityStatus { get; set; }

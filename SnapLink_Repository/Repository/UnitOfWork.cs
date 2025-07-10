@@ -17,7 +17,6 @@ namespace SnapLink_Repository.Repository
         private IGenericRepository<Booking> _bookingRepository;
         private IGenericRepository<Complaint> _complaintRepository;
         private IGenericRepository<Location> _locationRepository;
-        private IGenericRepository<LocationImage> _locationImageRepository;
         private IGenericRepository<LocationOwner> _locationOwnerRepository;
         private IGenericRepository<Messagess> _messagessRepository;
         private IGenericRepository<Moderator> _moderatorRepository;
@@ -37,8 +36,8 @@ namespace SnapLink_Repository.Repository
         private IGenericRepository<UserStyle> _userStyleRepository;
         private IGenericRepository<WithdrawalRequest> _withdrawalRequestRepository;
         private IGenericRepository<PhotographerEvent> _photographerEventRepository;
-        private IGenericRepository<PhotographerImage> _photographerImageRepository;
         private IGenericRepository<PhotographerEventLocation> _photographerEventLocationRepository;
+        private IGenericRepository<Image> _imageRepository;
 
         public UnitOfWork(SnaplinkDbContext context)
         {
@@ -60,9 +59,6 @@ namespace SnapLink_Repository.Repository
 
         public IGenericRepository<Location> LocationRepository => 
             _locationRepository ??= new GenericRepository<Location>(_context);
-
-        public IGenericRepository<LocationImage> LocationImageRepository => 
-            _locationImageRepository ??= new GenericRepository<LocationImage>(_context);
 
         public IGenericRepository<LocationOwner> LocationOwnerRepository => 
             _locationOwnerRepository ??= new GenericRepository<LocationOwner>(_context);
@@ -121,11 +117,11 @@ namespace SnapLink_Repository.Repository
         public IGenericRepository<PhotographerEvent> PhotographerEventRepository => 
             _photographerEventRepository ??= new GenericRepository<PhotographerEvent>(_context);
 
-        public IGenericRepository<PhotographerImage> PhotographerImageRepository => 
-            _photographerImageRepository ??= new GenericRepository<PhotographerImage>(_context);
-
         public IGenericRepository<PhotographerEventLocation> PhotographerEventLocationRepository => 
             _photographerEventLocationRepository ??= new GenericRepository<PhotographerEventLocation>(_context);
+
+        public IGenericRepository<Image> ImageRepository =>
+            _imageRepository ??= new GenericRepository<Image>(_context);
 
         // Transaction methods
         public async Task<int> SaveChangesAsync()

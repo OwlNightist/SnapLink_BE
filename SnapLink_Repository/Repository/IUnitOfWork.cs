@@ -12,7 +12,6 @@ namespace SnapLink_Repository.Repository
         IGenericRepository<Booking> BookingRepository { get; }
         IGenericRepository<Complaint> ComplaintRepository { get; }
         IGenericRepository<Location> LocationRepository { get; }
-        IGenericRepository<LocationImage> LocationImageRepository { get; }
         IGenericRepository<LocationOwner> LocationOwnerRepository { get; }
         IGenericRepository<Messagess> MessagessRepository { get; }
         IGenericRepository<Moderator> ModeratorRepository { get; }
@@ -32,8 +31,8 @@ namespace SnapLink_Repository.Repository
         IGenericRepository<UserStyle> UserStyleRepository { get; }
         IGenericRepository<WithdrawalRequest> WithdrawalRequestRepository { get; }
         IGenericRepository<PhotographerEvent> PhotographerEventRepository { get; }
-        IGenericRepository<PhotographerImage> PhotographerImageRepository { get; }
         IGenericRepository<PhotographerEventLocation> PhotographerEventLocationRepository { get; }
+        IGenericRepository<Image> ImageRepository { get; }
 
         // Transaction methods
         Task<int> SaveChangesAsync();

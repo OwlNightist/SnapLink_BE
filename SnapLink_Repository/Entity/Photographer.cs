@@ -13,10 +13,6 @@ public partial class Photographer
 
     public string? Equipment { get; set; }
 
-    public string? Specialty { get; set; } //style
-
-    public string? PortfolioUrl { get; set; }
-
     public decimal? HourlyRate { get; set; }
 
     public string? AvailabilityStatus { get; set; }
@@ -42,6 +38,4 @@ public partial class Photographer
     public virtual ICollection<WithdrawalRequest> WithdrawalRequests { get; set; } = new List<WithdrawalRequest>();
 
     public virtual ICollection<PhotographerEvent> PhotographerEvents { get; set; } = new List<PhotographerEvent>();
-
-    public virtual ICollection<PhotographerImage> PhotographerImages { get; set; } = new List<PhotographerImage>();
 }
