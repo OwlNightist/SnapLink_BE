@@ -16,13 +16,13 @@ namespace SnapLink_API.Controllers
             _imageService = imageService;
         }
 
-        // GET: api/image/{id}?type={type}
+        // GET: api/image/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<ImageResponse>> GetById(int id, [FromQuery] string type)
+        public async Task<ActionResult<ImageResponse>> GetById(int id)
         {
             try
             {
-                var image = await _imageService.GetByIdAsync(id, type);
+                var image = await _imageService.GetByIdAsync(id);
                 return Ok(image);
             }
             catch (ArgumentException ex)
@@ -65,7 +65,7 @@ namespace SnapLink_API.Controllers
             try
             {
                 var image = await _imageService.CreateAsync(request);
-                return CreatedAtAction(nameof(GetById), new { id = image.Id, type = image.Type }, image);
+                return CreatedAtAction(nameof(GetById), new { id = image.Id }, image);
             }
             catch (ArgumentException ex)
             {
@@ -88,24 +88,24 @@ namespace SnapLink_API.Controllers
             }
         }
 
-        // DELETE: api/image/{id}?type={type}
+        // DELETE: api/image/{id}
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id, [FromQuery] string type)
+        public async Task<ActionResult> Delete(int id)
         {
-            var result = await _imageService.DeleteAsync(id, type);
+            var result = await _imageService.DeleteAsync(id);
             if (!result)
-                return NotFound($"Image with ID {id} and type {type} not found");
+                return NotFound($"Image with ID {id} not found");
             
             return NoContent();
         }
 
-        // PUT: api/image/{id}/set-primary?type={type}
+        // PUT: api/image/{id}/set-primary
         [HttpPut("{id}/set-primary")]
-        public async Task<ActionResult> SetAsPrimary(int id, [FromQuery] string type)
+        public async Task<ActionResult> SetAsPrimary(int id)
         {
-            var result = await _imageService.SetAsPrimaryAsync(id, type);
+            var result = await _imageService.SetAsPrimaryAsync(id);
             if (!result)
-                return NotFound($"Image with ID {id} and type {type} not found");
+                return NotFound($"Image with ID {id} not found");
             
             return NoContent();
         }

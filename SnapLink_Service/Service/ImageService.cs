@@ -22,15 +22,15 @@ namespace SnapLink_Service.Service
             _mapper = mapper;
         }
 
-        public async Task<ImageResponse> GetByIdAsync(int id, string type)
+        public async Task<ImageResponse> GetByIdAsync(int id)
         {
             var image = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.Id == id && img.Type == type
+                filter: img => img.Id == id
             );
             
             var imageEntity = image.FirstOrDefault();
             if (imageEntity == null)
-                throw new ArgumentException($"Image with ID {id} and type {type} not found");
+                throw new ArgumentException($"Image with ID {id} not found");
                 
             return _mapper.Map<ImageResponse>(imageEntity);
         }
@@ -123,10 +123,10 @@ namespace SnapLink_Service.Service
             return _mapper.Map<ImageResponse>(imageEntity);
         }
 
-        public async Task<bool> DeleteAsync(int id, string type)
+        public async Task<bool> DeleteAsync(int id)
         {
             var image = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.Id == id && img.Type == type
+                filter: img => img.Id == id
             );
             
             var imageEntity = image.FirstOrDefault();
@@ -138,10 +138,10 @@ namespace SnapLink_Service.Service
             return true;
         }
 
-        public async Task<bool> SetAsPrimaryAsync(int imageId, string type)
+        public async Task<bool> SetAsPrimaryAsync(int imageId)
         {
             var image = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.Id == imageId && img.Type == type
+                filter: img => img.Id == imageId
             );
             
             var imageEntity = image.FirstOrDefault();
