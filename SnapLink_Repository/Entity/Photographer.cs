@@ -31,8 +31,6 @@ public partial class Photographer
 
     public virtual ICollection<PhotographerStyle> PhotographerStyles { get; set; } = new List<PhotographerStyle>();
 
-    public virtual ICollection<PhotographerWallet> PhotographerWallets { get; set; } = new List<PhotographerWallet>();
-
     public virtual User User { get; set; } = null!;
 
     public virtual ICollection<WithdrawalRequest> WithdrawalRequests { get; set; } = new List<WithdrawalRequest>();

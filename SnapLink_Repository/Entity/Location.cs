@@ -31,11 +31,17 @@ public partial class Location
 
     public string? VerificationStatus { get; set; }
 
+    public string? LocationType { get; set; } // "Registered" or "External" (Google Places)
+
+    public string? ExternalPlaceId { get; set; } // Google Places ID for external locations
+
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
     public virtual ICollection<Advertisement> Advertisements { get; set; } = new List<Advertisement>();
+
+    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
     public virtual LocationOwner LocationOwner { get; set; } = null!;
 

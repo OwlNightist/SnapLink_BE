@@ -37,6 +37,8 @@ public partial class Booking
 
     public virtual User User { get; set; } = null!;
 
+    public virtual Location? Location { get; set; }
+
     public virtual Payment? Payment { get; set; }
 
     public virtual PhotographerEvent? Event { get; set; }

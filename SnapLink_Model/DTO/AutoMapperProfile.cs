@@ -60,7 +60,7 @@ namespace SnapLink_Model.DTO
                 .ForMember(dest => dest.UpdateAt, opt => opt.MapFrom(src => src.User.UpdateAt))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.User.Status))
                 .ForMember(dest => dest.TotalBookings, opt => opt.MapFrom(src => src.Bookings.Count))
-                .ForMember(dest => dest.WalletBalance, opt => opt.MapFrom(src => src.PhotographerWallets.FirstOrDefault().Balance))
+                .ForMember(dest => dest.WalletBalance, opt => opt.MapFrom(src => src.User.Wallets.FirstOrDefault().Balance))
                 .ForMember(dest => dest.Styles, opt => opt.MapFrom(src => src.PhotographerStyles.Select(ps => ps.Style.Name)));
 
             CreateMap<CreatePhotographerRequest, Photographer>();

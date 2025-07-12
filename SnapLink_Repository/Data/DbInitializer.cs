@@ -196,11 +196,120 @@ namespace SnapLink_Repository.Data
                 var owners = context.LocationOwners.Take(5).ToList();
                 var locations = new[]
                 {
-                    new Location { LocationOwnerId = owners[0].LocationOwnerId, Name = "Central Park Studio", Address = "123 Main St", Description = "Spacious studio downtown", HourlyRate = 50, Capacity = 20, Indoor = true, Outdoor = false, AvailabilityStatus = "Available", CreatedAt = DateTime.Now },
-                    new Location { LocationOwnerId = owners[1].LocationOwnerId, Name = "Riverside Venue", Address = "456 River Rd", Description = "Beautiful riverside location", HourlyRate = 70, Capacity = 50, Indoor = false, Outdoor = true, AvailabilityStatus = "Available", CreatedAt = DateTime.Now },
-                    new Location { LocationOwnerId = owners[2].LocationOwnerId, Name = "Urban Loft", Address = "789 City Ave", Description = "Modern loft in city center", HourlyRate = 60, Capacity = 30, Indoor = true, Outdoor = false, AvailabilityStatus = "Busy", CreatedAt = DateTime.Now },
-                    new Location { LocationOwnerId = owners[3].LocationOwnerId, Name = "Garden Spot", Address = "321 Garden Ln", Description = "Lush garden for outdoor shoots", HourlyRate = 40, Capacity = 15, Indoor = false, Outdoor = true, AvailabilityStatus = "Available", CreatedAt = DateTime.Now },
-                    new Location { LocationOwnerId = owners[4].LocationOwnerId, Name = "Mountain View", Address = "654 Hill Rd", Description = "Scenic mountain backdrop", HourlyRate = 80, Capacity = 25, Indoor = false, Outdoor = true, AvailabilityStatus = "Available", CreatedAt = DateTime.Now }
+                    // Registered locations with fees
+                    new Location { 
+                        LocationOwnerId = owners[0].LocationOwnerId, 
+                        Name = "Central Park Studio", 
+                        Address = "123 Main St, New York, NY", 
+                        Description = "Spacious studio downtown", 
+                        HourlyRate = 50, 
+                        Capacity = 20, 
+                        Indoor = true, 
+                        Outdoor = false, 
+                        AvailabilityStatus = "Available", 
+                        LocationType = "Registered",
+                        ExternalPlaceId = "ChIJKxjxuxlZwokRwA2Ire1V8mk", // Example Google Places ID
+                        CreatedAt = DateTime.Now 
+                    },
+                    new Location { 
+                        LocationOwnerId = owners[1].LocationOwnerId, 
+                        Name = "Riverside Venue", 
+                        Address = "456 River Rd, New York, NY", 
+                        Description = "Beautiful riverside location", 
+                        HourlyRate = 70, 
+                        Capacity = 50, 
+                        Indoor = false, 
+                        Outdoor = true, 
+                        AvailabilityStatus = "Available", 
+                        LocationType = "Registered",
+                        ExternalPlaceId = "ChIJaXQRs6lZwokRY6EFpJnhNNE", // Example Google Places ID
+                        CreatedAt = DateTime.Now 
+                    },
+                    new Location { 
+                        LocationOwnerId = owners[2].LocationOwnerId, 
+                        Name = "Urban Loft", 
+                        Address = "789 City Ave, New York, NY", 
+                        Description = "Modern loft in city center", 
+                        HourlyRate = 60, 
+                        Capacity = 30, 
+                        Indoor = true, 
+                        Outdoor = false, 
+                        AvailabilityStatus = "Busy", 
+                        LocationType = "Registered",
+                        ExternalPlaceId = "ChIJN1t_tDeuEmsRUsoyG83frY4", // Example Google Places ID
+                        CreatedAt = DateTime.Now 
+                    },
+                    new Location { 
+                        LocationOwnerId = owners[3].LocationOwnerId, 
+                        Name = "Garden Spot", 
+                        Address = "321 Garden Ln, New York, NY", 
+                        Description = "Lush garden for outdoor shoots", 
+                        HourlyRate = 40, 
+                        Capacity = 15, 
+                        Indoor = false, 
+                        Outdoor = true, 
+                        AvailabilityStatus = "Available", 
+                        LocationType = "Registered",
+                        ExternalPlaceId = "ChIJKxjxuxlZwokRwA2Ire1V8mk", // Example Google Places ID
+                        CreatedAt = DateTime.Now 
+                    },
+                    new Location { 
+                        LocationOwnerId = owners[4].LocationOwnerId, 
+                        Name = "Mountain View", 
+                        Address = "654 Hill Rd, New York, NY", 
+                        Description = "Scenic mountain backdrop", 
+                        HourlyRate = 80, 
+                        Capacity = 25, 
+                        Indoor = false, 
+                        Outdoor = true, 
+                        AvailabilityStatus = "Available", 
+                        LocationType = "Registered",
+                        ExternalPlaceId = "ChIJaXQRs6lZwokRY6EFpJnhNNE", // Example Google Places ID
+                        CreatedAt = DateTime.Now 
+                    },
+                    // External locations (Google Places) - no fees
+                    new Location { 
+                        LocationOwnerId = owners[0].LocationOwnerId, 
+                        Name = "Central Park", 
+                        Address = "Central Park, New York, NY", 
+                        Description = "Iconic urban park with beautiful landscapes", 
+                        HourlyRate = 0, // No fee for external locations
+                        Capacity = 100, 
+                        Indoor = false, 
+                        Outdoor = true, 
+                        AvailabilityStatus = "Available", 
+                        LocationType = "External",
+                        ExternalPlaceId = "ChIJN1t_tDeuEmsRUsoyG83frY4", // Google Places ID for Central Park
+                        CreatedAt = DateTime.Now 
+                    },
+                    new Location { 
+                        LocationOwnerId = owners[1].LocationOwnerId, 
+                        Name = "Times Square", 
+                        Address = "Times Square, New York, NY", 
+                        Description = "Famous commercial intersection and tourist destination", 
+                        HourlyRate = 0, // No fee for external locations
+                        Capacity = 200, 
+                        Indoor = false, 
+                        Outdoor = true, 
+                        AvailabilityStatus = "Available", 
+                        LocationType = "External",
+                        ExternalPlaceId = "ChIJaXQRs6lZwokRY6EFpJnhNNE", // Google Places ID for Times Square
+                        CreatedAt = DateTime.Now 
+                    },
+                    new Location { 
+                        LocationOwnerId = owners[2].LocationOwnerId, 
+                        Name = "Brooklyn Bridge", 
+                        Address = "Brooklyn Bridge, New York, NY", 
+                        Description = "Historic suspension bridge connecting Manhattan and Brooklyn", 
+                        HourlyRate = 0, // No fee for external locations
+                        Capacity = 50, 
+                        Indoor = false, 
+                        Outdoor = true, 
+                        AvailabilityStatus = "Available", 
+                        LocationType = "External",
+                        ExternalPlaceId = "ChIJKxjxuxlZwokRwA2Ire1V8mk", // Google Places ID for Brooklyn Bridge
+                        CreatedAt = DateTime.Now 
+                    }
                 };
                 context.Locations.AddRange(locations);
                 context.SaveChanges();
@@ -211,14 +320,61 @@ namespace SnapLink_Repository.Data
             {
                 var users = context.Users.Take(5).ToList();
                 var photographers = context.Photographers.Take(5).ToList();
-                var locations = context.Locations.Take(5).ToList();
+                var locations = context.Locations.Take(8).ToList(); // Now we have 8 locations (5 registered + 3 external)
                 var bookings = new[]
                 {
-                    new Booking { UserId = users[0].UserId, PhotographerId = photographers[0].PhotographerId, LocationId = locations[0].LocationId, StartDatetime = DateTime.Now.AddDays(1), EndDatetime = DateTime.Now.AddDays(1).AddHours(2), Status = "Confirmed", TotalPrice = 200, CreatedAt = DateTime.Now },
-                    new Booking { UserId = users[1].UserId, PhotographerId = photographers[1].PhotographerId, LocationId = locations[1].LocationId, StartDatetime = DateTime.Now.AddDays(2), EndDatetime = DateTime.Now.AddDays(2).AddHours(3), Status = "Pending", TotalPrice = 240, CreatedAt = DateTime.Now },
-                    new Booking { UserId = users[2].UserId, PhotographerId = photographers[2].PhotographerId, LocationId = locations[2].LocationId, StartDatetime = DateTime.Now.AddDays(3), EndDatetime = DateTime.Now.AddDays(3).AddHours(1), Status = "Confirmed", TotalPrice = 120, CreatedAt = DateTime.Now },
-                    new Booking { UserId = users[3].UserId, PhotographerId = photographers[3].PhotographerId, LocationId = locations[3].LocationId, StartDatetime = DateTime.Now.AddDays(4), EndDatetime = DateTime.Now.AddDays(4).AddHours(2), Status = "Cancelled", TotalPrice = 140, CreatedAt = DateTime.Now },
-                    new Booking { UserId = users[4].UserId, PhotographerId = photographers[4].PhotographerId, LocationId = locations[4].LocationId, StartDatetime = DateTime.Now.AddDays(5), EndDatetime = DateTime.Now.AddDays(5).AddHours(2), Status = "Confirmed", TotalPrice = 180, CreatedAt = DateTime.Now }
+                    // Bookings with registered locations (include location fees)
+                    new Booking { 
+                        UserId = users[0].UserId, 
+                        PhotographerId = photographers[0].PhotographerId, 
+                        LocationId = locations[0].LocationId, // Central Park Studio (Registered)
+                        StartDatetime = DateTime.Now.AddDays(1), 
+                        EndDatetime = DateTime.Now.AddDays(1).AddHours(2), 
+                        Status = "Confirmed", 
+                        TotalPrice = 300, // Photographer (100/hr * 2) + Location (50/hr * 2) = 300
+                        CreatedAt = DateTime.Now 
+                    },
+                    new Booking { 
+                        UserId = users[1].UserId, 
+                        PhotographerId = photographers[1].PhotographerId, 
+                        LocationId = locations[1].LocationId, // Riverside Venue (Registered)
+                        StartDatetime = DateTime.Now.AddDays(2), 
+                        EndDatetime = DateTime.Now.AddDays(2).AddHours(3), 
+                        Status = "Pending", 
+                        TotalPrice = 450, // Photographer (80/hr * 3) + Location (70/hr * 3) = 450
+                        CreatedAt = DateTime.Now 
+                    },
+                    new Booking { 
+                        UserId = users[2].UserId, 
+                        PhotographerId = photographers[2].PhotographerId, 
+                        LocationId = locations[2].LocationId, // Urban Loft (Registered)
+                        StartDatetime = DateTime.Now.AddDays(3), 
+                        EndDatetime = DateTime.Now.AddDays(3).AddHours(1), 
+                        Status = "Confirmed", 
+                        TotalPrice = 180, // Photographer (120/hr * 1) + Location (60/hr * 1) = 180
+                        CreatedAt = DateTime.Now 
+                    },
+                    // Bookings with external locations (no location fees)
+                    new Booking { 
+                        UserId = users[3].UserId, 
+                        PhotographerId = photographers[3].PhotographerId, 
+                        LocationId = locations[5].LocationId, // Central Park (External)
+                        StartDatetime = DateTime.Now.AddDays(4), 
+                        EndDatetime = DateTime.Now.AddDays(4).AddHours(2), 
+                        Status = "Confirmed", 
+                        TotalPrice = 140, // Photographer (70/hr * 2) + Location (0/hr * 2) = 140
+                        CreatedAt = DateTime.Now 
+                    },
+                    new Booking { 
+                        UserId = users[4].UserId, 
+                        PhotographerId = photographers[4].PhotographerId, 
+                        LocationId = locations[6].LocationId, // Times Square (External)
+                        StartDatetime = DateTime.Now.AddDays(5), 
+                        EndDatetime = DateTime.Now.AddDays(5).AddHours(2), 
+                        Status = "Confirmed", 
+                        TotalPrice = 180, // Photographer (90/hr * 2) + Location (0/hr * 2) = 180
+                        CreatedAt = DateTime.Now 
+                    }
                 };
                 context.Bookings.AddRange(bookings);
                 context.SaveChanges();
@@ -246,11 +402,56 @@ namespace SnapLink_Repository.Data
                 var bookings = context.Bookings.Take(5).ToList();
                 var payments = new[]
                 {
-                    new Payment { BookingId = bookings[0].BookingId, Amount = 200, Status = "Paid", CreatedAt = DateTime.Now },
-                    new Payment { BookingId = bookings[1].BookingId, Amount = 240, Status = "Pending", CreatedAt = DateTime.Now },
-                    new Payment { BookingId = bookings[2].BookingId, Amount = 120, Status = "Paid", CreatedAt = DateTime.Now },
-                    new Payment { BookingId = bookings[3].BookingId, Amount = 140, Status = "Refunded", CreatedAt = DateTime.Now },
-                    new Payment { BookingId = bookings[4].BookingId, Amount = 180, Status = "Paid", CreatedAt = DateTime.Now }
+                    // Payment for registered location booking (Central Park Studio)
+                    new Payment { 
+                        BookingId = bookings[0].BookingId, 
+                        Amount = 300, 
+                        Status = "Paid", 
+                        PhotographerPayoutAmount = 180, // (100/hr * 2) - 10% platform fee = 180
+                        LocationOwnerPayoutAmount = 100, // 50/hr * 2 = 100
+                        PlatformFee = 20, // 10% of 300 = 30, but this is the actual platform fee
+                        CreatedAt = DateTime.Now 
+                    },
+                    // Payment for registered location booking (Riverside Venue)
+                    new Payment { 
+                        BookingId = bookings[1].BookingId, 
+                        Amount = 450, 
+                        Status = "Pending", 
+                        PhotographerPayoutAmount = 216, // (80/hr * 3) - 10% platform fee = 216
+                        LocationOwnerPayoutAmount = 210, // 70/hr * 3 = 210
+                        PlatformFee = 24, // Platform fee
+                        CreatedAt = DateTime.Now 
+                    },
+                    // Payment for registered location booking (Urban Loft)
+                    new Payment { 
+                        BookingId = bookings[2].BookingId, 
+                        Amount = 180, 
+                        Status = "Paid", 
+                        PhotographerPayoutAmount = 108, // (120/hr * 1) - 10% platform fee = 108
+                        LocationOwnerPayoutAmount = 60, // 60/hr * 1 = 60
+                        PlatformFee = 12, // Platform fee
+                        CreatedAt = DateTime.Now 
+                    },
+                    // Payment for external location booking (Central Park - no location fee)
+                    new Payment { 
+                        BookingId = bookings[3].BookingId, 
+                        Amount = 140, 
+                        Status = "Paid", 
+                        PhotographerPayoutAmount = 126, // (70/hr * 2) - 10% platform fee = 126
+                        LocationOwnerPayoutAmount = 0, // No location fee for external locations
+                        PlatformFee = 14, // Platform fee
+                        CreatedAt = DateTime.Now 
+                    },
+                    // Payment for external location booking (Times Square - no location fee)
+                    new Payment { 
+                        BookingId = bookings[4].BookingId, 
+                        Amount = 180, 
+                        Status = "Paid", 
+                        PhotographerPayoutAmount = 162, // (90/hr * 2) - 10% platform fee = 162
+                        LocationOwnerPayoutAmount = 0, // No location fee for external locations
+                        PlatformFee = 18, // Platform fee
+                        CreatedAt = DateTime.Now 
+                    }
                 };
                 context.Payments.AddRange(payments);
                 context.SaveChanges();
@@ -368,19 +569,24 @@ namespace SnapLink_Repository.Data
                 context.SaveChanges();
             }
 
-            // Seed PhotographerWallets
-            if (!context.PhotographerWallets.Any())
+            // Seed Wallets
+            if (!context.Wallets.Any())
             {
-                var photographers = context.Photographers.Take(5).ToList();
+                var users = context.Users.Take(10).ToList();
                 var wallets = new[]
                 {
-                    new PhotographerWallet { PhotographerId = photographers[0].PhotographerId, Balance = 500, UpdatedAt = DateTime.Now },
-                    new PhotographerWallet { PhotographerId = photographers[1].PhotographerId, Balance = 300, UpdatedAt = DateTime.Now },
-                    new PhotographerWallet { PhotographerId = photographers[2].PhotographerId, Balance = 700, UpdatedAt = DateTime.Now },
-                    new PhotographerWallet { PhotographerId = photographers[3].PhotographerId, Balance = 200, UpdatedAt = DateTime.Now },
-                    new PhotographerWallet { PhotographerId = photographers[4].PhotographerId, Balance = 400, UpdatedAt = DateTime.Now }
+                    new Wallet { UserId = users[0].UserId, Balance = 500, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[1].UserId, Balance = 300, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[2].UserId, Balance = 700, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[3].UserId, Balance = 200, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[4].UserId, Balance = 400, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[5].UserId, Balance = 150, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[6].UserId, Balance = 600, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[7].UserId, Balance = 250, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[8].UserId, Balance = 350, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[9].UserId, Balance = 450, UpdatedAt = DateTime.Now }
                 };
-                context.PhotographerWallets.AddRange(wallets);
+                context.Wallets.AddRange(wallets);
                 context.SaveChanges();
             }
 

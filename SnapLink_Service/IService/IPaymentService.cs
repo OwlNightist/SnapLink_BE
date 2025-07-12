@@ -6,7 +6,6 @@ namespace SnapLink_Service.IService;
 public interface IPaymentService
 {
     Task<PaymentResponse> CreatePaymentLinkAsync(CreatePaymentLinkRequest request, int userId);
-    Task<PaymentResponse> GetOrderAsync(int orderId);
-    Task<PaymentResponse> CancelOrderAsync(int orderId);
-    Task<PaymentResponse> ConfirmWebhookAsync(ConfirmWebhookRequest request);
+    Task<PaymentResponse> GetPaymentStatusAsync(int paymentId);
+    Task<PaymentResponse> CancelPaymentAsync(int paymentId);
 } 

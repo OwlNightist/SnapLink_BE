@@ -19,7 +19,7 @@ namespace SnapLink_Repository.Repository
         IGenericRepository<Payment> PaymentRepository { get; }
         IGenericRepository<Photographer> PhotographerRepository { get; }
         IGenericRepository<PhotographerStyle> PhotographerStyleRepository { get; }
-        IGenericRepository<PhotographerWallet> PhotographerWalletRepository { get; }
+        IGenericRepository<Wallet> WalletRepository { get; }
         IGenericRepository<PremiumPackage> PremiumPackageRepository { get; }
         IGenericRepository<PremiumSubscription> PremiumSubscriptionRepository { get; }
         IGenericRepository<Review> ReviewRepository { get; }

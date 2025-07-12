@@ -26,9 +26,3 @@ public class CreatePaymentLinkRequest
     [Required]
     public int LocationId { get; set; }
 }
-
-public class ConfirmWebhookRequest
-{
-    [Required]
-    public string WebhookUrl { get; set; } = string.Empty;
-} 

@@ -48,7 +48,7 @@ namespace SnapLink_Service.Service
         {
             var photographer = await _unitOfWork.PhotographerRepository.GetAsync(
                 filter: p => p.PhotographerId == id,
-                includeProperties: "User,Bookings,PhotographerWallets,PhotographerStyles.Style"
+                includeProperties: "User,Bookings,PhotographerStyles.Style"
             );
             
             var photographerEntity = photographer.FirstOrDefault();

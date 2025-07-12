@@ -12,7 +12,7 @@ using SnapLink_Repository.DBContext;
 namespace SnapLink_Repository.Migrations
 {
     [DbContext(typeof(SnaplinkDbContext))]
-    [Migration("20250710155405_InitialCreate")]
+    [Migration("20250712024754_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -177,6 +177,8 @@ namespace SnapLink_Repository.Migrations
 
                     b.HasIndex("EventId");
 
+                    b.HasIndex("LocationId");
+
                     b.HasIndex("PhotographerId");
 
                     b.HasIndex("UserId");
@@ -335,6 +337,9 @@ namespace SnapLink_Repository.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("description");
 
+                    b.Property<string>("ExternalPlaceId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool?>("FeaturedStatus")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -354,6 +359,9 @@ namespace SnapLink_Repository.Migrations
                     b.Property<int>("LocationOwnerId")
                         .HasColumnType("int")
                         .HasColumnName("locationOwnerId");
+
+                    b.Property<string>("LocationType")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .HasMaxLength(255)
@@ -805,39 +813,6 @@ namespace SnapLink_Repository.Migrations
                     b.ToTable("PhotographerStyle", (string)null);
                 });
 
-            modelBuilder.Entity("SnapLink_Repository.Entity.PhotographerWallet", b =>
-                {
-                    b.Property<int>("PhotographerWalletId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("photographerWalletId");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PhotographerWalletId"));
-
-                    b.Property<decimal?>("Balance")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(10, 2)")
-                        .HasDefaultValue(0m)
-                        .HasColumnName("balance");
-
-                    b.Property<int>("PhotographerId")
-                        .HasColumnType("int")
-                        .HasColumnName("photographerId");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasColumnName("updatedAt")
-                        .HasDefaultValueSql("(getdate())");
-
-                    b.HasKey("PhotographerWalletId")
-                        .HasName("PK__Photogra__99B37BECD7BD3C88");
-
-                    b.HasIndex("PhotographerId");
-
-                    b.ToTable("PhotographerWallet", (string)null);
-                });
-
             modelBuilder.Entity("SnapLink_Repository.Entity.PremiumPackage", b =>
                 {
                     b.Property<int>("PackageId")
@@ -1203,6 +1178,39 @@ namespace SnapLink_Repository.Migrations
                     b.ToTable("UserStyle", (string)null);
                 });
 
+            modelBuilder.Entity("SnapLink_Repository.Entity.Wallet", b =>
+                {
+                    b.Property<int>("WalletId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("walletId");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WalletId"));
+
+                    b.Property<decimal?>("Balance")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(10, 2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("balance");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("updatedAt")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("userId");
+
+                    b.HasKey("WalletId")
+                        .HasName("PK__Wallet__A5C5D5C5D5C5D5C5");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Wallet", (string)null);
+                });
+
             modelBuilder.Entity("SnapLink_Repository.Entity.WithdrawalRequest", b =>
                 {
                     b.Property<int>("Id")
@@ -1302,6 +1310,12 @@ namespace SnapLink_Repository.Migrations
                         .HasForeignKey("EventId")
                         .HasConstraintName("FK_Booking_Event");
 
+                    b.HasOne("SnapLink_Repository.Entity.Location", "Location")
+                        .WithMany("Bookings")
+                        .HasForeignKey("LocationId")
+                        .IsRequired()
+                        .HasConstraintName("FK_Booking_Location");
+
                     b.HasOne("SnapLink_Repository.Entity.Photographer", "Photographer")
                         .WithMany("Bookings")
                         .HasForeignKey("PhotographerId")
@@ -1315,6 +1329,8 @@ namespace SnapLink_Repository.Migrations
                         .HasConstraintName("FK_Booking_Users");
 
                     b.Navigation("Event");
+
+                    b.Navigation("Location");
 
                     b.Navigation("Photographer");
 
@@ -1486,17 +1502,6 @@ namespace SnapLink_Repository.Migrations
                     b.Navigation("Style");
                 });
 
-            modelBuilder.Entity("SnapLink_Repository.Entity.PhotographerWallet", b =>
-                {
-                    b.HasOne("SnapLink_Repository.Entity.Photographer", "Photographer")
-                        .WithMany("PhotographerWallets")
-                        .HasForeignKey("PhotographerId")
-                        .IsRequired()
-                        .HasConstraintName("FK_PhotographerWallet_Photographer");
-
-                    b.Navigation("Photographer");
-                });
-
             modelBuilder.Entity("SnapLink_Repository.Entity.PremiumSubscription", b =>
                 {
                     b.HasOne("SnapLink_Repository.Entity.PremiumPackage", "Package")
@@ -1581,6 +1586,17 @@ namespace SnapLink_Repository.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SnapLink_Repository.Entity.Wallet", b =>
+                {
+                    b.HasOne("SnapLink_Repository.Entity.User", "User")
+                        .WithMany("Wallets")
+                        .HasForeignKey("UserId")
+                        .IsRequired()
+                        .HasConstraintName("FK_Wallet_User");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SnapLink_Repository.Entity.WithdrawalRequest", b =>
                 {
                     b.HasOne("SnapLink_Repository.Entity.Photographer", "Photographer")
@@ -1604,6 +1620,8 @@ namespace SnapLink_Repository.Migrations
             modelBuilder.Entity("SnapLink_Repository.Entity.Location", b =>
                 {
                     b.Navigation("Advertisements");
+
+                    b.Navigation("Bookings");
 
                     b.Navigation("PhotographerEventLocations");
                 });
@@ -1632,8 +1650,6 @@ namespace SnapLink_Repository.Migrations
                     b.Navigation("PhotographerEvents");
 
                     b.Navigation("PhotographerStyles");
-
-                    b.Navigation("PhotographerWallets");
 
                     b.Navigation("WithdrawalRequests");
                 });
@@ -1691,6 +1707,8 @@ namespace SnapLink_Repository.Migrations
                     b.Navigation("UserRoles");
 
                     b.Navigation("UserStyles");
+
+                    b.Navigation("Wallets");
                 });
 #pragma warning restore 612, 618
         }

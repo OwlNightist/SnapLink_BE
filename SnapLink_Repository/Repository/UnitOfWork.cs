@@ -24,7 +24,7 @@ namespace SnapLink_Repository.Repository
         private IGenericRepository<Payment> _paymentRepository;
         private IGenericRepository<Photographer> _photographerRepository;
         private IGenericRepository<PhotographerStyle> _photographerStyleRepository;
-        private IGenericRepository<PhotographerWallet> _photographerWalletRepository;
+        private IGenericRepository<Wallet> _walletRepository;
         private IGenericRepository<PremiumPackage> _premiumPackageRepository;
         private IGenericRepository<PremiumSubscription> _premiumSubscriptionRepository;
         private IGenericRepository<Review> _reviewRepository;
@@ -81,8 +81,8 @@ namespace SnapLink_Repository.Repository
         public IGenericRepository<PhotographerStyle> PhotographerStyleRepository => 
             _photographerStyleRepository ??= new GenericRepository<PhotographerStyle>(_context);
 
-        public IGenericRepository<PhotographerWallet> PhotographerWalletRepository => 
-            _photographerWalletRepository ??= new GenericRepository<PhotographerWallet>(_context);
+        public IGenericRepository<Wallet> WalletRepository => 
+            _walletRepository ??= new GenericRepository<Wallet>(_context);
 
         public IGenericRepository<PremiumPackage> PremiumPackageRepository => 
             _premiumPackageRepository ??= new GenericRepository<PremiumPackage>(_context);

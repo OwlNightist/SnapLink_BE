@@ -43,7 +43,7 @@ public partial class SnaplinkDbContext : DbContext
 
     public virtual DbSet<PhotographerStyle> PhotographerStyles { get; set; }
 
-    public virtual DbSet<PhotographerWallet> PhotographerWallets { get; set; }
+    public virtual DbSet<Wallet> Wallets { get; set; }
 
     public virtual DbSet<PremiumPackage> PremiumPackages { get; set; }
 
@@ -183,6 +183,11 @@ public partial class SnaplinkDbContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Booking_Users");
+
+            entity.HasOne(d => d.Location).WithMany(p => p.Bookings)
+                .HasForeignKey(d => d.LocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Booking_Location");
 
             entity.HasOne(d => d.Event).WithMany(p => p.Bookings)
                 .HasForeignKey(d => d.EventId)
@@ -494,27 +499,27 @@ public partial class SnaplinkDbContext : DbContext
                 .HasConstraintName("FK_PhotographerStyle_Style");
         });
 
-        modelBuilder.Entity<PhotographerWallet>(entity =>
+        modelBuilder.Entity<Wallet>(entity =>
         {
-            entity.HasKey(e => e.PhotographerWalletId).HasName("PK__Photogra__99B37BECD7BD3C88");
+            entity.HasKey(e => e.WalletId).HasName("PK__Wallet__A5C5D5C5D5C5D5C5");
 
-            entity.ToTable("PhotographerWallet");
+            entity.ToTable("Wallet");
 
-            entity.Property(e => e.PhotographerWalletId).HasColumnName("photographerWalletId");
+            entity.Property(e => e.WalletId).HasColumnName("walletId");
             entity.Property(e => e.Balance)
                 .HasDefaultValue(0m)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("balance");
-            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
+            entity.Property(e => e.UserId).HasColumnName("userId");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("updatedAt");
 
-            entity.HasOne(d => d.Photographer).WithMany(p => p.PhotographerWallets)
-                .HasForeignKey(d => d.PhotographerId)
+            entity.HasOne(d => d.User).WithMany(p => p.Wallets)
+                .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PhotographerWallet_Photographer");
+                .HasConstraintName("FK_Wallet_User");
         });
 
         modelBuilder.Entity<PremiumPackage>(entity =>
