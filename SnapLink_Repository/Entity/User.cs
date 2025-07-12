@@ -49,7 +49,8 @@ public partial class User
 
     public virtual ICollection<PremiumSubscription> PremiumSubscriptions { get; set; } = new List<PremiumSubscription>();
 
-    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+    public virtual ICollection<Transaction> FromTransactions { get; set; } = new List<Transaction>();
+    public virtual ICollection<Transaction> ToTransactions { get; set; } = new List<Transaction>();
 
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     

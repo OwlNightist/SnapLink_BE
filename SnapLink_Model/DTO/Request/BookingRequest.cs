@@ -21,9 +21,8 @@ public class CreateBookingRequest
     
     public string? SpecialRequests { get; set; }
     
-    [Required]
-    [Range(0.01, double.MaxValue, ErrorMessage = "Total price must be greater than 0")]
-    public decimal TotalPrice { get; set; }
+    // TotalPrice will be calculated automatically by the system
+    // based on photographer rate, location fees, and duration
 }
 
 public class UpdateBookingRequest
@@ -36,6 +35,5 @@ public class UpdateBookingRequest
     
     public string? Status { get; set; }
     
-    [Range(0.01, double.MaxValue, ErrorMessage = "Total price must be greater than 0")]
-    public decimal? TotalPrice { get; set; }
+    // TotalPrice is calculated automatically and cannot be manually updated
 } 

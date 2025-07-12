@@ -9,12 +9,10 @@ namespace SnapLink_API.Controllers;
 public class BookingController : ControllerBase
 {
     private readonly IBookingService _bookingService;
-    private readonly IPaymentService _paymentService;
 
-    public BookingController(IBookingService bookingService, IPaymentService paymentService)
+    public BookingController(IBookingService bookingService)
     {
         _bookingService = bookingService;
-        _paymentService = paymentService;
     }
 
     [HttpPost("create")]
@@ -318,78 +316,27 @@ public class BookingController : ControllerBase
         }
     }
 
-    [HttpPost("{bookingId}/create-payment")]
-    public async Task<IActionResult> CreatePaymentForBooking(int bookingId, [FromQuery] int userId, [FromQuery] string cancelUrl, [FromQuery] string returnUrl)
+    [HttpPost("cleanup-expired")]
+    public async Task<IActionResult> CleanupExpiredBookings()
     {
         try
         {
-            // Get booking details
-            var bookingResult = await _bookingService.GetBookingByIdAsync(bookingId);
+            var cancelledCount = await _bookingService.CancelExpiredPendingBookingsAsync();
             
-            if (bookingResult.Error != 0)
+            return Ok(new
             {
-                return BadRequest(bookingResult);
-            }
-
-            var booking = bookingResult.Data;
-            
-            // Verify booking belongs to user
-            if (booking.UserId != userId)
-            {
-                return BadRequest(new
+                Error = 0,
+                Message = $"Cleanup completed. {cancelledCount} expired pending bookings cancelled.",
+                Data = new
                 {
-                    Error = -1,
-                    Message = "Booking does not belong to the specified user",
-                    Data = (object?)null
-                });
-            }
-
-            // Check if booking is in pending status
-            if (booking.Status != "Pending")
-            {
-                return BadRequest(new
-                {
-                    Error = -1,
-                    Message = "Payment can only be created for pending bookings",
-                    Data = (object?)null
-                });
-            }
-
-            // Create payment request
-            var paymentRequest = new CreatePaymentLinkRequest
-            {
-                ProductName = $"Photography Session - {booking.PhotographerName} at {booking.LocationName}",
-                Price = booking.TotalPrice,
-                Description = $"Photography booking for {booking.DurationHours} hours on {booking.StartDatetime:MMM dd, yyyy}",
-                CancelUrl = cancelUrl,
-                ReturnUrl = returnUrl,
-                PhotographerId = booking.PhotographerId,
-                LocationId = booking.LocationId
-            };
-
-            var paymentResult = await _paymentService.CreatePaymentLinkAsync(paymentRequest, userId);
-            
-            if (paymentResult.Error == 0)
-            {
-                return Ok(new
-                {
-                    Error = 0,
-                    Message = "Payment link created successfully",
-                    Data = new
-                    {
-                        Booking = booking,
-                        Payment = paymentResult.Data
-                    }
-                });
-            }
-            else
-            {
-                return BadRequest(paymentResult);
-            }
+                    CancelledCount = cancelledCount,
+                    Timestamp = DateTime.UtcNow
+                }
+            });
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error in CreatePaymentForBooking: {ex.Message}");
+            Console.WriteLine($"Error in CleanupExpiredBookings: {ex.Message}");
             return StatusCode(500, new
             {
                 Error = -1,
@@ -398,4 +345,35 @@ public class BookingController : ControllerBase
             });
         }
     }
+
+    [HttpPost("cleanup-all-pending")]
+    public async Task<IActionResult> CleanupAllPendingBookings()
+    {
+        try
+        {
+            var cancelledCount = await _bookingService.CancelAllPendingBookingsAsync();
+            
+            return Ok(new
+            {
+                Error = 0,
+                Message = $"Cleanup completed. {cancelledCount} pending bookings cancelled.",
+                Data = new
+                {
+                    CancelledCount = cancelledCount,
+                    Timestamp = DateTime.UtcNow
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in CleanupAllPendingBookings: {ex.Message}");
+            return StatusCode(500, new
+            {
+                Error = -1,
+                Message = "Internal server error",
+                Data = (object?)null
+            });
+        }
+    }
+
 } 

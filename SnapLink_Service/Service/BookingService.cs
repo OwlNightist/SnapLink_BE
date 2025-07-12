@@ -124,20 +124,13 @@ namespace SnapLink_Service.Service
                     };
                 }
 
-                // Calculate price
-                var calculatedPrice = await CalculateBookingPriceAsync(request.PhotographerId, locationId, request.StartDatetime, request.EndDatetime);
+                // Calculate true price automatically
+                var truePrice = await CalculateBookingPriceAsync(request.PhotographerId, locationId, request.StartDatetime, request.EndDatetime);
                 
-                if (Math.Abs(calculatedPrice - request.TotalPrice) > 0.01m)
-                {
-                    return new BookingResponse
-                    {
-                        Error = -1,
-                        Message = $"Price mismatch. Calculated price: {calculatedPrice:C}, provided price: {request.TotalPrice:C}",
-                        Data = null
-                    };
-                }
+                // Get display price (capped for testing)
+                var displayPrice = GetDisplayPrice(truePrice);
 
-                // Create booking
+                // Create booking with true price stored in database
                 var booking = new Booking
                 {
                     UserId = userId,
@@ -147,15 +140,15 @@ namespace SnapLink_Service.Service
                     EndDatetime = request.EndDatetime,
                     Status = "Pending", // Requires payment to be confirmed
                     SpecialRequests = request.SpecialRequests,
-                    TotalPrice = request.TotalPrice,
+                    TotalPrice = truePrice, // Store true price in database
                     CreatedAt = DateTime.UtcNow
                 };
 
                 await _unitOfWork.BookingRepository.AddAsync(booking);
                 await _unitOfWork.SaveChangesAsync();
 
-                // Return booking data
-                var bookingData = await MapBookingToResponseAsync(booking);
+                // Return booking data with display price
+                var bookingData = await MapBookingToResponseAsync(booking, displayPrice);
                 
                 return new BookingResponse
                 {
@@ -361,9 +354,6 @@ namespace SnapLink_Service.Service
                 if (request.SpecialRequests != null)
                     booking.SpecialRequests = request.SpecialRequests;
                 
-                if (request.TotalPrice.HasValue)
-                    booking.TotalPrice = request.TotalPrice.Value;
-                
                 if (request.Status != null)
                     booking.Status = request.Status;
 
@@ -562,10 +552,90 @@ namespace SnapLink_Service.Service
             return (photographerHourlyRate + locationHourlyRate) * (decimal)duration;
         }
 
-        private async Task<BookingData> MapBookingToResponseAsync(Booking booking)
+        public async Task<int> CancelAllPendingBookingsAsync()
+        {
+            try
+            {
+                // Find all pending bookings (regardless of age)
+                var pendingBookings = await _context.Bookings
+                    .Where(b => b.Status == "Pending")
+                    .ToListAsync();
+
+                int cancelledCount = 0;
+                foreach (var booking in pendingBookings)
+                {
+                    booking.Status = "Cancelled";
+                    booking.UpdatedAt = DateTime.UtcNow;
+                    cancelledCount++;
+                    
+                    Console.WriteLine($"Cancelled pending booking {booking.BookingId} created at {booking.CreatedAt}");
+                }
+
+                if (cancelledCount > 0)
+                {
+                    await _unitOfWork.SaveChangesAsync();
+                    Console.WriteLine($"Cancelled {cancelledCount} pending bookings");
+                }
+
+                return cancelledCount;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error cancelling pending bookings: {ex.Message}");
+                return 0;
+            }
+        }
+
+        public async Task<int> CancelExpiredPendingBookingsAsync()
+        {
+            try
+            {
+                // Get timeout duration (default 3 minutes for testing)
+                var timeoutMinutes = 3; // Can be moved to configuration later
+                var timeoutThreshold = DateTime.UtcNow.AddMinutes(-timeoutMinutes);
+
+                // Find all pending bookings that are older than the timeout threshold
+                var expiredBookings = await _context.Bookings
+                    .Where(b => b.Status == "Pending" && b.CreatedAt < timeoutThreshold)
+                    .ToListAsync();
+
+                int cancelledCount = 0;
+                foreach (var booking in expiredBookings)
+                {
+                    booking.Status = "Cancelled";
+                    booking.UpdatedAt = DateTime.UtcNow;
+                    cancelledCount++;
+                    
+                    Console.WriteLine($"Cancelled expired pending booking {booking.BookingId} created at {booking.CreatedAt}");
+                }
+
+                if (cancelledCount > 0)
+                {
+                    await _unitOfWork.SaveChangesAsync();
+                    Console.WriteLine($"Cancelled {cancelledCount} expired pending bookings");
+                }
+
+                return cancelledCount;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error cancelling expired bookings: {ex.Message}");
+                return 0;
+            }
+        }
+
+        private decimal GetDisplayPrice(decimal truePrice)
+        {
+            // For testing: hard-code display price at 5000, but keep true price in database
+            return 5000m;
+        }
+
+        private async Task<BookingData> MapBookingToResponseAsync(Booking booking, decimal? displayPrice = null)
         {
             var duration = (booking.EndDatetime - booking.StartDatetime)?.TotalHours ?? 0;
-            var pricePerHour = duration > 0 ? (booking.TotalPrice ?? 0) / (decimal)duration : 0;
+            var truePrice = booking.TotalPrice ?? 0;
+            var priceToDisplay = displayPrice ?? GetDisplayPrice(truePrice);
+            var pricePerHour = duration > 0 ? priceToDisplay / (decimal)duration : 0;
 
             return new BookingData
             {
@@ -583,12 +653,12 @@ namespace SnapLink_Service.Service
                 EndDatetime = booking.EndDatetime ?? DateTime.UtcNow,
                 Status = booking.Status ?? "",
                 SpecialRequests = booking.SpecialRequests,
-                TotalPrice = booking.TotalPrice ?? 0,
+                TotalPrice = priceToDisplay, // Use display price for response
                 CreatedAt = booking.CreatedAt ?? DateTime.UtcNow,
                 UpdatedAt = booking.UpdatedAt,
                 HasPayment = booking.Payment != null,
-                PaymentStatus = booking.Payment?.Status ?? "",
-                PaymentAmount = booking.Payment?.Amount,
+                PaymentStatus = booking.Payment?.Status.ToString() ?? "",
+                PaymentAmount = booking.Payment?.TotalAmount,
                 DurationHours = (int)duration,
                 PricePerHour = pricePerHour
             };

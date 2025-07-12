@@ -7,29 +7,38 @@ public partial class Payment
 {
     public int PaymentId { get; set; }
 
+    public int CustomerId { get; set; }
+    public virtual User Customer { get; set; } = null!;
+
     public int BookingId { get; set; }
-
-    public decimal? Amount { get; set; }
-
-    public string? PaymentMethod { get; set; }
-
-    public string? Status { get; set; }
-
-    public string? TransactionId { get; set; }
-
-    public decimal? PhotographerPayoutAmount { get; set; }
-
-    public decimal? LocationOwnerPayoutAmount { get; set; }
-
-    public decimal? PlatformFee { get; set; }
-
-    public DateTime? CreatedAt { get; set; }
-
-    public DateTime? UpdatedAt { get; set; }
-
     public virtual Booking Booking { get; set; } = null!;
+
+    public decimal TotalAmount { get; set; }
+
+    public string Currency { get; set; } = "VND";
+
+    public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
+
+    public string? ExternalTransactionId { get; set; }  // PayOS payment code
+
+    public string? Method { get; set; } = "PayOS";      // Payment method
+
+    public string? Note { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 
     public virtual ICollection<Advertisement> Advertisements { get; set; } = new List<Advertisement>();
 
     public virtual ICollection<PremiumSubscription> PremiumSubscriptions { get; set; } = new List<PremiumSubscription>();
+}
+
+public enum PaymentStatus
+{
+    Pending,
+    Success,
+    Failed,
+    Cancelled
 }

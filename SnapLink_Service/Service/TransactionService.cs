@@ -18,27 +18,31 @@ namespace SnapLink_Service.Service
         public async Task<IEnumerable<TransactionResponse>> GetUserTransactionHistoryAsync(int userId, int page = 1, int pageSize = 10)
         {
             var transactions = await _context.Transactions
-                .Include(t => t.User)
-                .Where(t => t.UserId == userId)
+                .Include(t => t.FromUser)
+                .Include(t => t.ToUser)
+                .Include(t => t.ReferencePayment)
+                .Where(t => t.FromUserId == userId || t.ToUserId == userId)
                 .OrderByDescending(t => t.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(t => new TransactionResponse
                 {
-                    Id = t.TransactionId,
-                    WalletId = 0, // Not directly linked to wallet in current structure
-                    TransactionType = t.Type ?? "Unknown",
-                    Amount = t.Amount ?? 0,
-                    BalanceBefore = 0, // Not stored in current structure
-                    BalanceAfter = 0, // Not stored in current structure
-                    Description = t.Description ?? "",
-                    Status = t.Status ?? "",
-                    CreatedAt = t.CreatedAt ?? DateTime.UtcNow,
-                    UpdatedAt = null, // Not stored in current structure
-                    UserName = t.User.FullName ?? "",
-                    UserEmail = t.User.Email ?? "",
-                    RelatedPaymentId = null, // Not stored in current structure
-                    RelatedBookingId = null // Not stored in current structure
+                    TransactionId = t.TransactionId,
+                    ReferencePaymentId = t.ReferencePaymentId,
+                    FromUserId = t.FromUserId,
+                    FromUserName = t.FromUser != null ? t.FromUser.FullName ?? "" : "System",
+                    ToUserId = t.ToUserId,
+                    ToUserName = t.ToUser != null ? t.ToUser.FullName ?? "" : "System",
+                    Amount = t.Amount,
+                    Currency = t.Currency,
+                    Type = t.Type.ToString(),
+                    Status = t.Status.ToString(),
+                    Note = t.Note,
+                    CreatedAt = t.CreatedAt,
+                    UpdatedAt = t.UpdatedAt,
+                    PaymentMethod = t.ReferencePayment != null ? t.ReferencePayment.Method : null,
+                    PaymentAmount = t.ReferencePayment != null ? t.ReferencePayment.TotalAmount : null,
+                    PaymentStatus = t.ReferencePayment != null ? t.ReferencePayment.Status.ToString() : null
                 })
                 .ToListAsync();
 
@@ -55,27 +59,31 @@ namespace SnapLink_Service.Service
                 return Enumerable.Empty<TransactionResponse>();
 
             var transactions = await _context.Transactions
-                .Include(t => t.User)
-                .Where(t => t.UserId == photographer.User.UserId)
+                .Include(t => t.FromUser)
+                .Include(t => t.ToUser)
+                .Include(t => t.ReferencePayment)
+                .Where(t => t.FromUserId == photographer.User.UserId || t.ToUserId == photographer.User.UserId)
                 .OrderByDescending(t => t.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(t => new TransactionResponse
                 {
-                    Id = t.TransactionId,
-                    WalletId = 0, // Not directly linked to wallet in current structure
-                    TransactionType = t.Type ?? "Unknown",
-                    Amount = t.Amount ?? 0,
-                    BalanceBefore = 0, // Not stored in current structure
-                    BalanceAfter = 0, // Not stored in current structure
-                    Description = t.Description ?? "",
-                    Status = t.Status ?? "",
-                    CreatedAt = t.CreatedAt ?? DateTime.UtcNow,
-                    UpdatedAt = null, // Not stored in current structure
-                    UserName = photographer.User.FullName ?? "",
-                    UserEmail = photographer.User.Email ?? "",
-                    RelatedPaymentId = null, // Not stored in current structure
-                    RelatedBookingId = null // Not stored in current structure
+                    TransactionId = t.TransactionId,
+                    ReferencePaymentId = t.ReferencePaymentId,
+                    FromUserId = t.FromUserId,
+                    FromUserName = t.FromUser != null ? t.FromUser.FullName ?? "" : "System",
+                    ToUserId = t.ToUserId,
+                    ToUserName = t.ToUser != null ? t.ToUser.FullName ?? "" : "System",
+                    Amount = t.Amount,
+                    Currency = t.Currency,
+                    Type = t.Type.ToString(),
+                    Status = t.Status.ToString(),
+                    Note = t.Note,
+                    CreatedAt = t.CreatedAt,
+                    UpdatedAt = t.UpdatedAt,
+                    PaymentMethod = t.ReferencePayment != null ? t.ReferencePayment.Method : null,
+                    PaymentAmount = t.ReferencePayment != null ? t.ReferencePayment.TotalAmount : null,
+                    PaymentStatus = t.ReferencePayment != null ? t.ReferencePayment.Status.ToString() : null
                 })
                 .ToListAsync();
 
@@ -92,27 +100,31 @@ namespace SnapLink_Service.Service
                 return Enumerable.Empty<TransactionResponse>();
 
             var transactions = await _context.Transactions
-                .Include(t => t.User)
-                .Where(t => t.UserId == locationOwner.User.UserId)
+                .Include(t => t.FromUser)
+                .Include(t => t.ToUser)
+                .Include(t => t.ReferencePayment)
+                .Where(t => t.FromUserId == locationOwner.User.UserId || t.ToUserId == locationOwner.User.UserId)
                 .OrderByDescending(t => t.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(t => new TransactionResponse
                 {
-                    Id = t.TransactionId,
-                    WalletId = 0, // Not directly linked to wallet in current structure
-                    TransactionType = t.Type ?? "Unknown",
-                    Amount = t.Amount ?? 0,
-                    BalanceBefore = 0, // Not stored in current structure
-                    BalanceAfter = 0, // Not stored in current structure
-                    Description = t.Description ?? "",
-                    Status = t.Status ?? "",
-                    CreatedAt = t.CreatedAt ?? DateTime.UtcNow,
-                    UpdatedAt = null, // Not stored in current structure
-                    UserName = locationOwner.User.FullName ?? "",
-                    UserEmail = locationOwner.User.Email ?? "",
-                    RelatedPaymentId = null, // Not stored in current structure
-                    RelatedBookingId = null // Not stored in current structure
+                    TransactionId = t.TransactionId,
+                    ReferencePaymentId = t.ReferencePaymentId,
+                    FromUserId = t.FromUserId,
+                    FromUserName = t.FromUser != null ? t.FromUser.FullName ?? "" : "System",
+                    ToUserId = t.ToUserId,
+                    ToUserName = t.ToUser != null ? t.ToUser.FullName ?? "" : "System",
+                    Amount = t.Amount,
+                    Currency = t.Currency,
+                    Type = t.Type.ToString(),
+                    Status = t.Status.ToString(),
+                    Note = t.Note,
+                    CreatedAt = t.CreatedAt,
+                    UpdatedAt = t.UpdatedAt,
+                    PaymentMethod = t.ReferencePayment != null ? t.ReferencePayment.Method : null,
+                    PaymentAmount = t.ReferencePayment != null ? t.ReferencePayment.TotalAmount : null,
+                    PaymentStatus = t.ReferencePayment != null ? t.ReferencePayment.Status.ToString() : null
                 })
                 .ToListAsync();
 
@@ -122,7 +134,9 @@ namespace SnapLink_Service.Service
         public async Task<TransactionResponse> GetTransactionByIdAsync(int transactionId)
         {
             var transaction = await _context.Transactions
-                .Include(t => t.User)
+                .Include(t => t.FromUser)
+                .Include(t => t.ToUser)
+                .Include(t => t.ReferencePayment)
                 .FirstOrDefaultAsync(t => t.TransactionId == transactionId);
 
             if (transaction == null)
@@ -130,27 +144,29 @@ namespace SnapLink_Service.Service
 
             return new TransactionResponse
             {
-                Id = transaction.TransactionId,
-                WalletId = 0, // Not directly linked to wallet in current structure
-                TransactionType = transaction.Type ?? "Unknown",
-                Amount = transaction.Amount ?? 0,
-                BalanceBefore = 0, // Not stored in current structure
-                BalanceAfter = 0, // Not stored in current structure
-                Description = transaction.Description ?? "",
-                Status = transaction.Status ?? "",
-                CreatedAt = transaction.CreatedAt ?? DateTime.UtcNow,
-                UpdatedAt = null, // Not stored in current structure
-                UserName = transaction.User.FullName ?? "",
-                UserEmail = transaction.User.Email ?? "",
-                RelatedPaymentId = null, // Not stored in current structure
-                RelatedBookingId = null // Not stored in current structure
+                TransactionId = transaction.TransactionId,
+                ReferencePaymentId = transaction.ReferencePaymentId,
+                FromUserId = transaction.FromUserId,
+                FromUserName = transaction.FromUser != null ? transaction.FromUser.FullName ?? "" : "System",
+                ToUserId = transaction.ToUserId,
+                ToUserName = transaction.ToUser != null ? transaction.ToUser.FullName ?? "" : "System",
+                Amount = transaction.Amount,
+                Currency = transaction.Currency,
+                Type = transaction.Type.ToString(),
+                Status = transaction.Status.ToString(),
+                Note = transaction.Note,
+                CreatedAt = transaction.CreatedAt,
+                UpdatedAt = transaction.UpdatedAt,
+                PaymentMethod = transaction.ReferencePayment != null ? transaction.ReferencePayment.Method : null,
+                PaymentAmount = transaction.ReferencePayment != null ? transaction.ReferencePayment.TotalAmount : null,
+                PaymentStatus = transaction.ReferencePayment != null ? transaction.ReferencePayment.Status.ToString() : null
             };
         }
 
         public async Task<int> GetUserTransactionCountAsync(int userId)
         {
             return await _context.Transactions
-                .CountAsync(t => t.UserId == userId);
+                .CountAsync(t => t.FromUserId == userId || t.ToUserId == userId);
         }
 
         public async Task<int> GetPhotographerTransactionCountAsync(int photographerId)
@@ -163,7 +179,7 @@ namespace SnapLink_Service.Service
                 return 0;
 
             return await _context.Transactions
-                .CountAsync(t => t.UserId == photographer.User.UserId);
+                .CountAsync(t => t.FromUserId == photographer.User.UserId || t.ToUserId == photographer.User.UserId);
         }
 
         public async Task<int> GetLocationOwnerTransactionCountAsync(int locationOwnerId)
@@ -176,7 +192,7 @@ namespace SnapLink_Service.Service
                 return 0;
 
             return await _context.Transactions
-                .CountAsync(t => t.UserId == locationOwner.User.UserId);
+                .CountAsync(t => t.FromUserId == locationOwner.User.UserId || t.ToUserId == locationOwner.User.UserId);
         }
     }
 } 

@@ -4,7 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Net.payOS;
 using SnapLink_Model.DTO;
-using SnapLink_Model.Configuration;
+
 using SnapLink_Repository.Data;
 using SnapLink_Repository.DBContext;
 using SnapLink_Repository.IRepository;
@@ -18,8 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
-//payment settings
-builder.Services.Configure<PaymentSettings>(builder.Configuration.GetSection("PaymentSettings"));
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -130,6 +129,9 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IPhotographerEventService, PhotographerEventService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
+
+// Add Background Services
+// builder.Services.AddHostedService<BookingTimeoutService>(); 
 
 
 builder.Services.AddCors(opts =>

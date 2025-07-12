@@ -45,7 +45,13 @@ namespace SnapLink_Repository.Data
                     new User { UserName = "leo", Email = "leo@example.com", PasswordHash = "hash12", PhoneNumber = "1234567901", FullName = "Leo Martinez", Status = "Active", CreateAt = DateTime.Now },
                     new User { UserName = "maya", Email = "maya@example.com", PasswordHash = "hash13", PhoneNumber = "1234567902", FullName = "Maya Rodriguez", Status = "Active", CreateAt = DateTime.Now },
                     new User { UserName = "nina", Email = "nina@example.com", PasswordHash = "hash14", PhoneNumber = "1234567903", FullName = "Nina Thompson", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "oscar", Email = "oscar@example.com", PasswordHash = "hash15", PhoneNumber = "1234567904", FullName = "Oscar Garcia", Status = "Active", CreateAt = DateTime.Now }
+                    new User { UserName = "oscar", Email = "oscar@example.com", PasswordHash = "hash15", PhoneNumber = "1234567904", FullName = "Oscar Garcia", Status = "Active", CreateAt = DateTime.Now },
+                    // Additional users for location owners
+                    new User { UserName = "peter", Email = "peter@example.com", PasswordHash = "hash16", PhoneNumber = "1234567905", FullName = "Peter Chen", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "sarah", Email = "sarah@example.com", PasswordHash = "hash17", PhoneNumber = "1234567906", FullName = "Sarah Kim", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "mike", Email = "mike@example.com", PasswordHash = "hash18", PhoneNumber = "1234567907", FullName = "Mike Johnson", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "lisa", Email = "lisa@example.com", PasswordHash = "hash19", PhoneNumber = "1234567908", FullName = "Lisa Wang", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "david", Email = "david@example.com", PasswordHash = "hash20", PhoneNumber = "1234567909", FullName = "David Park", Status = "Active", CreateAt = DateTime.Now }
                 };
                 context.Users.AddRange(users);
                 context.SaveChanges();
@@ -60,7 +66,13 @@ namespace SnapLink_Repository.Data
                     new UserRole { UserId = context.Users.Skip(1).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Photographer").RoleId },
                     new UserRole { UserId = context.Users.Skip(2).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "User").RoleId },
                     new UserRole { UserId = context.Users.Skip(3).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Moderator").RoleId },
-                    new UserRole { UserId = context.Users.Skip(4).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId }
+                    new UserRole { UserId = context.Users.Skip(4).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId },
+                    // Additional user roles for new location owners
+                    new UserRole { UserId = context.Users.Skip(15).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId }, // Peter
+                    new UserRole { UserId = context.Users.Skip(16).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId }, // Sarah
+                    new UserRole { UserId = context.Users.Skip(17).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId }, // Mike
+                    new UserRole { UserId = context.Users.Skip(18).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId }, // Lisa
+                    new UserRole { UserId = context.Users.Skip(19).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId }  // David
                 };
                 context.UserRoles.AddRange(userRoles);
                 context.SaveChanges();
@@ -177,14 +189,20 @@ namespace SnapLink_Repository.Data
             // Seed LocationOwners
             if (!context.LocationOwners.Any())
             {
-                var users = context.Users.Take(5).ToList();
+                var users = context.Users.Take(10).ToList(); // Take 10 users (5 original + 5 new)
                 var owners = new[]
                 {
                     new LocationOwner { UserId = users[0].UserId, BusinessName = "VenueCo", BusinessAddress = "venueco@example.com" },
                     new LocationOwner { UserId = users[1].UserId, BusinessName = "EventSpaces", BusinessAddress = "eventspaces@example.com" },
                     new LocationOwner { UserId = users[2].UserId, BusinessName = "PhotoStudios", BusinessAddress = "photostudios@example.com" },
                     new LocationOwner { UserId = users[3].UserId, BusinessName = "UrbanVenues", BusinessAddress = "urbanvenues@example.com" },
-                    new LocationOwner { UserId = users[4].UserId, BusinessName = "NatureSpots", BusinessAddress = "naturespots@example.com" }
+                    new LocationOwner { UserId = users[4].UserId, BusinessName = "NatureSpots", BusinessAddress = "naturespots@example.com" },
+                    // Additional location owners
+                    new LocationOwner { UserId = users[5].UserId, BusinessName = "Studio Elite", BusinessAddress = "studioelite@example.com" },
+                    new LocationOwner { UserId = users[6].UserId, BusinessName = "Creative Spaces", BusinessAddress = "creativespaces@example.com" },
+                    new LocationOwner { UserId = users[7].UserId, BusinessName = "Modern Venues", BusinessAddress = "modernvenues@example.com" },
+                    new LocationOwner { UserId = users[8].UserId, BusinessName = "Premium Studios", BusinessAddress = "premiumstudios@example.com" },
+                    new LocationOwner { UserId = users[9].UserId, BusinessName = "Luxury Locations", BusinessAddress = "luxurylocations@example.com" }
                 };
                 context.LocationOwners.AddRange(owners);
                 context.SaveChanges();
@@ -193,10 +211,10 @@ namespace SnapLink_Repository.Data
             // Seed Locations
             if (!context.Locations.Any())
             {
-                var owners = context.LocationOwners.Take(5).ToList();
+                var owners = context.LocationOwners.Take(10).ToList(); // Take all 10 location owners
                 var locations = new[]
                 {
-                    // Registered locations with fees
+                    // Original 5 registered locations with fees
                     new Location { 
                         LocationOwnerId = owners[0].LocationOwnerId, 
                         Name = "Central Park Studio", 
@@ -261,6 +279,77 @@ namespace SnapLink_Repository.Data
                         HourlyRate = 80, 
                         Capacity = 25, 
                         Indoor = false, 
+                        Outdoor = true, 
+                        AvailabilityStatus = "Available", 
+                        LocationType = "Registered",
+                        ExternalPlaceId = "ChIJaXQRs6lZwokRY6EFpJnhNNE", // Example Google Places ID
+                        CreatedAt = DateTime.Now 
+                    },
+                    // 5 new locations for additional location owners
+                    new Location { 
+                        LocationOwnerId = owners[5].LocationOwnerId, 
+                        Name = "Studio Elite", 
+                        Address = "555 Elite Ave, New York, NY", 
+                        Description = "Premium photography studio with state-of-the-art equipment", 
+                        HourlyRate = 90, 
+                        Capacity = 40, 
+                        Indoor = true, 
+                        Outdoor = false, 
+                        AvailabilityStatus = "Available", 
+                        LocationType = "Registered",
+                        ExternalPlaceId = "ChIJKxjxuxlZwokRwA2Ire1V8mk", // Example Google Places ID
+                        CreatedAt = DateTime.Now 
+                    },
+                    new Location { 
+                        LocationOwnerId = owners[6].LocationOwnerId, 
+                        Name = "Creative Spaces", 
+                        Address = "777 Creative Blvd, New York, NY", 
+                        Description = "Versatile creative space for all types of photography", 
+                        HourlyRate = 65, 
+                        Capacity = 35, 
+                        Indoor = true, 
+                        Outdoor = true, 
+                        AvailabilityStatus = "Available", 
+                        LocationType = "Registered",
+                        ExternalPlaceId = "ChIJaXQRs6lZwokRY6EFpJnhNNE", // Example Google Places ID
+                        CreatedAt = DateTime.Now 
+                    },
+                    new Location { 
+                        LocationOwnerId = owners[7].LocationOwnerId, 
+                        Name = "Modern Venues", 
+                        Address = "888 Modern St, New York, NY", 
+                        Description = "Contemporary venue with minimalist design", 
+                        HourlyRate = 75, 
+                        Capacity = 45, 
+                        Indoor = true, 
+                        Outdoor = false, 
+                        AvailabilityStatus = "Available", 
+                        LocationType = "Registered",
+                        ExternalPlaceId = "ChIJN1t_tDeuEmsRUsoyG83frY4", // Example Google Places ID
+                        CreatedAt = DateTime.Now 
+                    },
+                    new Location { 
+                        LocationOwnerId = owners[8].LocationOwnerId, 
+                        Name = "Premium Studios", 
+                        Address = "999 Premium Dr, New York, NY", 
+                        Description = "High-end studio with luxury amenities", 
+                        HourlyRate = 100, 
+                        Capacity = 30, 
+                        Indoor = true, 
+                        Outdoor = false, 
+                        AvailabilityStatus = "Available", 
+                        LocationType = "Registered",
+                        ExternalPlaceId = "ChIJKxjxuxlZwokRwA2Ire1V8mk", // Example Google Places ID
+                        CreatedAt = DateTime.Now 
+                    },
+                    new Location { 
+                        LocationOwnerId = owners[9].LocationOwnerId, 
+                        Name = "Luxury Locations", 
+                        Address = "111 Luxury Way, New York, NY", 
+                        Description = "Exclusive location for premium photography sessions", 
+                        HourlyRate = 120, 
+                        Capacity = 25, 
+                        Indoor = true, 
                         Outdoor = true, 
                         AvailabilityStatus = "Available", 
                         LocationType = "Registered",
@@ -400,56 +489,61 @@ namespace SnapLink_Repository.Data
             if (!context.Payments.Any())
             {
                 var bookings = context.Bookings.Take(5).ToList();
+                var users = context.Users.Take(5).ToList();
                 var payments = new[]
                 {
                     // Payment for registered location booking (Central Park Studio)
                     new Payment { 
+                        CustomerId = users[0].UserId,
                         BookingId = bookings[0].BookingId, 
-                        Amount = 300, 
-                        Status = "Paid", 
-                        PhotographerPayoutAmount = 180, // (100/hr * 2) - 10% platform fee = 180
-                        LocationOwnerPayoutAmount = 100, // 50/hr * 2 = 100
-                        PlatformFee = 20, // 10% of 300 = 30, but this is the actual platform fee
+                        TotalAmount = 300, 
+                        Status = PaymentStatus.Success, 
+                        Method = "PayOS",
+                        ExternalTransactionId = "PAY_001",
+                        Note = "Payment for Central Park Studio booking",
                         CreatedAt = DateTime.Now 
                     },
                     // Payment for registered location booking (Riverside Venue)
                     new Payment { 
+                        CustomerId = users[1].UserId,
                         BookingId = bookings[1].BookingId, 
-                        Amount = 450, 
-                        Status = "Pending", 
-                        PhotographerPayoutAmount = 216, // (80/hr * 3) - 10% platform fee = 216
-                        LocationOwnerPayoutAmount = 210, // 70/hr * 3 = 210
-                        PlatformFee = 24, // Platform fee
+                        TotalAmount = 450, 
+                        Status = PaymentStatus.Pending, 
+                        Method = "PayOS",
+                        Note = "Payment for Riverside Venue booking",
                         CreatedAt = DateTime.Now 
                     },
                     // Payment for registered location booking (Urban Loft)
                     new Payment { 
+                        CustomerId = users[2].UserId,
                         BookingId = bookings[2].BookingId, 
-                        Amount = 180, 
-                        Status = "Paid", 
-                        PhotographerPayoutAmount = 108, // (120/hr * 1) - 10% platform fee = 108
-                        LocationOwnerPayoutAmount = 60, // 60/hr * 1 = 60
-                        PlatformFee = 12, // Platform fee
+                        TotalAmount = 180, 
+                        Status = PaymentStatus.Success, 
+                        Method = "PayOS",
+                        ExternalTransactionId = "PAY_003",
+                        Note = "Payment for Urban Loft booking",
                         CreatedAt = DateTime.Now 
                     },
                     // Payment for external location booking (Central Park - no location fee)
                     new Payment { 
+                        CustomerId = users[3].UserId,
                         BookingId = bookings[3].BookingId, 
-                        Amount = 140, 
-                        Status = "Paid", 
-                        PhotographerPayoutAmount = 126, // (70/hr * 2) - 10% platform fee = 126
-                        LocationOwnerPayoutAmount = 0, // No location fee for external locations
-                        PlatformFee = 14, // Platform fee
+                        TotalAmount = 140, 
+                        Status = PaymentStatus.Success, 
+                        Method = "PayOS",
+                        ExternalTransactionId = "PAY_004",
+                        Note = "Payment for external location booking",
                         CreatedAt = DateTime.Now 
                     },
                     // Payment for external location booking (Times Square - no location fee)
                     new Payment { 
+                        CustomerId = users[4].UserId,
                         BookingId = bookings[4].BookingId, 
-                        Amount = 180, 
-                        Status = "Paid", 
-                        PhotographerPayoutAmount = 162, // (90/hr * 2) - 10% platform fee = 162
-                        LocationOwnerPayoutAmount = 0, // No location fee for external locations
-                        PlatformFee = 18, // Platform fee
+                        TotalAmount = 180, 
+                        Status = PaymentStatus.Success, 
+                        Method = "PayOS",
+                        ExternalTransactionId = "PAY_005",
+                        Note = "Payment for external location booking",
                         CreatedAt = DateTime.Now 
                     }
                 };
@@ -559,11 +653,11 @@ namespace SnapLink_Repository.Data
                 var users = context.Users.Take(5).ToList();
                 var transactions = new[]
                 {
-                    new Transaction { UserId = users[0].UserId, Amount = 100, Type = "Credit", Description = "Deposit", Status = "Completed", CreatedAt = DateTime.Now },
-                    new Transaction { UserId = users[1].UserId, Amount = 50, Type = "Debit", Description = "Withdrawal", Status = "Completed", CreatedAt = DateTime.Now },
-                    new Transaction { UserId = users[2].UserId, Amount = 75, Type = "Credit", Description = "Refund", Status = "Completed", CreatedAt = DateTime.Now },
-                    new Transaction { UserId = users[3].UserId, Amount = 120, Type = "Debit", Description = "Payment", Status = "Pending", CreatedAt = DateTime.Now },
-                    new Transaction { UserId = users[4].UserId, Amount = 200, Type = "Credit", Description = "Bonus", Status = "Completed", CreatedAt = DateTime.Now }
+                    new Transaction { FromUserId = null, ToUserId = users[0].UserId, Amount = 100, Type = TransactionType.Topup, Status = TransactionStatus.Success, Note = "Initial deposit", CreatedAt = DateTime.Now },
+                    new Transaction { FromUserId = users[1].UserId, ToUserId = null, Amount = 50, Type = TransactionType.Withdraw, Status = TransactionStatus.Success, Note = "Withdrawal", CreatedAt = DateTime.Now },
+                    new Transaction { FromUserId = null, ToUserId = users[2].UserId, Amount = 75, Type = TransactionType.Refund, Status = TransactionStatus.Success, Note = "Refund for cancelled booking", CreatedAt = DateTime.Now },
+                    new Transaction { FromUserId = users[3].UserId, ToUserId = null, Amount = 120, Type = TransactionType.Payout, Status = TransactionStatus.Pending, Note = "Photographer payout", CreatedAt = DateTime.Now },
+                    new Transaction { FromUserId = null, ToUserId = users[4].UserId, Amount = 200, Type = TransactionType.Bonus, Status = TransactionStatus.Success, Note = "Referral bonus", CreatedAt = DateTime.Now }
                 };
                 context.Transactions.AddRange(transactions);
                 context.SaveChanges();
@@ -572,7 +666,7 @@ namespace SnapLink_Repository.Data
             // Seed Wallets
             if (!context.Wallets.Any())
             {
-                var users = context.Users.Take(10).ToList();
+                var users = context.Users.Take(20).ToList(); // Take all 20 users
                 var wallets = new[]
                 {
                     new Wallet { UserId = users[0].UserId, Balance = 500, UpdatedAt = DateTime.Now },
@@ -584,7 +678,18 @@ namespace SnapLink_Repository.Data
                     new Wallet { UserId = users[6].UserId, Balance = 600, UpdatedAt = DateTime.Now },
                     new Wallet { UserId = users[7].UserId, Balance = 250, UpdatedAt = DateTime.Now },
                     new Wallet { UserId = users[8].UserId, Balance = 350, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[9].UserId, Balance = 450, UpdatedAt = DateTime.Now }
+                    new Wallet { UserId = users[9].UserId, Balance = 450, UpdatedAt = DateTime.Now },
+                    // Additional wallets for new users
+                    new Wallet { UserId = users[10].UserId, Balance = 800, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[11].UserId, Balance = 550, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[12].UserId, Balance = 650, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[13].UserId, Balance = 750, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[14].UserId, Balance = 900, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[15].UserId, Balance = 1200, UpdatedAt = DateTime.Now }, // Peter - Location Owner
+                    new Wallet { UserId = users[16].UserId, Balance = 1100, UpdatedAt = DateTime.Now }, // Sarah - Location Owner
+                    new Wallet { UserId = users[17].UserId, Balance = 1300, UpdatedAt = DateTime.Now }, // Mike - Location Owner
+                    new Wallet { UserId = users[18].UserId, Balance = 1400, UpdatedAt = DateTime.Now }, // Lisa - Location Owner
+                    new Wallet { UserId = users[19].UserId, Balance = 1600, UpdatedAt = DateTime.Now }  // David - Location Owner
                 };
                 context.Wallets.AddRange(wallets);
                 context.SaveChanges();

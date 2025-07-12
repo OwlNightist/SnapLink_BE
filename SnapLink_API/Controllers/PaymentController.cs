@@ -104,4 +104,106 @@ public class PaymentController : ControllerBase
             });
         }
     }
+
+    [HttpGet("success")]
+    public async Task<IActionResult> PaymentSuccess([FromQuery] string? code, [FromQuery] string? id, [FromQuery] string? orderCode, [FromQuery] string? status)
+    {
+        try
+        {
+            Console.WriteLine($"PaymentSuccess callback - code: {code}, id: {id}, orderCode: {orderCode}, status: {status}");
+            
+            // PayOS sends orderCode as the payment identifier
+            if (string.IsNullOrEmpty(orderCode))
+            {
+                return BadRequest(new { 
+                    message = "Missing orderCode parameter",
+                    status = "error"
+                });
+            }
+
+            // Try to parse orderCode as payment ID
+            if (!int.TryParse(orderCode, out int paymentId))
+            {
+                return BadRequest(new { 
+                    message = "Invalid orderCode format",
+                    orderCode = orderCode,
+                    status = "error"
+                });
+            }
+
+            var result = await _paymentService.GetPaymentStatusAsync(paymentId);
+            
+            if (result.Error == 0)
+            {
+                return Ok(new { 
+                    message = "Payment completed successfully",
+                    paymentId = paymentId,
+                    orderCode = orderCode,
+                    status = "success"
+                });
+            }
+            else
+            {
+                return BadRequest(new { 
+                    message = "Payment verification failed",
+                    paymentId = paymentId,
+                    orderCode = orderCode,
+                    status = "error"
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in PaymentSuccess: {ex.Message}");
+            return StatusCode(500, new { 
+                message = "Internal server error",
+                status = "error"
+            });
+        }
+    }
+
+    [HttpGet("cancel")]
+    public async Task<IActionResult> PaymentCancel([FromQuery] string? code, [FromQuery] string? id, [FromQuery] string? orderCode, [FromQuery] string? status)
+    {
+        try
+        {
+            Console.WriteLine($"PaymentCancel callback - code: {code}, id: {id}, orderCode: {orderCode}, status: {status}");
+            
+            // PayOS sends orderCode as the payment identifier
+            if (string.IsNullOrEmpty(orderCode))
+            {
+                return BadRequest(new { 
+                    message = "Missing orderCode parameter",
+                    status = "error"
+                });
+            }
+
+            // Try to parse orderCode as payment ID
+            if (!int.TryParse(orderCode, out int paymentId))
+            {
+                return BadRequest(new { 
+                    message = "Invalid orderCode format",
+                    orderCode = orderCode,
+                    status = "error"
+                });
+            }
+
+            var result = await _paymentService.CancelPaymentAsync(paymentId);
+            
+            return Ok(new { 
+                message = "Payment cancelled",
+                paymentId = paymentId,
+                orderCode = orderCode,
+                status = "cancelled"
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in PaymentCancel: {ex.Message}");
+            return StatusCode(500, new { 
+                message = "Internal server error",
+                status = "error"
+            });
+        }
+    }
 } 

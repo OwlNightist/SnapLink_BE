@@ -4,23 +4,23 @@ namespace SnapLink_Model.DTO.Response
 {
     public class TransactionResponse
     {
-        public int Id { get; set; }
-        public int WalletId { get; set; }
-        public string TransactionType { get; set; } = string.Empty; // "Payment", "Withdrawal", "Transfer", "Refund"
+        public int TransactionId { get; set; }
+        public int? ReferencePaymentId { get; set; }
+        public int? FromUserId { get; set; }
+        public string? FromUserName { get; set; }
+        public int? ToUserId { get; set; }
+        public string? ToUserName { get; set; }
         public decimal Amount { get; set; }
-        public decimal BalanceBefore { get; set; }
-        public decimal BalanceAfter { get; set; }
-        public string Description { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty; // "Completed", "Pending", "Failed"
+        public string Currency { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty; // TransactionType enum
+        public string Status { get; set; } = string.Empty; // TransactionStatus enum
+        public string? Note { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
         
-        // Related data
-        public string UserName { get; set; } = string.Empty;
-        public string UserEmail { get; set; } = string.Empty;
-        public string? RelatedUserName { get; set; } // For transfers between users
-        public string? RelatedUserEmail { get; set; }
-        public int? RelatedPaymentId { get; set; } // Link to payment if this transaction is from a payment
-        public int? RelatedBookingId { get; set; } // Link to booking if this transaction is from a booking
+        // Related payment info
+        public string? PaymentMethod { get; set; }
+        public decimal? PaymentAmount { get; set; }
+        public string? PaymentStatus { get; set; }
     }
 } 

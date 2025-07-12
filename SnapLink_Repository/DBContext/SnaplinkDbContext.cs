@@ -409,36 +409,45 @@ public partial class SnaplinkDbContext : DbContext
             entity.ToTable("Payment");
 
             entity.Property(e => e.PaymentId).HasColumnName("paymentId");
-            entity.Property(e => e.Amount)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("amount");
+            entity.Property(e => e.CustomerId).HasColumnName("customerId");
             entity.Property(e => e.BookingId).HasColumnName("bookingId");
+            entity.Property(e => e.TotalAmount)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("totalAmount");
+            entity.Property(e => e.Currency)
+                .HasMaxLength(3)
+                .HasDefaultValue("VND")
+                .HasColumnName("currency");
+            entity.Property(e => e.Status)
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .HasColumnName("status");
+            entity.Property(e => e.ExternalTransactionId)
+                .HasMaxLength(255)
+                .HasColumnName("externalTransactionId");
+            entity.Property(e => e.Method)
+                .HasMaxLength(50)
+                .HasDefaultValue("PayOS")
+                .HasColumnName("method");
+            entity.Property(e => e.Note).HasColumnName("note");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("createdAt");
-            entity.Property(e => e.LocationOwnerPayoutAmount)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("locationOwnerPayoutAmount");
-            entity.Property(e => e.PaymentMethod)
-                .HasMaxLength(30)
-                .HasColumnName("paymentMethod");
-            entity.Property(e => e.PhotographerPayoutAmount)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("photographerPayoutAmount");
-            entity.Property(e => e.PlatformFee)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("platformFee");
-            entity.Property(e => e.Status)
-                .HasMaxLength(30)
-                .HasColumnName("status");
-            entity.Property(e => e.TransactionId)
-                .HasMaxLength(255)
-                .HasColumnName("transactionId");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("updatedAt");
+
+            entity.HasOne(d => d.Customer).WithMany()
+                .HasForeignKey(d => d.CustomerId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Payment_Customer");
+
+            entity.HasOne(d => d.Booking).WithOne(p => p.Payment)
+                .HasForeignKey<Payment>(d => d.BookingId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Payment_Booking");
         });
 
         modelBuilder.Entity<Photographer>(entity =>
@@ -638,27 +647,48 @@ public partial class SnaplinkDbContext : DbContext
         {
             entity.HasKey(e => e.TransactionId).HasName("PK__Transact__9B57CF7272086B9B");
 
+            entity.ToTable("Transaction");
+
             entity.Property(e => e.TransactionId).HasColumnName("transactionId");
+            entity.Property(e => e.ReferencePaymentId).HasColumnName("referencePaymentId");
+            entity.Property(e => e.FromUserId).HasColumnName("fromUserId");
+            entity.Property(e => e.ToUserId).HasColumnName("toUserId");
             entity.Property(e => e.Amount)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("amount");
+            entity.Property(e => e.Currency)
+                .HasMaxLength(3)
+                .HasDefaultValue("VND")
+                .HasColumnName("currency");
+            entity.Property(e => e.Type)
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .HasColumnName("type");
+            entity.Property(e => e.Status)
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .HasColumnName("status");
+            entity.Property(e => e.Note).HasColumnName("note");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("createdAt");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.Status)
-                .HasMaxLength(30)
-                .HasColumnName("status");
-            entity.Property(e => e.Type)
-                .HasMaxLength(30)
-                .HasColumnName("type");
-            entity.Property(e => e.UserId).HasColumnName("userId");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updatedAt");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Transactions)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Transactions_Users");
+            entity.HasOne(d => d.ReferencePayment).WithMany(p => p.Transactions)
+                .HasForeignKey(d => d.ReferencePaymentId)
+                .HasConstraintName("FK_Transaction_Payment");
+
+            entity.HasOne(d => d.FromUser).WithMany(p => p.FromTransactions)
+                .HasForeignKey(d => d.FromUserId)
+                .HasConstraintName("FK_Transaction_FromUser");
+
+            entity.HasOne(d => d.ToUser).WithMany(p => p.ToTransactions)
+                .HasForeignKey(d => d.ToUserId)
+                .HasConstraintName("FK_Transaction_ToUser");
         });
 
         modelBuilder.Entity<User>(entity =>

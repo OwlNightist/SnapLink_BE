@@ -238,29 +238,6 @@ namespace SnapLink_Repository.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Transactions",
-                columns: table => new
-                {
-                    transactionId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    userId = table.Column<int>(type: "int", nullable: false),
-                    amount = table.Column<decimal>(type: "decimal(10,2)", nullable: true),
-                    type = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true),
-                    description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true),
-                    createdAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK__Transact__9B57CF7272086B9B", x => x.transactionId);
-                    table.ForeignKey(
-                        name: "FK_Transactions_Users",
-                        column: x => x.userId,
-                        principalTable: "Users",
-                        principalColumn: "userId");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "UserRole",
                 columns: table => new
                 {
@@ -559,26 +536,30 @@ namespace SnapLink_Repository.Migrations
                 {
                     paymentId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    customerId = table.Column<int>(type: "int", nullable: false),
                     bookingId = table.Column<int>(type: "int", nullable: false),
-                    amount = table.Column<decimal>(type: "decimal(10,2)", nullable: true),
-                    paymentMethod = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true),
-                    status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true),
-                    transactionId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    photographerPayoutAmount = table.Column<decimal>(type: "decimal(10,2)", nullable: true),
-                    locationOwnerPayoutAmount = table.Column<decimal>(type: "decimal(10,2)", nullable: true),
-                    platformFee = table.Column<decimal>(type: "decimal(10,2)", nullable: true),
-                    createdAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    updatedAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    totalAmount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    currency = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false, defaultValue: "VND"),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    externalTransactionId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    method = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true, defaultValue: "PayOS"),
+                    note = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    createdAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
+                    updatedAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK__Payment__A0D9EFC6D01669A5", x => x.paymentId);
                     table.ForeignKey(
-                        name: "FK_Payment_Booking_bookingId",
+                        name: "FK_Payment_Booking",
                         column: x => x.bookingId,
                         principalTable: "Booking",
-                        principalColumn: "bookingId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "bookingId");
+                    table.ForeignKey(
+                        name: "FK_Payment_Customer",
+                        column: x => x.customerId,
+                        principalTable: "Users",
+                        principalColumn: "userId");
                 });
 
             migrationBuilder.CreateTable(
@@ -666,6 +647,43 @@ namespace SnapLink_Repository.Migrations
                     table.ForeignKey(
                         name: "FK_PremiumSubscription_Users",
                         column: x => x.userId,
+                        principalTable: "Users",
+                        principalColumn: "userId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Transaction",
+                columns: table => new
+                {
+                    transactionId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    referencePaymentId = table.Column<int>(type: "int", nullable: true),
+                    fromUserId = table.Column<int>(type: "int", nullable: true),
+                    toUserId = table.Column<int>(type: "int", nullable: true),
+                    amount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    currency = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false, defaultValue: "VND"),
+                    type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    note = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    createdAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
+                    updatedAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__Transact__9B57CF7272086B9B", x => x.transactionId);
+                    table.ForeignKey(
+                        name: "FK_Transaction_FromUser",
+                        column: x => x.fromUserId,
+                        principalTable: "Users",
+                        principalColumn: "userId");
+                    table.ForeignKey(
+                        name: "FK_Transaction_Payment",
+                        column: x => x.referencePaymentId,
+                        principalTable: "Payment",
+                        principalColumn: "paymentId");
+                    table.ForeignKey(
+                        name: "FK_Transaction_ToUser",
+                        column: x => x.toUserId,
                         principalTable: "Users",
                         principalColumn: "userId");
                 });
@@ -762,6 +780,11 @@ namespace SnapLink_Repository.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Payment_customerId",
+                table: "Payment",
+                column: "customerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Photographer_userId",
                 table: "Photographer",
                 column: "userId");
@@ -812,9 +835,19 @@ namespace SnapLink_Repository.Migrations
                 column: "bookingId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Transactions_userId",
-                table: "Transactions",
-                column: "userId");
+                name: "IX_Transaction_fromUserId",
+                table: "Transaction",
+                column: "fromUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transaction_referencePaymentId",
+                table: "Transaction",
+                column: "referencePaymentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transaction_toUserId",
+                table: "Transaction",
+                column: "toUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRole_roleId",
@@ -881,7 +914,7 @@ namespace SnapLink_Repository.Migrations
                 name: "Review");
 
             migrationBuilder.DropTable(
-                name: "Transactions");
+                name: "Transaction");
 
             migrationBuilder.DropTable(
                 name: "UserRole");
@@ -899,10 +932,10 @@ namespace SnapLink_Repository.Migrations
                 name: "Moderator");
 
             migrationBuilder.DropTable(
-                name: "Payment");
+                name: "PremiumPackage");
 
             migrationBuilder.DropTable(
-                name: "PremiumPackage");
+                name: "Payment");
 
             migrationBuilder.DropTable(
                 name: "Roles");

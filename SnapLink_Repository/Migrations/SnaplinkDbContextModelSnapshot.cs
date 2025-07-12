@@ -564,48 +564,55 @@ namespace SnapLink_Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
 
-                    b.Property<decimal?>("Amount")
-                        .HasColumnType("decimal(10, 2)")
-                        .HasColumnName("amount");
-
                     b.Property<int>("BookingId")
                         .HasColumnType("int")
                         .HasColumnName("bookingId");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasColumnName("createdAt")
                         .HasDefaultValueSql("(getdate())");
 
-                    b.Property<decimal?>("LocationOwnerPayoutAmount")
-                        .HasColumnType("decimal(10, 2)")
-                        .HasColumnName("locationOwnerPayoutAmount");
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)")
+                        .HasDefaultValue("VND")
+                        .HasColumnName("currency");
 
-                    b.Property<string>("PaymentMethod")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)")
-                        .HasColumnName("paymentMethod");
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int")
+                        .HasColumnName("customerId");
 
-                    b.Property<decimal?>("PhotographerPayoutAmount")
-                        .HasColumnType("decimal(10, 2)")
-                        .HasColumnName("photographerPayoutAmount");
-
-                    b.Property<decimal?>("PlatformFee")
-                        .HasColumnType("decimal(10, 2)")
-                        .HasColumnName("platformFee");
-
-                    b.Property<string>("Status")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)")
-                        .HasColumnName("status");
-
-                    b.Property<string>("TransactionId")
+                    b.Property<string>("ExternalTransactionId")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
-                        .HasColumnName("transactionId");
+                        .HasColumnName("externalTransactionId");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<string>("Method")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("PayOS")
+                        .HasColumnName("method");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("note");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnName("totalAmount");
+
+                    b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasColumnName("updatedAt")
@@ -616,6 +623,8 @@ namespace SnapLink_Repository.Migrations
 
                     b.HasIndex("BookingId")
                         .IsUnique();
+
+                    b.HasIndex("CustomerId");
 
                     b.ToTable("Payment", (string)null);
                 });
@@ -1009,40 +1018,68 @@ namespace SnapLink_Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransactionId"));
 
-                    b.Property<decimal?>("Amount")
+                    b.Property<decimal>("Amount")
                         .HasColumnType("decimal(10, 2)")
                         .HasColumnName("amount");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasColumnName("createdAt")
                         .HasDefaultValueSql("(getdate())");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)")
+                        .HasDefaultValue("VND")
+                        .HasColumnName("currency");
+
+                    b.Property<int?>("FromUserId")
+                        .HasColumnType("int")
+                        .HasColumnName("fromUserId");
+
+                    b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("description");
+                        .HasColumnName("note");
+
+                    b.Property<int?>("ReferencePaymentId")
+                        .HasColumnType("int")
+                        .HasColumnName("referencePaymentId");
 
                     b.Property<string>("Status")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("status");
 
+                    b.Property<int?>("ToUserId")
+                        .HasColumnType("int")
+                        .HasColumnName("toUserId");
+
                     b.Property<string>("Type")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("type");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("userId");
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("updatedAt")
+                        .HasDefaultValueSql("(getdate())");
 
                     b.HasKey("TransactionId")
                         .HasName("PK__Transact__9B57CF7272086B9B");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("FromUserId");
 
-                    b.ToTable("Transactions");
+                    b.HasIndex("ReferencePaymentId");
+
+                    b.HasIndex("ToUserId");
+
+                    b.ToTable("Transaction", (string)null);
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.User", b =>
@@ -1433,10 +1470,18 @@ namespace SnapLink_Repository.Migrations
                     b.HasOne("SnapLink_Repository.Entity.Booking", "Booking")
                         .WithOne("Payment")
                         .HasForeignKey("SnapLink_Repository.Entity.Payment", "BookingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_Payment_Booking");
+
+                    b.HasOne("SnapLink_Repository.Entity.User", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .IsRequired()
+                        .HasConstraintName("FK_Payment_Customer");
 
                     b.Navigation("Booking");
+
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.Photographer", b =>
@@ -1538,13 +1583,26 @@ namespace SnapLink_Repository.Migrations
 
             modelBuilder.Entity("SnapLink_Repository.Entity.Transaction", b =>
                 {
-                    b.HasOne("SnapLink_Repository.Entity.User", "User")
-                        .WithMany("Transactions")
-                        .HasForeignKey("UserId")
-                        .IsRequired()
-                        .HasConstraintName("FK_Transactions_Users");
+                    b.HasOne("SnapLink_Repository.Entity.User", "FromUser")
+                        .WithMany("FromTransactions")
+                        .HasForeignKey("FromUserId")
+                        .HasConstraintName("FK_Transaction_FromUser");
 
-                    b.Navigation("User");
+                    b.HasOne("SnapLink_Repository.Entity.Payment", "ReferencePayment")
+                        .WithMany("Transactions")
+                        .HasForeignKey("ReferencePaymentId")
+                        .HasConstraintName("FK_Transaction_Payment");
+
+                    b.HasOne("SnapLink_Repository.Entity.User", "ToUser")
+                        .WithMany("ToTransactions")
+                        .HasForeignKey("ToUserId")
+                        .HasConstraintName("FK_Transaction_ToUser");
+
+                    b.Navigation("FromUser");
+
+                    b.Navigation("ReferencePayment");
+
+                    b.Navigation("ToUser");
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.UserRole", b =>
@@ -1638,6 +1696,8 @@ namespace SnapLink_Repository.Migrations
                     b.Navigation("Advertisements");
 
                     b.Navigation("PremiumSubscriptions");
+
+                    b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.Photographer", b =>
@@ -1685,6 +1745,8 @@ namespace SnapLink_Repository.Migrations
 
                     b.Navigation("ComplaintReporters");
 
+                    b.Navigation("FromTransactions");
+
                     b.Navigation("LocationOwners");
 
                     b.Navigation("MessagessRecipients");
@@ -1699,7 +1761,7 @@ namespace SnapLink_Repository.Migrations
 
                     b.Navigation("PremiumSubscriptions");
 
-                    b.Navigation("Transactions");
+                    b.Navigation("ToTransactions");
 
                     b.Navigation("UserRoles");
 
