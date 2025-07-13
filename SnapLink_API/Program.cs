@@ -11,6 +11,7 @@ using SnapLink_Repository.IRepository;
 using SnapLink_Repository.Repository;
 using SnapLink_Service.IService;
 using SnapLink_Service.Service;
+using SnapLink_API.Hubs;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,6 +39,24 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
     };
 });
+
+    // Configure JWT for SignalR
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
+});
+*/
 
 // Add services to the container.
 builder.Services.AddDbContext<SnaplinkDbContext>(options =>
@@ -129,6 +148,16 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IPhotographerEventService, PhotographerEventService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IChatService, ChatService>();
+
+// Add SignalR
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true; // Enable detailed errors for debugging
+    options.MaximumReceiveMessageSize = 102400; // 100KB max message size
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+});
 
 // Add Background Services
 // builder.Services.AddHostedService<BookingTimeoutService>(); 
@@ -138,9 +167,10 @@ builder.Services.AddCors(opts =>
 {
     opts.AddPolicy("corspolicy", build =>
     {
-        build.WithOrigins("*")
+        build.SetIsOriginAllowed(origin => true) // Allow all origins for development
              .AllowAnyMethod()
-             .AllowAnyHeader();
+             .AllowAnyHeader()
+             .AllowCredentials(); // Important for SignalR
     });
 });
 
@@ -184,5 +214,6 @@ app.UseCors("corspolicy");
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("/chatHub");
 
 app.Run();
