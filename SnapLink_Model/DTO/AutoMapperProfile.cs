@@ -69,7 +69,6 @@ namespace SnapLink_Model.DTO
 
             // Image mappings
             CreateMap<Image, ImageResponse>();
-            CreateMap<CreateImageRequest, Image>();
             CreateMap<UpdateImageRequest, Image>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 

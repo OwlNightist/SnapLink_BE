@@ -15,11 +15,13 @@ namespace SnapLink_Service.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IAzureStorageService _azureStorageService;
 
-        public ImageService(IUnitOfWork unitOfWork, IMapper mapper)
+        public ImageService(IUnitOfWork unitOfWork, IMapper mapper, IAzureStorageService azureStorageService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _azureStorageService = azureStorageService;
         }
 
         public async Task<ImageResponse> GetByIdAsync(int id)
@@ -55,25 +57,26 @@ namespace SnapLink_Service.Service
             return imageEntity != null ? _mapper.Map<ImageResponse>(imageEntity) : null;
         }
 
-        public async Task<ImageResponse> CreateAsync(CreateImageRequest request)
+
+
+        public async Task<ImageResponse> UploadImageAsync(UploadImageRequest request)
         {
-            var image = _mapper.Map<Image>(request);
-            image.CreatedAt = DateTime.UtcNow;
+            // Upload file to Azure Storage
+            var blobName = await _azureStorageService.UploadImageAsync(request.File, request.Type, request.RefId);
+            
+            // Get the public URL
+            var imageUrl = await _azureStorageService.GetImageUrlAsync(blobName);
 
-            // If this is set as primary, unset other primary images for the same type and refId
-            if (request.IsPrimary)
+            // Create image entity
+            var image = new Image
             {
-                var existingPrimaryImages = await _unitOfWork.ImageRepository.GetAsync(
-                    filter: img => img.Type == request.Type && img.RefId == request.RefId && img.IsPrimary
-                );
-                
-                foreach (var existingImage in existingPrimaryImages)
-                {
-                    existingImage.IsPrimary = false;
-                    _unitOfWork.ImageRepository.Update(existingImage);
-                }
-            }
-
+                Url = imageUrl,
+                Type = request.Type,
+                RefId = request.RefId,
+                IsPrimary = request.IsPrimary,
+                Caption = request.Caption,
+                CreatedAt = DateTime.UtcNow
+            };
             await _unitOfWork.ImageRepository.AddAsync(image);
             await _unitOfWork.SaveChangesAsync();
 
@@ -132,6 +135,22 @@ namespace SnapLink_Service.Service
             var imageEntity = image.FirstOrDefault();
             if (imageEntity == null)
                 return false;
+
+            // Extract blob name from URL and delete from Azure Storage
+            if (!string.IsNullOrEmpty(imageEntity.Url))
+            {
+                try
+                {
+                    var uri = new Uri(imageEntity.Url);
+                    var blobName = uri.AbsolutePath.TrimStart('/').Replace(_azureStorageService.GetContainerName(), "").TrimStart('/');
+                    await _azureStorageService.DeleteImageAsync(blobName);
+                }
+                catch (Exception ex)
+                {
+                    // Log the error but don't fail the deletion
+                    Console.WriteLine($"Error deleting blob: {ex.Message}");
+                }
+            }
 
             _unitOfWork.ImageRepository.Remove(imageEntity);
             await _unitOfWork.SaveChangesAsync();

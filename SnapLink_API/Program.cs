@@ -13,6 +13,7 @@ using SnapLink_Service.IService;
 using SnapLink_Service.Service;
 using SnapLink_API.Hubs;
 using System.Text;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 // Cấu hình JwtSettings
@@ -40,24 +41,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-    // Configure JWT for SignalR
-    options.Events = new JwtBearerEvents
-    {
-        OnMessageReceived = context =>
-        {
-            var accessToken = context.Request.Query["access_token"];
-            var path = context.HttpContext.Request.Path;
-            
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
-            {
-                context.Token = accessToken;
-            }
-            return Task.CompletedTask;
-        }
-    };
-});
-*/
-
 // Add services to the container.
 builder.Services.AddDbContext<SnaplinkDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -84,6 +67,8 @@ builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IAzureStorageService, AzureStorageService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -133,7 +118,7 @@ builder.Services.AddSingleton<PayOS>(provider =>
     var clientId = configuration["PayOS:ClientId"];
     var apiKey = configuration["PayOS:ApiKey"];
     var checksumKey = configuration["PayOS:ChecksumKey"];
-    
+
     return new PayOS(clientId!, apiKey!, checksumKey!);
 });
 
@@ -148,16 +133,8 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IPhotographerEventService, PhotographerEventService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
-builder.Services.AddScoped<IChatService, ChatService>();
 
-// Add SignalR
-builder.Services.AddSignalR(options =>
-{
-    options.EnableDetailedErrors = true; // Enable detailed errors for debugging
-    options.MaximumReceiveMessageSize = 102400; // 100KB max message size
-    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
-    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
-});
+
 
 // Add Background Services
 // builder.Services.AddHostedService<BookingTimeoutService>(); 
@@ -214,6 +191,5 @@ app.UseCors("corspolicy");
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<ChatHub>("/chatHub");
 
 app.Run();
