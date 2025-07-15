@@ -58,18 +58,27 @@ namespace SnapLink_API.Controllers
             return Ok(images);
         }
 
+
+
         // POST: api/image
         [HttpPost]
-        public async Task<ActionResult<ImageResponse>> Create([FromBody] CreateImageRequest request)
+        public async Task<ActionResult<ImageResponse>> UploadImage([FromForm] UploadImageRequest request)
         {
             try
             {
-                var image = await _imageService.CreateAsync(request);
+                if (request.File == null || request.File.Length == 0)
+                    return BadRequest("No file provided");
+
+                var image = await _imageService.UploadImageAsync(request);
                 return CreatedAtAction(nameof(GetById), new { id = image.Id }, image);
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 

@@ -11,7 +11,9 @@ using SnapLink_Repository.IRepository;
 using SnapLink_Repository.Repository;
 using SnapLink_Service.IService;
 using SnapLink_Service.Service;
+using SnapLink_API.Hubs;
 using System.Text;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 // Cấu hình JwtSettings
@@ -65,6 +67,8 @@ builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IAzureStorageService, AzureStorageService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -114,7 +118,7 @@ builder.Services.AddSingleton<PayOS>(provider =>
     var clientId = configuration["PayOS:ClientId"];
     var apiKey = configuration["PayOS:ApiKey"];
     var checksumKey = configuration["PayOS:ChecksumKey"];
-    
+
     return new PayOS(clientId!, apiKey!, checksumKey!);
 });
 
@@ -130,6 +134,8 @@ builder.Services.AddScoped<IPhotographerEventService, PhotographerEventService>(
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 
+
+
 // Add Background Services
 // builder.Services.AddHostedService<BookingTimeoutService>(); 
 
@@ -138,9 +144,10 @@ builder.Services.AddCors(opts =>
 {
     opts.AddPolicy("corspolicy", build =>
     {
-        build.WithOrigins("*")
+        build.SetIsOriginAllowed(origin => true) // Allow all origins for development
              .AllowAnyMethod()
-             .AllowAnyHeader();
+             .AllowAnyHeader()
+             .AllowCredentials(); // Important for SignalR
     });
 });
 
