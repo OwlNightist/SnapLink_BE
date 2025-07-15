@@ -63,5 +63,11 @@ namespace SnapLink_API.Controllers
                 expires = token.ValidTo
             });
         }
+
+        [HttpPost("Logout")]
+        public IActionResult Logout()
+        {
+            return Ok(new { message = "Logged out successfully." });
+        }
     }
 }
