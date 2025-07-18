@@ -225,7 +225,11 @@ namespace SnapLink_Repository.Migrations
                     ratingSum = table.Column<decimal>(type: "decimal(10,2)", nullable: true),
                     ratingCount = table.Column<int>(type: "int", nullable: true),
                     featuredStatus = table.Column<bool>(type: "bit", nullable: true, defaultValue: false),
-                    verificationStatus = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true)
+                    verificationStatus = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    GoogleMapsAddress = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Latitude = table.Column<double>(type: "float", nullable: true),
+                    Longitude = table.Column<double>(type: "float", nullable: true)
                 },
                 constraints: table =>
                 {

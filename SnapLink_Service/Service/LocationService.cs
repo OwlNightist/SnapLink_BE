@@ -79,5 +79,37 @@ namespace SnapLink_Service.Service
             await _repo.DeleteAsync(location);
             await _repo.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<Location>> GetLocationsWithinRadiusAsync(double latitude, double longitude, double radiusKm)
+        {
+            // TODO: Add Latitude/Longitude fields to Location entity for real geospatial queries
+            // For now, return an empty list to satisfy the interface
+            return new List<Location>();
+        }
+
+      
+        public Task<double> CalculateDistanceAsync(double lat1, double lon1, double lat2, double lon2)
+        {
+            var distance = CalculateDistance(lat1, lon1, lat2, lon2);
+            return Task.FromResult(distance);
+        }
+
+        private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double R = 6371; // Radius of the earth in km
+            var dLat = ToRadians(lat2 - lat1);
+            var dLon = ToRadians(lon2 - lon1);
+            var a =
+                Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
+                Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            return R * c;
+        }
+
+        private double ToRadians(double deg)
+        {
+            return deg * (Math.PI / 180);
+        }
     }
 }

@@ -123,6 +123,7 @@ builder.Services.AddSingleton<PayOS>(provider =>
 
 // Add Services
 builder.Services.AddScoped<IPhotographerService, PhotographerService>();
+builder.Services.AddScoped<IPhotographerLocationService, PhotographerLocationService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IStyleService, StyleService>();
 builder.Services.AddScoped<IUserStyleService, UserStyleService>();

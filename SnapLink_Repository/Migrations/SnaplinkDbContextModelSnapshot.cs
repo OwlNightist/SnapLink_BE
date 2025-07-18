@@ -638,6 +638,10 @@ namespace SnapLink_Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PhotographerId"));
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("AvailabilityStatus")
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)")
@@ -653,9 +657,19 @@ namespace SnapLink_Repository.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("featuredStatus");
 
+                    b.Property<string>("GoogleMapsAddress")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<decimal?>("HourlyRate")
                         .HasColumnType("decimal(10, 2)")
                         .HasColumnName("hourlyRate");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("float");
 
                     b.Property<decimal?>("Rating")
                         .HasColumnType("decimal(3, 2)")
