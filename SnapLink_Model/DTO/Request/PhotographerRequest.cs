@@ -31,6 +31,18 @@ namespace SnapLink_Model.DTO.Request
 
         [MaxLength(30)]
         public string? VerificationStatus { get; set; }
+
+        [MaxLength(500)]
+        public string? Address { get; set; }
+
+        [MaxLength(500)]
+        public string? GoogleMapsAddress { get; set; }
+
+        [Range(-90, 90)]
+        public double? Latitude { get; set; }
+
+        [Range(-180, 180)]
+        public double? Longitude { get; set; }
         
         // Style IDs for many-to-many relationship
         public List<int> StyleIds { get; set; } = new List<int>();
@@ -62,6 +74,18 @@ namespace SnapLink_Model.DTO.Request
 
         [MaxLength(30)]
         public string? VerificationStatus { get; set; }
+
+        [MaxLength(500)]
+        public string? Address { get; set; }
+
+        [MaxLength(500)]
+        public string? GoogleMapsAddress { get; set; }
+
+        [Range(-90, 90)]
+        public double? Latitude { get; set; }
+
+        [Range(-180, 180)]
+        public double? Longitude { get; set; }
         
         // Style IDs for many-to-many relationship
         public List<int> StyleIds { get; set; } = new List<int>();
