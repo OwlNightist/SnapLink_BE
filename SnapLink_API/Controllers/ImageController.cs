@@ -16,48 +16,59 @@ namespace SnapLink_API.Controllers
             _imageService = imageService;
         }
 
-        // GET: api/image/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ImageResponse>> GetById(int id)
+        // GET: api/image/photographer/{photographerId}
+        [HttpGet("photographer/{photographerId}")]
+        public async Task<ActionResult<IEnumerable<ImageResponse>>> GetByPhotographerId(int photographerId)
         {
-            try
-            {
-                var image = await _imageService.GetByIdAsync(id);
-                return Ok(image);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
-
-        // GET: api/image/type/{type}/ref/{refId}
-        [HttpGet("type/{type}/ref/{refId}")]
-        public async Task<ActionResult<IEnumerable<ImageResponse>>> GetByTypeAndRefId(string type, int refId)
-        {
-            var images = await _imageService.GetByTypeAndRefIdAsync(type, refId);
+            var images = await _imageService.GetByPhotographerIdAsync(photographerId);
             return Ok(images);
         }
 
-        // GET: api/image/type/{type}/ref/{refId}/primary
-        [HttpGet("type/{type}/ref/{refId}/primary")]
-        public async Task<ActionResult<ImageResponse>> GetPrimaryImage(string type, int refId)
+        // GET: api/image/location/{locationId}
+        [HttpGet("location/{locationId}")]
+        public async Task<ActionResult<IEnumerable<ImageResponse>>> GetByLocationId(int locationId)
         {
-            var image = await _imageService.GetPrimaryImageAsync(type, refId);
+            var images = await _imageService.GetByLocationIdAsync(locationId);
+            return Ok(images);
+        }
+
+        // GET: api/image/event/{eventId}
+        [HttpGet("event/{eventId}")]
+        public async Task<ActionResult<IEnumerable<ImageResponse>>> GetByPhotographerEventId(int eventId)
+        {
+            var images = await _imageService.GetByPhotographerEventIdAsync(eventId);
+            return Ok(images);
+        }
+
+        // GET: api/image/photographer/{photographerId}/primary
+        [HttpGet("photographer/{photographerId}/primary")]
+        public async Task<ActionResult<ImageResponse>> GetPrimaryByPhotographerId(int photographerId)
+        {
+            var image = await _imageService.GetPrimaryByPhotographerIdAsync(photographerId);
             if (image == null)
-                return NotFound($"No primary image found for {type} with ID {refId}");
-            
+                return NotFound($"No primary image found for photographer with ID {photographerId}");
             return Ok(image);
         }
 
-        // GET: api/image/type/{type}
-        [HttpGet("type/{type}")]
-        public async Task<ActionResult<IEnumerable<ImageResponse>>> GetAllByType(string type)
+        // GET: api/image/location/{locationId}/primary
+        [HttpGet("location/{locationId}/primary")]
+        public async Task<ActionResult<ImageResponse>> GetPrimaryByLocationId(int locationId)
         {
-            var images = await _imageService.GetAllByTypeAsync(type);
-            return Ok(images);
+            var image = await _imageService.GetPrimaryByLocationIdAsync(locationId);
+            if (image == null)
+                return NotFound($"No primary image found for location with ID {locationId}");
+            return Ok(image);
         }
 
+        // GET: api/image/event/{eventId}/primary
+        [HttpGet("event/{eventId}/primary")]
+        public async Task<ActionResult<ImageResponse>> GetPrimaryByPhotographerEventId(int eventId)
+        {
+            var image = await _imageService.GetPrimaryByPhotographerEventIdAsync(eventId);
+            if (image == null)
+                return NotFound($"No primary image found for event with ID {eventId}");
+            return Ok(image);
+        }
 
 
         // POST: api/image
@@ -70,7 +81,8 @@ namespace SnapLink_API.Controllers
                     return BadRequest("No file provided");
 
                 var image = await _imageService.UploadImageAsync(request);
-                return CreatedAtAction(nameof(GetById), new { id = image.Id }, image);
+                // return CreatedAtAction(nameof(GetById), new { id = image.Id }, image);
+                return Ok(image);
             }
             catch (ArgumentException ex)
             {

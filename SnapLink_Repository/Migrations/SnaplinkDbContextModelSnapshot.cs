@@ -262,7 +262,8 @@ namespace SnapLink_Repository.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Caption")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("caption");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -276,15 +277,14 @@ namespace SnapLink_Repository.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("is_primary");
 
-                    b.Property<int>("RefId")
-                        .HasColumnType("int")
-                        .HasColumnName("ref_id");
+                    b.Property<int?>("LocationId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("type");
+                    b.Property<int?>("PhotographerEventId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PhotographerId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Url")
                         .IsRequired()
@@ -294,6 +294,12 @@ namespace SnapLink_Repository.Migrations
 
                     b.HasKey("Id")
                         .HasName("PK_Image_Id");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("PhotographerEventId");
+
+                    b.HasIndex("PhotographerId");
 
                     b.ToTable("Image", (string)null);
                 });
@@ -1287,9 +1293,8 @@ namespace SnapLink_Repository.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("bankName");
 
-                    b.Property<int>("PhotographerId")
-                        .HasColumnType("int")
-                        .HasColumnName("photographerId");
+                    b.Property<int?>("PhotographerId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("ProcessedAt")
                         .HasColumnType("datetime")
@@ -1314,10 +1319,16 @@ namespace SnapLink_Repository.Migrations
                         .HasColumnName("requestedAt")
                         .HasDefaultValueSql("(getdate())");
 
+                    b.Property<int>("WalletId")
+                        .HasColumnType("int")
+                        .HasColumnName("walletId");
+
                     b.HasKey("Id")
                         .HasName("PK__Withdraw__3213E83FE86C5098");
 
                     b.HasIndex("PhotographerId");
+
+                    b.HasIndex("WalletId");
 
                     b.ToTable("WithdrawalRequest", (string)null);
                 });
@@ -1416,6 +1427,30 @@ namespace SnapLink_Repository.Migrations
                     b.Navigation("ReportedUser");
 
                     b.Navigation("Reporter");
+                });
+
+            modelBuilder.Entity("SnapLink_Repository.Entity.Image", b =>
+                {
+                    b.HasOne("SnapLink_Repository.Entity.Location", "Location")
+                        .WithMany("Images")
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SnapLink_Repository.Entity.PhotographerEvent", "PhotographerEvent")
+                        .WithMany("Images")
+                        .HasForeignKey("PhotographerEventId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SnapLink_Repository.Entity.Photographer", "Photographer")
+                        .WithMany("Images")
+                        .HasForeignKey("PhotographerId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Location");
+
+                    b.Navigation("Photographer");
+
+                    b.Navigation("PhotographerEvent");
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.Location", b =>
@@ -1668,13 +1703,17 @@ namespace SnapLink_Repository.Migrations
 
             modelBuilder.Entity("SnapLink_Repository.Entity.WithdrawalRequest", b =>
                 {
-                    b.HasOne("SnapLink_Repository.Entity.Photographer", "Photographer")
+                    b.HasOne("SnapLink_Repository.Entity.Photographer", null)
                         .WithMany("WithdrawalRequests")
-                        .HasForeignKey("PhotographerId")
-                        .IsRequired()
-                        .HasConstraintName("FK_WithdrawalRequest_Photographer");
+                        .HasForeignKey("PhotographerId");
 
-                    b.Navigation("Photographer");
+                    b.HasOne("SnapLink_Repository.Entity.Wallet", "Wallet")
+                        .WithMany("WithdrawalRequests")
+                        .HasForeignKey("WalletId")
+                        .IsRequired()
+                        .HasConstraintName("FK_WithdrawalRequest_Wallet");
+
+                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.Booking", b =>
@@ -1691,6 +1730,8 @@ namespace SnapLink_Repository.Migrations
                     b.Navigation("Advertisements");
 
                     b.Navigation("Bookings");
+
+                    b.Navigation("Images");
 
                     b.Navigation("PhotographerEventLocations");
                 });
@@ -1718,6 +1759,8 @@ namespace SnapLink_Repository.Migrations
                 {
                     b.Navigation("Bookings");
 
+                    b.Navigation("Images");
+
                     b.Navigation("PhotographerEvents");
 
                     b.Navigation("PhotographerStyles");
@@ -1728,6 +1771,8 @@ namespace SnapLink_Repository.Migrations
             modelBuilder.Entity("SnapLink_Repository.Entity.PhotographerEvent", b =>
                 {
                     b.Navigation("Bookings");
+
+                    b.Navigation("Images");
 
                     b.Navigation("PhotographerEventLocations");
                 });
@@ -1782,6 +1827,11 @@ namespace SnapLink_Repository.Migrations
                     b.Navigation("UserStyles");
 
                     b.Navigation("Wallets");
+                });
+
+            modelBuilder.Entity("SnapLink_Repository.Entity.Wallet", b =>
+                {
+                    b.Navigation("WithdrawalRequests");
                 });
 #pragma warning restore 612, 618
         }

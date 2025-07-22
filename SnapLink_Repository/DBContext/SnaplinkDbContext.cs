@@ -295,10 +295,24 @@ public partial class SnaplinkDbContext : DbContext
             entity.ToTable("Image");
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Url).HasMaxLength(255).HasColumnName("url");
-            entity.Property(e => e.Type).HasMaxLength(50).HasColumnName("type");
-            entity.Property(e => e.RefId).HasColumnName("ref_id");
             entity.Property(e => e.IsPrimary).HasDefaultValue(false).HasColumnName("is_primary");
+            entity.Property(e => e.Caption).HasColumnName("caption");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())").HasColumnType("datetime").HasColumnName("created_at");
+
+            entity.HasOne(e => e.Photographer)
+                .WithMany(p => p.Images)
+                .HasForeignKey(e => e.PhotographerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Location)
+                .WithMany(l => l.Images)
+                .HasForeignKey(e => e.LocationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.PhotographerEvent)
+                .WithMany(ev => ev.Images)
+                .HasForeignKey(e => e.PhotographerEventId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<LocationOwner>(entity =>
@@ -781,6 +795,7 @@ public partial class SnaplinkDbContext : DbContext
             entity.ToTable("WithdrawalRequest");
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.WalletId).HasColumnName("walletId");
             entity.Property(e => e.Amount)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("amount");
@@ -793,7 +808,6 @@ public partial class SnaplinkDbContext : DbContext
             entity.Property(e => e.BankName)
                 .HasMaxLength(100)
                 .HasColumnName("bankName");
-            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
             entity.Property(e => e.ProcessedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("processedAt");
@@ -807,10 +821,10 @@ public partial class SnaplinkDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("requestedAt");
 
-            entity.HasOne(d => d.Photographer).WithMany(p => p.WithdrawalRequests)
-                .HasForeignKey(d => d.PhotographerId)
+            entity.HasOne(d => d.Wallet).WithMany(p => p.WithdrawalRequests)
+                .HasForeignKey(d => d.WalletId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_WithdrawalRequest_Photographer");
+                .HasConstraintName("FK_WithdrawalRequest_Wallet");
         });
 
         modelBuilder.Entity<PhotographerEvent>(entity =>

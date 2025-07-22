@@ -38,4 +38,6 @@ public partial class PhotographerEvent
     public virtual ICollection<PhotographerEventLocation> PhotographerEventLocations { get; set; } = new List<PhotographerEventLocation>();
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+
+    public virtual ICollection<Image> Images { get; set; } = new List<Image>();
 } 

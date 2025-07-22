@@ -37,33 +37,70 @@ namespace SnapLink_Service.Service
             return _mapper.Map<ImageResponse>(imageEntity);
         }
 
-        public async Task<IEnumerable<ImageResponse>> GetByTypeAndRefIdAsync(string type, int refId)
+        public async Task<IEnumerable<ImageResponse>> GetByPhotographerIdAsync(int photographerId)
         {
             var images = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.Type == type && img.RefId == refId,
+                filter: img => img.PhotographerId == photographerId,
                 orderBy: q => q.OrderByDescending(img => img.IsPrimary).ThenBy(img => img.CreatedAt)
             );
-            
             return _mapper.Map<IEnumerable<ImageResponse>>(images);
         }
 
-        public async Task<ImageResponse?> GetPrimaryImageAsync(string type, int refId)
+        public async Task<IEnumerable<ImageResponse>> GetByLocationIdAsync(int locationId)
+        {
+            var images = await _unitOfWork.ImageRepository.GetAsync(
+                filter: img => img.LocationId == locationId,
+                orderBy: q => q.OrderByDescending(img => img.IsPrimary).ThenBy(img => img.CreatedAt)
+            );
+            return _mapper.Map<IEnumerable<ImageResponse>>(images);
+        }
+
+        public async Task<IEnumerable<ImageResponse>> GetByPhotographerEventIdAsync(int photographerEventId)
+        {
+            var images = await _unitOfWork.ImageRepository.GetAsync(
+                filter: img => img.PhotographerEventId == photographerEventId,
+                orderBy: q => q.OrderByDescending(img => img.IsPrimary).ThenBy(img => img.CreatedAt)
+            );
+            return _mapper.Map<IEnumerable<ImageResponse>>(images);
+        }
+
+        public async Task<ImageResponse?> GetPrimaryByPhotographerIdAsync(int photographerId)
         {
             var primaryImage = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.Type == type && img.RefId == refId && img.IsPrimary
+                filter: img => img.PhotographerId == photographerId && img.IsPrimary
             );
-            
+            var imageEntity = primaryImage.FirstOrDefault();
+            return imageEntity != null ? _mapper.Map<ImageResponse>(imageEntity) : null;
+        }
+
+        public async Task<ImageResponse?> GetPrimaryByLocationIdAsync(int locationId)
+        {
+            var primaryImage = await _unitOfWork.ImageRepository.GetAsync(
+                filter: img => img.LocationId == locationId && img.IsPrimary
+            );
+            var imageEntity = primaryImage.FirstOrDefault();
+            return imageEntity != null ? _mapper.Map<ImageResponse>(imageEntity) : null;
+        }
+
+        public async Task<ImageResponse?> GetPrimaryByPhotographerEventIdAsync(int photographerEventId)
+        {
+            var primaryImage = await _unitOfWork.ImageRepository.GetAsync(
+                filter: img => img.PhotographerEventId == photographerEventId && img.IsPrimary
+            );
             var imageEntity = primaryImage.FirstOrDefault();
             return imageEntity != null ? _mapper.Map<ImageResponse>(imageEntity) : null;
         }
 
 
-
         public async Task<ImageResponse> UploadImageAsync(UploadImageRequest request)
         {
             // Upload file to Azure Storage
-            var blobName = await _azureStorageService.UploadImageAsync(request.File, request.Type, request.RefId);
-            
+            var blobName = await _azureStorageService.UploadImageAsync(
+                request.File,
+                request.PhotographerId,
+                request.LocationId,
+                request.PhotographerEventId
+            );
             // Get the public URL
             var imageUrl = await _azureStorageService.GetImageUrlAsync(blobName);
 
@@ -71,8 +108,9 @@ namespace SnapLink_Service.Service
             var image = new Image
             {
                 Url = imageUrl,
-                Type = request.Type,
-                RefId = request.RefId,
+                PhotographerId = request.PhotographerId,
+                LocationId = request.LocationId,
+                PhotographerEventId = request.PhotographerEventId,
                 IsPrimary = request.IsPrimary,
                 Caption = request.Caption,
                 CreatedAt = DateTime.UtcNow
@@ -86,12 +124,11 @@ namespace SnapLink_Service.Service
         public async Task<ImageResponse> UpdateAsync(UpdateImageRequest request)
         {
             var image = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.Id == request.Id && img.Type == request.Type
+                filter: img => img.Id == request.Id
             );
-            
             var imageEntity = image.FirstOrDefault();
             if (imageEntity == null)
-                throw new ArgumentException($"Image with ID {request.Id} and type {request.Type} not found");
+                throw new ArgumentException($"Image with ID {request.Id} not found");
 
             // Update only provided fields
             if (!string.IsNullOrEmpty(request.Url))
@@ -101,17 +138,18 @@ namespace SnapLink_Service.Service
             if (request.IsPrimary.HasValue)
             {
                 imageEntity.IsPrimary = request.IsPrimary.Value;
-                
-                // If setting as primary, unset other primary images for the same type and refId
+
+                // If setting as primary, unset other primary images for the same entity
                 if (request.IsPrimary.Value)
                 {
                     var existingPrimaryImages = await _unitOfWork.ImageRepository.GetAsync(
-                        filter: img => img.Type == imageEntity.Type && 
-                                    img.RefId == imageEntity.RefId && 
-                                    img.Id != request.Id && 
-                                    img.IsPrimary
+                        filter: img =>
+                            ((img.PhotographerId != null && img.PhotographerId == imageEntity.PhotographerId) ||
+                             (img.LocationId != null && img.LocationId == imageEntity.LocationId) ||
+                             (img.PhotographerEventId != null && img.PhotographerEventId == imageEntity.PhotographerEventId)) &&
+                            img.Id != request.Id &&
+                            img.IsPrimary
                     );
-                    
                     foreach (var existingImage in existingPrimaryImages)
                     {
                         existingImage.IsPrimary = false;
@@ -162,16 +200,19 @@ namespace SnapLink_Service.Service
             var image = await _unitOfWork.ImageRepository.GetAsync(
                 filter: img => img.Id == imageId
             );
-            
             var imageEntity = image.FirstOrDefault();
             if (imageEntity == null)
                 return false;
 
-            // Unset all other primary images for the same type and refId
+            // Unset all other primary images for the same entity
             var existingPrimaryImages = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.Type == imageEntity.Type && img.RefId == imageEntity.RefId && img.IsPrimary
+                filter: img =>
+                    ((img.PhotographerId != null && img.PhotographerId == imageEntity.PhotographerId) ||
+                     (img.LocationId != null && img.LocationId == imageEntity.LocationId) ||
+                     (img.PhotographerEventId != null && img.PhotographerEventId == imageEntity.PhotographerEventId)) &&
+                    img.Id != imageId &&
+                    img.IsPrimary
             );
-            
             foreach (var existingImage in existingPrimaryImages)
             {
                 existingImage.IsPrimary = false;
@@ -182,18 +223,8 @@ namespace SnapLink_Service.Service
             imageEntity.IsPrimary = true;
             _unitOfWork.ImageRepository.Update(imageEntity);
             await _unitOfWork.SaveChangesAsync();
-            
-            return true;
-        }
 
-        public async Task<IEnumerable<ImageResponse>> GetAllByTypeAsync(string type)
-        {
-            var images = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.Type == type,
-                orderBy: q => q.OrderBy(img => img.RefId).ThenByDescending(img => img.IsPrimary)
-            );
-            
-            return _mapper.Map<IEnumerable<ImageResponse>>(images);
+            return true;
         }
     }
 } 
