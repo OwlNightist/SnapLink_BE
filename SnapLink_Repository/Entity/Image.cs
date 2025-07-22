@@ -5,11 +5,18 @@ namespace SnapLink_Repository.Entity
     public class Image
     {
         public int Id { get; set; }
-        public string Url { get; set; } // or Path, or whatever you use
-        public string Type { get; set; } // e.g., "photographer", "location"
-        public int RefId { get; set; } // The referenced entity's ID
+        public string Url { get; set; }
         public bool IsPrimary { get; set; }
-        public string? Caption { get; set; } // Optional caption for the image
+        public string? Caption { get; set; }
         public DateTime CreatedAt { get; set; }
+
+        public int? PhotographerId { get; set; }
+        public Photographer? Photographer { get; set; }
+
+        public int? LocationId { get; set; }
+        public Location? Location { get; set; }
+
+        public int? PhotographerEventId { get; set; }
+        public PhotographerEvent? PhotographerEvent { get; set; }
     }
 } 

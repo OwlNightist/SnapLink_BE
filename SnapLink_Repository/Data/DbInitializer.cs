@@ -698,14 +698,14 @@ namespace SnapLink_Repository.Data
             // Seed WithdrawalRequests
             if (!context.WithdrawalRequests.Any())
             {
-                var photographers = context.Photographers.Take(5).ToList();
+                var wallets = context.Wallets.Take(5).ToList();
                 var requests = new[]
                 {
-                    new WithdrawalRequest { PhotographerId = photographers[0].PhotographerId, Amount = 100, BankAccountNumber = "111111", BankAccountName = "Alice Smith", BankName = "Bank A", RequestStatus = "Pending", RequestedAt = DateTime.Now },
-                    new WithdrawalRequest { PhotographerId = photographers[1].PhotographerId, Amount = 200, BankAccountNumber = "222222", BankAccountName = "Bob Johnson", BankName = "Bank B", RequestStatus = "Approved", RequestedAt = DateTime.Now },
-                    new WithdrawalRequest { PhotographerId = photographers[2].PhotographerId, Amount = 150, BankAccountNumber = "333333", BankAccountName = "Carol White", BankName = "Bank C", RequestStatus = "Rejected", RequestedAt = DateTime.Now },
-                    new WithdrawalRequest { PhotographerId = photographers[3].PhotographerId, Amount = 120, BankAccountNumber = "444444", BankAccountName = "Dave Brown", BankName = "Bank D", RequestStatus = "Pending", RequestedAt = DateTime.Now },
-                    new WithdrawalRequest { PhotographerId = photographers[4].PhotographerId, Amount = 180, BankAccountNumber = "555555", BankAccountName = "Eve Black", BankName = "Bank E", RequestStatus = "Approved", RequestedAt = DateTime.Now }
+                    new WithdrawalRequest { WalletId = wallets[0].WalletId, Amount = 100, BankAccountNumber = "111111", BankAccountName = "Alice Smith", BankName = "Bank A", RequestStatus = "Pending", RequestedAt = DateTime.Now },
+                    new WithdrawalRequest { WalletId = wallets[1].WalletId, Amount = 200, BankAccountNumber = "222222", BankAccountName = "Bob Johnson", BankName = "Bank B", RequestStatus = "Approved", RequestedAt = DateTime.Now },
+                    new WithdrawalRequest { WalletId = wallets[2].WalletId, Amount = 150, BankAccountNumber = "333333", BankAccountName = "Carol White", BankName = "Bank C", RequestStatus = "Rejected", RequestedAt = DateTime.Now },
+                    new WithdrawalRequest { WalletId = wallets[3].WalletId, Amount = 120, BankAccountNumber = "444444", BankAccountName = "Dave Brown", BankName = "Bank D", RequestStatus = "Pending", RequestedAt = DateTime.Now },
+                    new WithdrawalRequest { WalletId = wallets[4].WalletId, Amount = 180, BankAccountNumber = "555555", BankAccountName = "Eve Black", BankName = "Bank E", RequestStatus = "Approved", RequestedAt = DateTime.Now }
                 };
                 context.WithdrawalRequests.AddRange(requests);
                 context.SaveChanges();
@@ -786,16 +786,16 @@ namespace SnapLink_Repository.Data
                 var locations = context.Locations.Take(5).ToList();
                 var images = new[]
                 {
-                    new Image { Url = "photographer1.jpg", Type = "photographer", RefId = photographers[0].PhotographerId, IsPrimary = true, Caption = "Photographer 1", CreatedAt = DateTime.Now },
-                    new Image { Url = "photographer2.jpg", Type = "photographer", RefId = photographers[1].PhotographerId, IsPrimary = true, Caption = "Photographer 2", CreatedAt = DateTime.Now },
-                    new Image { Url = "location1.jpg", Type = "location", RefId = locations[0].LocationId, IsPrimary = true, Caption = "Location 1", CreatedAt = DateTime.Now },
-                    new Image { Url = "location2.jpg", Type = "location", RefId = locations[1].LocationId, IsPrimary = true, Caption = "Location 2", CreatedAt = DateTime.Now },
-                    new Image { Url = "location3.jpg", Type = "location", RefId = locations[2].LocationId, IsPrimary = false, Caption = "Location 3", CreatedAt = DateTime.Now },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423583882606.png", Type = "photographer", RefId = 2, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423449716041.png", Type = "photographer", RefId = 2, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:13:35.237") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/location/1/20250715045320_428621570_1579447972877159_7932360639229696187_n.jpg", Type = "location", RefId = 1, IsPrimary = false, Caption = "duoc", CreatedAt = DateTime.Parse("2025-07-15 04:53:21.597") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/20250715052645_linggka109_3670740457001717233_s2025-7-15-12.25.361_story.jpg", Type = "photographer", RefId = 2, IsPrimary = false, Caption = "null real", CreatedAt = DateTime.Parse("2025-07-15 05:26:45.567") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/20250715053902_test.jpg", Type = "photographer", RefId = 1, IsPrimary = false, Caption = "hehe", CreatedAt = DateTime.Parse("2025-07-15 05:39:02.590") }
+                    new Image { Url = "photographer1.jpg", PhotographerId = photographers[0].PhotographerId, IsPrimary = true, Caption = "Photographer 1", CreatedAt = DateTime.Now },
+                    new Image { Url = "photographer2.jpg", PhotographerId = photographers[1].PhotographerId, IsPrimary = true, Caption = "Photographer 2", CreatedAt = DateTime.Now },
+                    new Image { Url = "location1.jpg", LocationId = locations[0].LocationId, IsPrimary = true, Caption = "Location 1", CreatedAt = DateTime.Now },
+                    new Image { Url = "location2.jpg", LocationId = locations[1].LocationId, IsPrimary = true, Caption = "Location 2", CreatedAt = DateTime.Now },
+                    new Image { Url = "location3.jpg", LocationId = locations[2].LocationId, IsPrimary = false, Caption = "Location 3", CreatedAt = DateTime.Now },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423583882606.png", PhotographerId = 2, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423449716041.png", PhotographerId = 2, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:13:35.237") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/location/1/20250715045320_428621570_1579447972877159_7932360639229696187_n.jpg", LocationId = 1, IsPrimary = false, Caption = "duoc", CreatedAt = DateTime.Parse("2025-07-15 04:53:21.597") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/20250715052645_linggka109_3670740457001717233_s2025-7-15-12.25.361_story.jpg", PhotographerId = 2, IsPrimary = false, Caption = "null real", CreatedAt = DateTime.Parse("2025-07-15 05:26:45.567") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/20250715053902_test.jpg", PhotographerId = 1, IsPrimary = false, Caption = "hehe", CreatedAt = DateTime.Parse("2025-07-15 05:39:02.590") }
                 };
                 context.Images.AddRange(images);
                 context.SaveChanges();

@@ -30,7 +30,7 @@ namespace SnapLink_Service.Service
             _containerClient.CreateIfNotExists(PublicAccessType.Blob);
         }
 
-        public async Task<string> UploadImageAsync(IFormFile file, string type, int refId)
+        public async Task<string> UploadImageAsync(IFormFile file, int? photographerId, int? locationId, int? photographerEventId)
         {
             if (file == null || file.Length == 0)
                 throw new ArgumentException("File is empty or null");
@@ -46,10 +46,33 @@ namespace SnapLink_Service.Service
             if (file.Length > 10 * 1024 * 1024)
                 throw new ArgumentException("File size exceeds 10MB limit");
 
+            // Determine entity type and id
+            string entityType;
+            int entityId;
+            if (photographerId.HasValue)
+            {
+                entityType = "photographer";
+                entityId = photographerId.Value;
+            }
+            else if (locationId.HasValue)
+            {
+                entityType = "location";
+                entityId = locationId.Value;
+            }
+            else if (photographerEventId.HasValue)
+            {
+                entityType = "event";
+                entityId = photographerEventId.Value;
+            }
+            else
+            {
+                throw new ArgumentException("At least one entity ID must be provided.");
+            }
+
             // Generate unique blob name
             var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
             var sanitizedFileName = SanitizeFileName(file.FileName);
-            var blobName = $"{type}/{refId}/{timestamp}_{sanitizedFileName}";
+            var blobName = $"{entityType}/{entityId}/{timestamp}_{sanitizedFileName}";
 
             // Get blob client
             var blobClient = _containerClient.GetBlobClient(blobName);
