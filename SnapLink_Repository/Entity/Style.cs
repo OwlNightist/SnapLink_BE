@@ -12,4 +12,6 @@ public partial class Style
     public string? Description { get; set; }
 
     public virtual ICollection<PhotographerStyle> PhotographerStyles { get; set; } = new List<PhotographerStyle>();
+
+    public virtual ICollection<UserStyle> UserStyles { get; set; } = new List<UserStyle>();
 }

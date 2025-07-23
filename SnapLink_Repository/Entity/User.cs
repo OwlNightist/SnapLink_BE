@@ -27,6 +27,10 @@ public partial class User
 
     public string? Status { get; set; }
 
+    public string? VerificationCode { get; set; }
+
+    public bool? IsVerified { get; set; }
+
     public virtual ICollection<Administrator> Administrators { get; set; } = new List<Administrator>();
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
@@ -45,11 +49,19 @@ public partial class User
 
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
+    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
     public virtual ICollection<Photographer> Photographers { get; set; } = new List<Photographer>();
 
     public virtual ICollection<PremiumSubscription> PremiumSubscriptions { get; set; } = new List<PremiumSubscription>();
 
-    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+    public virtual ICollection<Transaction> TransactionFromUsers { get; set; } = new List<Transaction>();
+
+    public virtual ICollection<Transaction> TransactionToUsers { get; set; } = new List<Transaction>();
 
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+
+    public virtual ICollection<UserStyle> UserStyles { get; set; } = new List<UserStyle>();
+
+    public virtual ICollection<Wallet> Wallets { get; set; } = new List<Wallet>();
 }

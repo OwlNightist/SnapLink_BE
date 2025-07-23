@@ -31,13 +31,21 @@ public partial class Location
 
     public string? VerificationStatus { get; set; }
 
+    public string? LocationType { get; set; }
+
+    public string? ExternalPlaceId { get; set; }
+
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
     public virtual ICollection<Advertisement> Advertisements { get; set; } = new List<Advertisement>();
 
-    public virtual ICollection<LocationImage> LocationImages { get; set; } = new List<LocationImage>();
+    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+
+    public virtual ICollection<Image> Images { get; set; } = new List<Image>();
 
     public virtual LocationOwner LocationOwner { get; set; } = null!;
+
+    public virtual ICollection<PhotographerEventLocation> PhotographerEventLocations { get; set; } = new List<PhotographerEventLocation>();
 }
