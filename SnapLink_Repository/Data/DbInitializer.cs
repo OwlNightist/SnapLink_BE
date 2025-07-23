@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Linq;
 using SnapLink_Repository.DBContext;
 using SnapLink_Repository.Entity;
@@ -32,7 +32,7 @@ namespace SnapLink_Repository.Data
                 var users = new[]
                 {
                     new User { UserName = "alice", Email = "alice@example.com", PasswordHash = "hash1", PhoneNumber = "1234567890", FullName = "Alice Smith", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "bob", Email = "bob@example.com", PasswordHash = "hash2", PhoneNumber = "1234567891", FullName = "Bob Johnson", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "bob", Email = "bob@example.com", PasswordHash = "hash2", PhoneNumber = "1234567891", FullName = "linhka", ProfileImage = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/linggka109_2864048423449716041.png", Status = "Active", CreateAt = DateTime.Now },
                     new User { UserName = "carol", Email = "carol@example.com", PasswordHash = "hash3", PhoneNumber = "1234567892", FullName = "Carol White", Status = "Active", CreateAt = DateTime.Now },
                     new User { UserName = "dave", Email = "dave@example.com", PasswordHash = "hash4", PhoneNumber = "1234567893", FullName = "Dave Brown", Status = "Active", CreateAt = DateTime.Now },
                     new User { UserName = "eve", Email = "eve@example.com", PasswordHash = "hash5", PhoneNumber = "1234567894", FullName = "Eve Black", Status = "Active", CreateAt = DateTime.Now },
@@ -790,7 +790,12 @@ namespace SnapLink_Repository.Data
                     new Image { Url = "photographer2.jpg", Type = "photographer", RefId = photographers[1].PhotographerId, IsPrimary = true, Caption = "Photographer 2", CreatedAt = DateTime.Now },
                     new Image { Url = "location1.jpg", Type = "location", RefId = locations[0].LocationId, IsPrimary = true, Caption = "Location 1", CreatedAt = DateTime.Now },
                     new Image { Url = "location2.jpg", Type = "location", RefId = locations[1].LocationId, IsPrimary = true, Caption = "Location 2", CreatedAt = DateTime.Now },
-                    new Image { Url = "location3.jpg", Type = "location", RefId = locations[2].LocationId, IsPrimary = false, Caption = "Location 3", CreatedAt = DateTime.Now }
+                    new Image { Url = "location3.jpg", Type = "location", RefId = locations[2].LocationId, IsPrimary = false, Caption = "Location 3", CreatedAt = DateTime.Now },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423583882606.png", Type = "photographer", RefId = 2, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423449716041.png", Type = "photographer", RefId = 2, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:13:35.237") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/location/1/20250715045320_428621570_1579447972877159_7932360639229696187_n.jpg", Type = "location", RefId = 1, IsPrimary = false, Caption = "duoc", CreatedAt = DateTime.Parse("2025-07-15 04:53:21.597") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/20250715052645_linggka109_3670740457001717233_s2025-7-15-12.25.361_story.jpg", Type = "photographer", RefId = 2, IsPrimary = false, Caption = "null real", CreatedAt = DateTime.Parse("2025-07-15 05:26:45.567") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/20250715053902_test.jpg", Type = "photographer", RefId = 1, IsPrimary = false, Caption = "hehe", CreatedAt = DateTime.Parse("2025-07-15 05:39:02.590") }
                 };
                 context.Images.AddRange(images);
                 context.SaveChanges();
@@ -815,3 +820,4 @@ namespace SnapLink_Repository.Data
         }
     }
 }
+*/

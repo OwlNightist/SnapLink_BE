@@ -17,6 +17,10 @@ namespace SnapLink_Model.DTO.Response
         public int? RatingCount { get; set; }
         public bool? FeaturedStatus { get; set; }
         public string? VerificationStatus { get; set; }
+        public string? Address { get; set; }
+        public string? GoogleMapsAddress { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
 
         // User information
         public string? UserName { get; set; }
@@ -54,6 +58,10 @@ namespace SnapLink_Model.DTO.Response
         public bool? FeaturedStatus { get; set; }
         public string? ProfileImage { get; set; }
         public string? VerificationStatus { get; set; }
+        public string? Address { get; set; }
+        public string? GoogleMapsAddress { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
 
         // Styles information
         public List<string> Styles { get; set; } = new List<string>();

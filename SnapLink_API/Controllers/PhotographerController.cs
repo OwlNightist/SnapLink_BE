@@ -9,10 +9,12 @@ namespace SnapLink_API.Controllers
     public class PhotographerController : ControllerBase
     {
         private readonly IPhotographerService _photographerService;
+        private readonly IPhotographerLocationService _locationService;
 
-        public PhotographerController(IPhotographerService photographerService)
+        public PhotographerController(IPhotographerService photographerService, IPhotographerLocationService locationService)
         {
             _photographerService = photographerService;
+            _locationService = locationService;
         }
 
         /// <summary>
@@ -319,6 +321,110 @@ namespace SnapLink_API.Controllers
                     return BadRequest(new { message = "Failed to remove style. Photographer or style relationship not found." });
                 }
                 return Ok(new { message = "Style removed successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get photographers within a specified radius
+        /// </summary>
+        /// <param name="latitude">User's latitude</param>
+        /// <param name="longitude">User's longitude</param>
+        /// <param name="radiusKm">Search radius in kilometers</param>
+        /// <returns>List of photographers within the specified radius</returns>
+        [HttpGet("nearby")]
+        public async Task<IActionResult> GetPhotographersNearby([FromQuery] double latitude, [FromQuery] double longitude, [FromQuery] double radiusKm = 10.0)
+        {
+            try
+            {
+                if (radiusKm <= 0 || radiusKm > 100)
+                {
+                    return BadRequest(new { message = "Radius must be between 0 and 100 kilometers" });
+                }
+
+                var photographers = await _locationService.GetPhotographersWithinRadiusAsync(latitude, longitude, radiusKm);
+                return Ok(photographers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get photographers by city
+        /// </summary>
+        /// <param name="city">City name to search for</param>
+        /// <returns>List of photographers in the specified city</returns>
+        [HttpGet("city/{city}")]
+        public async Task<IActionResult> GetPhotographersByCity(string city)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(city))
+                {
+                    return BadRequest(new { message = "City name cannot be empty" });
+                }
+
+                var photographers = await _locationService.GetPhotographersByCityAsync(city);
+                return Ok(photographers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Calculate distance to a specific photographer
+        /// </summary>
+        /// <param name="photographerId">Photographer ID</param>
+        /// <param name="latitude">User's latitude</param>
+        /// <param name="longitude">User's longitude</param>
+        /// <returns>Distance in kilometers</returns>
+        [HttpGet("{photographerId}/distance")]
+        public async Task<IActionResult> GetDistanceToPhotographer(int photographerId, [FromQuery] double latitude, [FromQuery] double longitude)
+        {
+            try
+            {
+                var distance = await _locationService.CalculateDistanceToPhotographerAsync(latitude, longitude, photographerId);
+                return Ok(new { distance = Math.Round(distance, 2), unit = "km" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Update photographer location
+        /// </summary>
+        /// <param name="id">Photographer ID</param>
+        /// <param name="request">Location update request</param>
+        /// <returns>Success message</returns>
+        [HttpPut("{id}/location")]
+        public async Task<IActionResult> UpdatePhotographerLocation(int id, [FromBody] UpdatePhotographerLocationRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                await _locationService.UpdatePhotographerLocationAsync(id, request.Address, request.GoogleMapsAddress, request.Latitude, request.Longitude);
+                return Ok(new { message = "Location updated successfully" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {

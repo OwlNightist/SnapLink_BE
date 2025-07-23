@@ -31,9 +31,9 @@ public partial class Location
 
     public string? VerificationStatus { get; set; }
 
-    public string? LocationType { get; set; } // "Registered" or "External" (Google Places)
+    public string? LocationType { get; set; }
 
-    public string? ExternalPlaceId { get; set; } // Google Places ID for external locations
+    public string? ExternalPlaceId { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
@@ -42,6 +42,8 @@ public partial class Location
     public virtual ICollection<Advertisement> Advertisements { get; set; } = new List<Advertisement>();
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+
+    public virtual ICollection<Image> Images { get; set; } = new List<Image>();
 
     public virtual LocationOwner LocationOwner { get; set; } = null!;
 

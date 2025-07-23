@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace SnapLink_Repository.Entity;
@@ -14,4 +14,6 @@ public partial class Wallet
     public DateTime? UpdatedAt { get; set; }
 
     public virtual User User { get; set; } = null!;
-} 
+
+    public virtual ICollection<WithdrawalRequest> WithdrawalRequests { get; set; } = new List<WithdrawalRequest>();
+}
