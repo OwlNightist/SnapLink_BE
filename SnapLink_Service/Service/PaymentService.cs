@@ -1,4 +1,4 @@
-/*using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +16,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace SnapLink_Service.Service
 {
-    public class PaymentService : IPaymentService
+public class PaymentService : IPaymentService
 {
     private readonly PayOS _payOS;
     private readonly IUnitOfWork _unitOfWork;
@@ -477,4 +477,4 @@ namespace SnapLink_Service.Service
             }
         }
     }
-}*/
+}

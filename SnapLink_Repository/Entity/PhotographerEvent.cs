@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace SnapLink_Repository.Entity;
@@ -27,15 +27,11 @@ public partial class PhotographerEvent
 
     public int? CurrentBookings { get; set; }
 
-    public string? Status { get; set; }
+    public string? Status { get; set; } // Active, Inactive, Expired, FullyBooked
 
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
-
-    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
-
-    public virtual ICollection<Image> Images { get; set; } = new List<Image>();
 
     public virtual Photographer Photographer { get; set; } = null!;
 

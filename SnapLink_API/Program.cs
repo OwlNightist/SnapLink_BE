@@ -5,7 +5,7 @@ using Microsoft.OpenApi.Models;
 using Net.payOS;
 using SnapLink_Model.DTO;
 
-/*using SnapLink_Repository.Data;*/
+using SnapLink_Repository.Data;
 using SnapLink_Repository.DBContext;
 using SnapLink_Repository.IRepository;
 using SnapLink_Repository.Repository;
@@ -66,7 +66,7 @@ builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
-/*builder.Services.AddScoped<IImageService, ImageService>();*/
+builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IAzureStorageService, AzureStorageService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -124,12 +124,12 @@ builder.Services.AddSingleton<PayOS>(provider =>
 // Add Services
 builder.Services.AddScoped<IPhotographerService, PhotographerService>();
 builder.Services.AddScoped<IPhotographerLocationService, PhotographerLocationService>();
-/*builder.Services.AddScoped<IImageService, ImageService>();*/
+builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IStyleService, StyleService>();
 builder.Services.AddScoped<IUserStyleService, UserStyleService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
-/*builder.Services.AddScoped<IPaymentService, PaymentService>();*/
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IPhotographerEventService, PhotographerEventService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
@@ -162,7 +162,7 @@ if (app.Environment.IsDevelopment())
         try
         {
             var context = scope.ServiceProvider.GetRequiredService<SnaplinkDbContext>();
-            /*DbInitializer.Initialize(context);*/
+            DbInitializer.Initialize(context);
             Console.WriteLine("✅ Database seeded successfully in Development environment.");
         }
         catch (Exception ex)

@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
+using SnapLink_Repository.IRepository;
 
 namespace SnapLink_Repository.Entity;
 
@@ -14,4 +14,4 @@ public partial class PhotographerEventLocation
     public virtual PhotographerEvent Event { get; set; } = null!;
 
     public virtual Location Location { get; set; } = null!;
-}
+} 

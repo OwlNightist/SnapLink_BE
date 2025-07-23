@@ -25,9 +25,9 @@ public partial class SnaplinkDbContext : DbContext
 
     public virtual DbSet<Complaint> Complaints { get; set; }
 
-    public virtual DbSet<Image> Images { get; set; }
-
     public virtual DbSet<Location> Locations { get; set; }
+
+    public virtual DbSet<Image> Images { get; set; }
 
     public virtual DbSet<LocationOwner> LocationOwners { get; set; }
 
@@ -41,11 +41,9 @@ public partial class SnaplinkDbContext : DbContext
 
     public virtual DbSet<Photographer> Photographers { get; set; }
 
-    public virtual DbSet<PhotographerEvent> PhotographerEvents { get; set; }
-
-    public virtual DbSet<PhotographerEventLocation> PhotographerEventLocations { get; set; }
-
     public virtual DbSet<PhotographerStyle> PhotographerStyles { get; set; }
+
+    public virtual DbSet<Wallet> Wallets { get; set; }
 
     public virtual DbSet<PremiumPackage> PremiumPackages { get; set; }
 
@@ -65,12 +63,14 @@ public partial class SnaplinkDbContext : DbContext
 
     public virtual DbSet<UserStyle> UserStyles { get; set; }
 
-    public virtual DbSet<Wallet> Wallets { get; set; }
-
     public virtual DbSet<WithdrawalRequest> WithdrawalRequests { get; set; }
 
+    public virtual DbSet<PhotographerEvent> PhotographerEvents { get; set; }
+
+    public virtual DbSet<PhotographerEventLocation> PhotographerEventLocations { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-       => optionsBuilder.UseSqlServer(GetConnectionString());
+        => optionsBuilder.UseSqlServer(GetConnectionString());
 
     private string GetConnectionString()
     {
@@ -86,8 +86,6 @@ public partial class SnaplinkDbContext : DbContext
             entity.HasKey(e => e.AdminId).HasName("PK__Administ__AD0500A64814467C");
 
             entity.ToTable("Administrator");
-
-            entity.HasIndex(e => e.UserId, "IX_Administrator_userId");
 
             entity.Property(e => e.AdminId).HasColumnName("adminId");
             entity.Property(e => e.AccessLevel)
@@ -109,10 +107,6 @@ public partial class SnaplinkDbContext : DbContext
             entity.HasKey(e => e.AdvertisementId).HasName("PK__Advertis__4729E935E7D591B6");
 
             entity.ToTable("Advertisement");
-
-            entity.HasIndex(e => e.LocationId, "IX_Advertisement_locationId");
-
-            entity.HasIndex(e => e.PaymentId, "IX_Advertisement_paymentId");
 
             entity.Property(e => e.AdvertisementId).HasColumnName("advertisementId");
             entity.Property(e => e.Cost)
@@ -153,14 +147,6 @@ public partial class SnaplinkDbContext : DbContext
 
             entity.ToTable("Booking");
 
-            entity.HasIndex(e => e.EventId, "IX_Booking_eventId");
-
-            entity.HasIndex(e => e.LocationId, "IX_Booking_locationId");
-
-            entity.HasIndex(e => e.PhotographerId, "IX_Booking_photographerId");
-
-            entity.HasIndex(e => e.UserId, "IX_Booking_userId");
-
             entity.Property(e => e.BookingId).HasColumnName("bookingId");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -169,9 +155,9 @@ public partial class SnaplinkDbContext : DbContext
             entity.Property(e => e.EndDatetime)
                 .HasColumnType("datetime")
                 .HasColumnName("endDatetime");
-            entity.Property(e => e.EventId).HasColumnName("eventId");
             entity.Property(e => e.LocationId).HasColumnName("locationId");
             entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
+            entity.Property(e => e.EventId).HasColumnName("eventId");
             entity.Property(e => e.SpecialRequests).HasColumnName("specialRequests");
             entity.Property(e => e.StartDatetime)
                 .HasColumnType("datetime")
@@ -188,15 +174,6 @@ public partial class SnaplinkDbContext : DbContext
                 .HasColumnName("updatedAt");
             entity.Property(e => e.UserId).HasColumnName("userId");
 
-            entity.HasOne(d => d.Event).WithMany(p => p.Bookings)
-                .HasForeignKey(d => d.EventId)
-                .HasConstraintName("FK_Booking_Event");
-
-            entity.HasOne(d => d.Location).WithMany(p => p.Bookings)
-                .HasForeignKey(d => d.LocationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Booking_Location");
-
             entity.HasOne(d => d.Photographer).WithMany(p => p.Bookings)
                 .HasForeignKey(d => d.PhotographerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -206,6 +183,15 @@ public partial class SnaplinkDbContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Booking_Users");
+
+            entity.HasOne(d => d.Location).WithMany(p => p.Bookings)
+                .HasForeignKey(d => d.LocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Booking_Location");
+
+            entity.HasOne(d => d.Event).WithMany(p => p.Bookings)
+                .HasForeignKey(d => d.EventId)
+                .HasConstraintName("FK_Booking_Event");
         });
 
         modelBuilder.Entity<Complaint>(entity =>
@@ -213,14 +199,6 @@ public partial class SnaplinkDbContext : DbContext
             entity.HasKey(e => e.ComplaintId).HasName("PK__Complain__489708C12E34784F");
 
             entity.ToTable("Complaint");
-
-            entity.HasIndex(e => e.AssignedModeratorId, "IX_Complaint_assignedModeratorId");
-
-            entity.HasIndex(e => e.BookingId, "IX_Complaint_bookingId");
-
-            entity.HasIndex(e => e.ReportedUserId, "IX_Complaint_reportedUserId");
-
-            entity.HasIndex(e => e.ReporterId, "IX_Complaint_reporterId");
 
             entity.Property(e => e.ComplaintId).HasColumnName("complaintId");
             entity.Property(e => e.AssignedModeratorId).HasColumnName("assignedModeratorId");
@@ -263,49 +241,11 @@ public partial class SnaplinkDbContext : DbContext
                 .HasConstraintName("FK_Complaint_Reporter");
         });
 
-        modelBuilder.Entity<Image>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK_Image_Id");
-
-            entity.ToTable("Image");
-
-            entity.HasIndex(e => e.LocationId, "IX_Image_LocationId");
-
-            entity.HasIndex(e => e.PhotographerEventId, "IX_Image_PhotographerEventId");
-
-            entity.HasIndex(e => e.PhotographerId, "IX_Image_PhotographerId");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Caption).HasColumnName("caption");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("created_at");
-            entity.Property(e => e.IsPrimary).HasColumnName("is_primary");
-            entity.Property(e => e.Url)
-                .HasMaxLength(255)
-                .HasColumnName("url");
-
-            entity.HasOne(d => d.Location).WithMany(p => p.Images)
-                .HasForeignKey(d => d.LocationId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(d => d.PhotographerEvent).WithMany(p => p.Images)
-                .HasForeignKey(d => d.PhotographerEventId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(d => d.Photographer).WithMany(p => p.Images)
-                .HasForeignKey(d => d.PhotographerId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
         modelBuilder.Entity<Location>(entity =>
         {
             entity.HasKey(e => e.LocationId).HasName("PK__Location__30646B6EDF76987D");
 
             entity.ToTable("Location");
-
-            entity.HasIndex(e => e.LocationOwnerId, "IX_Location_locationOwnerId");
 
             entity.Property(e => e.LocationId).HasColumnName("locationId");
             entity.Property(e => e.Address).HasColumnName("address");
@@ -381,8 +321,6 @@ public partial class SnaplinkDbContext : DbContext
 
             entity.ToTable("LocationOwner");
 
-            entity.HasIndex(e => e.UserId, "IX_LocationOwner_userId");
-
             entity.Property(e => e.LocationOwnerId).HasColumnName("locationOwnerId");
             entity.Property(e => e.BusinessAddress).HasColumnName("businessAddress");
             entity.Property(e => e.BusinessName)
@@ -407,10 +345,6 @@ public partial class SnaplinkDbContext : DbContext
             entity.HasKey(e => e.MessageId).HasName("PK__Messages__4808B993F0C0786B");
 
             entity.ToTable("Messagess");
-
-            entity.HasIndex(e => e.RecipientId, "IX_Messagess_recipientId");
-
-            entity.HasIndex(e => e.SenderId, "IX_Messagess_senderId");
 
             entity.Property(e => e.MessageId).HasColumnName("messageId");
             entity.Property(e => e.AttachmentUrl)
@@ -444,8 +378,6 @@ public partial class SnaplinkDbContext : DbContext
 
             entity.ToTable("Moderator");
 
-            entity.HasIndex(e => e.UserId, "IX_Moderator_userId");
-
             entity.Property(e => e.ModeratorId).HasColumnName("moderatorId");
             entity.Property(e => e.AreasOfFocus).HasColumnName("areasOfFocus");
             entity.Property(e => e.UserId).HasColumnName("userId");
@@ -459,8 +391,6 @@ public partial class SnaplinkDbContext : DbContext
         modelBuilder.Entity<Notification>(entity =>
         {
             entity.HasKey(e => e.MotificationId).HasName("PK__Notifica__9F9C8614B3C7E2AF");
-
-            entity.HasIndex(e => e.UserId, "IX_Notifications_userId");
 
             entity.Property(e => e.MotificationId).HasColumnName("motificationId");
             entity.Property(e => e.Content).HasColumnName("content");
@@ -492,21 +422,20 @@ public partial class SnaplinkDbContext : DbContext
 
             entity.ToTable("Payment");
 
-            entity.HasIndex(e => e.BookingId, "IX_Payment_bookingId").IsUnique();
-
-            entity.HasIndex(e => e.CustomerId, "IX_Payment_customerId");
-
             entity.Property(e => e.PaymentId).HasColumnName("paymentId");
+            entity.Property(e => e.CustomerId).HasColumnName("customerId");
             entity.Property(e => e.BookingId).HasColumnName("bookingId");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
+            entity.Property(e => e.TotalAmount)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("totalAmount");
             entity.Property(e => e.Currency)
                 .HasMaxLength(3)
                 .HasDefaultValue("VND")
                 .HasColumnName("currency");
-            entity.Property(e => e.CustomerId).HasColumnName("customerId");
+            entity.Property(e => e.Status)
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .HasColumnName("status");
             entity.Property(e => e.ExternalTransactionId)
                 .HasMaxLength(255)
                 .HasColumnName("externalTransactionId");
@@ -515,26 +444,24 @@ public partial class SnaplinkDbContext : DbContext
                 .HasDefaultValue("PayOS")
                 .HasColumnName("method");
             entity.Property(e => e.Note).HasColumnName("note");
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .HasColumnName("status");
-            entity.Property(e => e.TotalAmount)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("totalAmount");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("updatedAt");
 
+            entity.HasOne(d => d.Customer).WithMany()
+                .HasForeignKey(d => d.CustomerId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Payment_Customer");
+
             entity.HasOne(d => d.Booking).WithOne(p => p.Payment)
                 .HasForeignKey<Payment>(d => d.BookingId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Payment_Booking");
-
-            entity.HasOne(d => d.Customer).WithMany(p => p.Payments)
-                .HasForeignKey(d => d.CustomerId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Payment_Customer");
         });
 
         modelBuilder.Entity<Photographer>(entity =>
@@ -543,10 +470,7 @@ public partial class SnaplinkDbContext : DbContext
 
             entity.ToTable("Photographer");
 
-            entity.HasIndex(e => e.UserId, "IX_Photographer_userId");
-
             entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
-            entity.Property(e => e.Address).HasMaxLength(500);
             entity.Property(e => e.AvailabilityStatus)
                 .HasMaxLength(30)
                 .HasColumnName("availabilityStatus");
@@ -554,17 +478,17 @@ public partial class SnaplinkDbContext : DbContext
             entity.Property(e => e.FeaturedStatus)
                 .HasDefaultValue(false)
                 .HasColumnName("featuredStatus");
-            entity.Property(e => e.GoogleMapsAddress).HasMaxLength(500);
             entity.Property(e => e.HourlyRate)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("hourlyRate");
             entity.Property(e => e.Rating)
                 .HasColumnType("decimal(3, 2)")
                 .HasColumnName("rating");
-            entity.Property(e => e.RatingCount).HasColumnName("ratingCount");
             entity.Property(e => e.RatingSum)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("ratingSum");
+            entity.Property(e => e.RatingCount)
+                .HasColumnName("ratingCount");
             entity.Property(e => e.UserId).HasColumnName("userId");
             entity.Property(e => e.VerificationStatus)
                 .HasMaxLength(30)
@@ -577,89 +501,11 @@ public partial class SnaplinkDbContext : DbContext
                 .HasConstraintName("FK_Photographer_Users");
         });
 
-        modelBuilder.Entity<PhotographerEvent>(entity =>
-        {
-            entity.HasKey(e => e.EventId).HasName("PK__PhotographerEvent__EventId");
-
-            entity.ToTable("PhotographerEvent");
-
-            entity.HasIndex(e => e.PhotographerId, "IX_PhotographerEvent_photographerId");
-
-            entity.Property(e => e.EventId).HasColumnName("eventId");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.CurrentBookings).HasColumnName("currentBookings");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.DiscountPercentage)
-                .HasColumnType("decimal(5, 2)")
-                .HasColumnName("discountPercentage");
-            entity.Property(e => e.DiscountedPrice)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("discountedPrice");
-            entity.Property(e => e.EndDate)
-                .HasColumnType("datetime")
-                .HasColumnName("endDate");
-            entity.Property(e => e.MaxBookings).HasColumnName("maxBookings");
-            entity.Property(e => e.OriginalPrice)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("originalPrice");
-            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
-            entity.Property(e => e.StartDate)
-                .HasColumnType("datetime")
-                .HasColumnName("startDate");
-            entity.Property(e => e.Status)
-                .HasMaxLength(30)
-                .HasColumnName("status");
-            entity.Property(e => e.Title)
-                .HasMaxLength(255)
-                .HasColumnName("title");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-
-            entity.HasOne(d => d.Photographer).WithMany(p => p.PhotographerEvents)
-                .HasForeignKey(d => d.PhotographerId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PhotographerEvent_Photographer");
-        });
-
-        modelBuilder.Entity<PhotographerEventLocation>(entity =>
-        {
-            entity.HasKey(e => e.EventLocationId).HasName("PK__PhotographerEventLocation__EventLocationId");
-
-            entity.ToTable("PhotographerEventLocation");
-
-            entity.HasIndex(e => e.EventId, "IX_PhotographerEventLocation_eventId");
-
-            entity.HasIndex(e => e.LocationId, "IX_PhotographerEventLocation_locationId");
-
-            entity.Property(e => e.EventLocationId).HasColumnName("eventLocationId");
-            entity.Property(e => e.EventId).HasColumnName("eventId");
-            entity.Property(e => e.LocationId).HasColumnName("locationId");
-
-            entity.HasOne(d => d.Event).WithMany(p => p.PhotographerEventLocations)
-                .HasForeignKey(d => d.EventId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PhotographerEventLocation_Event");
-
-            entity.HasOne(d => d.Location).WithMany(p => p.PhotographerEventLocations)
-                .HasForeignKey(d => d.LocationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PhotographerEventLocation_Location");
-        });
-
         modelBuilder.Entity<PhotographerStyle>(entity =>
         {
             entity.HasKey(e => e.PhotographerStyleId).HasName("PK__Photogra__D64320D6694031E8");
 
             entity.ToTable("PhotographerStyle");
-
-            entity.HasIndex(e => e.PhotographerId, "IX_PhotographerStyle_photographerId");
-
-            entity.HasIndex(e => e.StyleId, "IX_PhotographerStyle_styleId");
 
             entity.Property(e => e.PhotographerStyleId).HasColumnName("photographerStyleId");
             entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
@@ -674,6 +520,29 @@ public partial class SnaplinkDbContext : DbContext
                 .HasForeignKey(d => d.StyleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PhotographerStyle_Style");
+        });
+
+        modelBuilder.Entity<Wallet>(entity =>
+        {
+            entity.HasKey(e => e.WalletId).HasName("PK__Wallet__A5C5D5C5D5C5D5C5");
+
+            entity.ToTable("Wallet");
+
+            entity.Property(e => e.WalletId).HasColumnName("walletId");
+            entity.Property(e => e.Balance)
+                .HasDefaultValue(0m)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("balance");
+            entity.Property(e => e.UserId).HasColumnName("userId");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updatedAt");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Wallets)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Wallet_User");
         });
 
         modelBuilder.Entity<PremiumPackage>(entity =>
@@ -702,12 +571,6 @@ public partial class SnaplinkDbContext : DbContext
             entity.HasKey(e => e.PremiumSubscriptionId).HasName("PK__PremiumS__CE9A698AE4183E7A");
 
             entity.ToTable("PremiumSubscription");
-
-            entity.HasIndex(e => e.PackageId, "IX_PremiumSubscription_packageId");
-
-            entity.HasIndex(e => e.PaymentId, "IX_PremiumSubscription_paymentId");
-
-            entity.HasIndex(e => e.UserId, "IX_PremiumSubscription_userId");
 
             entity.Property(e => e.PremiumSubscriptionId).HasColumnName("premiumSubscriptionId");
             entity.Property(e => e.EndDate)
@@ -743,8 +606,6 @@ public partial class SnaplinkDbContext : DbContext
             entity.HasKey(e => e.ReviewId).HasName("PK__Review__2ECD6E04FCF9D780");
 
             entity.ToTable("Review");
-
-            entity.HasIndex(e => e.BookingId, "IX_Review_bookingId");
 
             entity.Property(e => e.ReviewId).HasColumnName("reviewId");
             entity.Property(e => e.BookingId).HasColumnName("bookingId");
@@ -802,48 +663,44 @@ public partial class SnaplinkDbContext : DbContext
 
             entity.ToTable("Transaction");
 
-            entity.HasIndex(e => e.FromUserId, "IX_Transaction_fromUserId");
-
-            entity.HasIndex(e => e.ReferencePaymentId, "IX_Transaction_referencePaymentId");
-
-            entity.HasIndex(e => e.ToUserId, "IX_Transaction_toUserId");
-
             entity.Property(e => e.TransactionId).HasColumnName("transactionId");
+            entity.Property(e => e.ReferencePaymentId).HasColumnName("referencePaymentId");
+            entity.Property(e => e.FromUserId).HasColumnName("fromUserId");
+            entity.Property(e => e.ToUserId).HasColumnName("toUserId");
             entity.Property(e => e.Amount)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("amount");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
             entity.Property(e => e.Currency)
                 .HasMaxLength(3)
                 .HasDefaultValue("VND")
                 .HasColumnName("currency");
-            entity.Property(e => e.FromUserId).HasColumnName("fromUserId");
-            entity.Property(e => e.Note).HasColumnName("note");
-            entity.Property(e => e.ReferencePaymentId).HasColumnName("referencePaymentId");
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .HasColumnName("status");
-            entity.Property(e => e.ToUserId).HasColumnName("toUserId");
             entity.Property(e => e.Type)
+                .HasConversion<string>()
                 .HasMaxLength(20)
                 .HasColumnName("type");
+            entity.Property(e => e.Status)
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .HasColumnName("status");
+            entity.Property(e => e.Note).HasColumnName("note");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("updatedAt");
 
-            entity.HasOne(d => d.FromUser).WithMany(p => p.TransactionFromUsers)
-                .HasForeignKey(d => d.FromUserId)
-                .HasConstraintName("FK_Transaction_FromUser");
-
             entity.HasOne(d => d.ReferencePayment).WithMany(p => p.Transactions)
                 .HasForeignKey(d => d.ReferencePaymentId)
                 .HasConstraintName("FK_Transaction_Payment");
 
-            entity.HasOne(d => d.ToUser).WithMany(p => p.TransactionToUsers)
+            entity.HasOne(d => d.FromUser).WithMany(p => p.FromTransactions)
+                .HasForeignKey(d => d.FromUserId)
+                .HasConstraintName("FK_Transaction_FromUser");
+
+            entity.HasOne(d => d.ToUser).WithMany(p => p.ToTransactions)
                 .HasForeignKey(d => d.ToUserId)
                 .HasConstraintName("FK_Transaction_ToUser");
         });
@@ -866,7 +723,6 @@ public partial class SnaplinkDbContext : DbContext
             entity.Property(e => e.FullName)
                 .HasMaxLength(50)
                 .HasColumnName("fullName");
-            entity.Property(e => e.IsVerified).HasColumnName("isVerified");
             entity.Property(e => e.PasswordHash)
                 .HasMaxLength(100)
                 .HasColumnName("passwordHash");
@@ -886,9 +742,6 @@ public partial class SnaplinkDbContext : DbContext
             entity.Property(e => e.UserName)
                 .HasMaxLength(30)
                 .HasColumnName("userName");
-            entity.Property(e => e.VerificationCode)
-                .HasMaxLength(50)
-                .HasColumnName("verificationCode");
         });
 
         modelBuilder.Entity<UserRole>(entity =>
@@ -896,10 +749,6 @@ public partial class SnaplinkDbContext : DbContext
             entity.HasKey(e => e.UserRoleId).HasName("PK__UserRole__CD3149CC42F7DFB1");
 
             entity.ToTable("UserRole");
-
-            entity.HasIndex(e => e.RoleId, "IX_UserRole_roleId");
-
-            entity.HasIndex(e => e.UserId, "IX_UserRole_userId");
 
             entity.Property(e => e.UserRoleId).HasColumnName("userRoleId");
             entity.Property(e => e.AssignedAt)
@@ -924,10 +773,6 @@ public partial class SnaplinkDbContext : DbContext
 
             entity.ToTable("UserStyle");
 
-            entity.HasIndex(e => e.StyleId, "IX_UserStyle_styleId");
-
-            entity.HasIndex(e => e.UserId, "IX_UserStyle_userId");
-
             entity.Property(e => e.UserStyleId).HasColumnName("userStyleId");
             entity.Property(e => e.StyleId).HasColumnName("styleId");
             entity.Property(e => e.UserId).HasColumnName("userId");
@@ -943,40 +788,11 @@ public partial class SnaplinkDbContext : DbContext
                 .HasConstraintName("FK_UserStyle_User");
         });
 
-        modelBuilder.Entity<Wallet>(entity =>
-        {
-            entity.HasKey(e => e.WalletId).HasName("PK__Wallet__A5C5D5C5D5C5D5C5");
-
-            entity.ToTable("Wallet");
-
-            entity.HasIndex(e => e.UserId, "IX_Wallet_userId");
-
-            entity.Property(e => e.WalletId).HasColumnName("walletId");
-            entity.Property(e => e.Balance)
-                .HasDefaultValue(0.0m)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("balance");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-            entity.Property(e => e.UserId).HasColumnName("userId");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Wallets)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Wallet_User");
-        });
-
         modelBuilder.Entity<WithdrawalRequest>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Withdraw__3213E83FE86C5098");
 
             entity.ToTable("WithdrawalRequest");
-
-            entity.HasIndex(e => e.PhotographerId, "IX_WithdrawalRequest_PhotographerId");
-
-            entity.HasIndex(e => e.WalletId, "IX_WithdrawalRequest_walletId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.WalletId).HasColumnName("walletId");
@@ -1004,19 +820,79 @@ public partial class SnaplinkDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("requestedAt");
-            entity.Property(e => e.WalletId).HasColumnName("walletId");
 
-            entity.HasOne(d => d.Photographer).WithMany(p => p.WithdrawalRequests).HasForeignKey(d => d.PhotographerId);
             entity.HasOne(d => d.Wallet).WithMany(p => p.WithdrawalRequests)
                 .HasForeignKey(d => d.WalletId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_WithdrawalRequest_Wallet");
         });
 
-            entity.HasOne(d => d.Wallet).WithMany(p => p.WithdrawalRequests)
-                .HasForeignKey(d => d.WalletId)
+        modelBuilder.Entity<PhotographerEvent>(entity =>
+        {
+            entity.HasKey(e => e.EventId).HasName("PK__PhotographerEvent__EventId");
+
+            entity.ToTable("PhotographerEvent");
+
+            entity.Property(e => e.EventId).HasColumnName("eventId");
+            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
+            entity.Property(e => e.Title)
+                .HasMaxLength(255)
+                .HasColumnName("title");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.OriginalPrice)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("originalPrice");
+            entity.Property(e => e.DiscountedPrice)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("discountedPrice");
+            entity.Property(e => e.DiscountPercentage)
+                .HasColumnType("decimal(5, 2)")
+                .HasColumnName("discountPercentage");
+            entity.Property(e => e.StartDate)
+                .HasColumnType("datetime")
+                .HasColumnName("startDate");
+            entity.Property(e => e.EndDate)
+                .HasColumnType("datetime")
+                .HasColumnName("endDate");
+            entity.Property(e => e.MaxBookings).HasColumnName("maxBookings");
+            entity.Property(e => e.CurrentBookings).HasColumnName("currentBookings");
+            entity.Property(e => e.Status)
+                .HasMaxLength(30)
+                .HasColumnName("status");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updatedAt");
+
+            entity.HasOne(d => d.Photographer).WithMany(p => p.PhotographerEvents)
+                .HasForeignKey(d => d.PhotographerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_WithdrawalRequest_Wallet");
+                .HasConstraintName("FK_PhotographerEvent_Photographer");
+        });
+
+        modelBuilder.Entity<PhotographerEventLocation>(entity =>
+        {
+            entity.HasKey(e => e.EventLocationId).HasName("PK__PhotographerEventLocation__EventLocationId");
+
+            entity.ToTable("PhotographerEventLocation");
+
+            entity.Property(e => e.EventLocationId).HasColumnName("eventLocationId");
+            entity.Property(e => e.EventId).HasColumnName("eventId");
+            entity.Property(e => e.LocationId).HasColumnName("locationId");
+
+            entity.HasOne(d => d.Event).WithMany(p => p.PhotographerEventLocations)
+                .HasForeignKey(d => d.EventId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PhotographerEventLocation_Event");
+
+            entity.HasOne(d => d.Location).WithMany(p => p.PhotographerEventLocations)
+                .HasForeignKey(d => d.LocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PhotographerEventLocation_Location");
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -31,15 +31,15 @@ public partial class Booking
 
     public virtual ICollection<Complaint> Complaints { get; set; } = new List<Complaint>();
 
-    public virtual PhotographerEvent? Event { get; set; }
-
-    public virtual Location Location { get; set; } = null!;
-
-    public virtual Payment? Payment { get; set; }
-
     public virtual Photographer Photographer { get; set; } = null!;
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
     public virtual User User { get; set; } = null!;
+
+    public virtual Location? Location { get; set; }
+
+    public virtual Payment? Payment { get; set; }
+
+    public virtual PhotographerEvent? Event { get; set; }
 }

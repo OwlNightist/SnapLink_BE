@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace SnapLink_Repository.Entity;
@@ -11,9 +11,9 @@ public partial class UserStyle
 
     public int StyleId { get; set; }
 
-    public DateTime CreatedAt { get; set; }
-
-    public virtual Style Style { get; set; } = null!;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 
     public virtual User User { get; set; } = null!;
-}
+
+    public virtual Style Style { get; set; } = null!;
+} 

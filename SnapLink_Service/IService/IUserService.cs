@@ -18,7 +18,6 @@ namespace SnapLink_Service.IService
         Task<List<UserDto>> GetUsersByRoleNameAsync(string roleName);
         Task<UserDto?> GetUserByEmailAsync(string email);
         Task<bool> AssignRolesToUserAsync(AssignRolesDto request);
-        Task<bool> VerifyEmailAsync(string email, string code);
 
     }
 }
