@@ -7,7 +7,7 @@ public partial class WithdrawalRequest
 {
     public int Id { get; set; }
 
-    public int PhotographerId { get; set; }
+    public int WalletId { get; set; }
 
     public decimal Amount { get; set; }
 
@@ -27,5 +27,9 @@ public partial class WithdrawalRequest
 
     public string? RejectionReason { get; set; }
 
-    public virtual Photographer Photographer { get; set; } = null!;
+    public int? PhotographerId { get; set; }
+
+    public virtual Photographer? Photographer { get; set; }
+
+    public virtual Wallet Wallet { get; set; } = null!;
 }
