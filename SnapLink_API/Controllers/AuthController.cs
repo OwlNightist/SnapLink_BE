@@ -30,6 +30,8 @@ namespace SnapLink_API.Controllers
                 u.Email == dto.Email && u.PasswordHash == dto.Password);
 
             if (user == null) return Unauthorized("Invalid credentials");
+            if (user.IsVerified != true) 
+                return Unauthorized("Account not verified. Please check your email.");
 
             var roles = _context.UserRoles
                 .Where(ur => ur.UserId == user.UserId)

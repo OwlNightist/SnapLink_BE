@@ -1,6 +1,9 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 
-namespace SnapLink_Repository.Entity
+namespace SnapLink_Repository.Entity;
+
+public partial class Image
 {
     public class Image
     {

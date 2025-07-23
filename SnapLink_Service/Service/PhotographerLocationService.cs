@@ -2,7 +2,6 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SnapLink_Model.DTO.Response;
 using SnapLink_Repository.DBContext;
-using SnapLink_Repository.Entity;
 using SnapLink_Service.IService;
 using System;
 using System.Collections.Generic;

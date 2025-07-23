@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SnapLink_Model.DTO.Response;
 using SnapLink_Repository.DBContext;
-using SnapLink_Repository.Entity;
 using SnapLink_Service.IService;
 
 namespace SnapLink_Service.Service

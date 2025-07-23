@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace SnapLink_Repository.Entity;
 
@@ -28,19 +27,19 @@ public partial class Photographer
 
     public string? VerificationStatus { get; set; }
 
-    [MaxLength(500)]
     public string? Address { get; set; }
 
-    [MaxLength(500)]
     public string? GoogleMapsAddress { get; set; }
 
-    [Range(-90, 90)]
     public double? Latitude { get; set; }
 
-    [Range(-180, 180)]
     public double? Longitude { get; set; }
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+
+    public virtual ICollection<Image> Images { get; set; } = new List<Image>();
+
+    public virtual ICollection<PhotographerEvent> PhotographerEvents { get; set; } = new List<PhotographerEvent>();
 
     public virtual ICollection<PhotographerStyle> PhotographerStyles { get; set; } = new List<PhotographerStyle>();
 
