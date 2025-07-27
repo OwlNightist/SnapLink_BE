@@ -42,7 +42,8 @@ builder.Services.AddAuthentication(options =>
 
 // Add services to the container.
 builder.Services.AddDbContext<SnaplinkDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), 
+        b => b.MigrationsAssembly("SnapLink_API")));
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
