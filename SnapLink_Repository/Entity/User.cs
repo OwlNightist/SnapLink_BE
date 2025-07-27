@@ -26,6 +26,8 @@ public partial class User
     public DateTime? UpdateAt { get; set; }
 
     public string? Status { get; set; }
+    public string? VerificationCode { get; set; }
+    public bool IsVerified { get; set; } = false;
 
     public virtual ICollection<Administrator> Administrators { get; set; } = new List<Administrator>();
 

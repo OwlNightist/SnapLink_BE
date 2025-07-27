@@ -32,7 +32,7 @@ namespace SnapLink_Repository.Data
                 var users = new[]
                 {
                     new User { UserName = "alice", Email = "alice@example.com", PasswordHash = "hash1", PhoneNumber = "1234567890", FullName = "Alice Smith", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "bob", Email = "bob@example.com", PasswordHash = "hash2", PhoneNumber = "1234567891", FullName = "linhka", ProfileImage = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/linggka109_2864048423449716041.png", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "bob", Email = "bob@example.com", PasswordHash = "hash2", PhoneNumber = "1234567891", FullName = "linhka", ProfileImage = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2933653585994336284's2025-7-27-20.14.485%20story.jpg", Status = "Active", CreateAt = DateTime.Now },
                     new User { UserName = "carol", Email = "carol@example.com", PasswordHash = "hash3", PhoneNumber = "1234567892", FullName = "Carol White", Status = "Active", CreateAt = DateTime.Now },
                     new User { UserName = "dave", Email = "dave@example.com", PasswordHash = "hash4", PhoneNumber = "1234567893", FullName = "Dave Brown", Status = "Active", CreateAt = DateTime.Now },
                     new User { UserName = "eve", Email = "eve@example.com", PasswordHash = "hash5", PhoneNumber = "1234567894", FullName = "Eve Black", Status = "Active", CreateAt = DateTime.Now },
