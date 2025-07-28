@@ -38,6 +38,8 @@ public partial class Location
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
 
     public virtual ICollection<Advertisement> Advertisements { get; set; } = new List<Advertisement>();
 
