@@ -42,6 +42,13 @@ public class PayOSWebhookData
     public string paymentLinkId { get; set; }
     public string code { get; set; }
     public string desc { get; set; }
+    // Bổ sung các field còn thiếu
+    public string counterAccountBankId { get; set; }
+    public string counterAccountBankName { get; set; }
+    public string counterAccountName { get; set; }
+    public string counterAccountNumber { get; set; }
+    public string virtualAccountName { get; set; }
+    public string virtualAccountNumber { get; set; }
     // Thêm các trường khác nếu cần
 }
 
