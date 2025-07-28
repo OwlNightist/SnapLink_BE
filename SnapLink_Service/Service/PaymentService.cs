@@ -351,7 +351,7 @@ public class PaymentService : IPaymentService
             
             // Update payment status to cancelled
             var payment = await _context.Payments
-                    .FirstOrDefaultAsync(p => p.ExternalTransactionId == paymentId.ToString());
+                    .FirstOrDefaultAsync(p => p.PaymentId == paymentId);
             
             if (payment != null)
             {
