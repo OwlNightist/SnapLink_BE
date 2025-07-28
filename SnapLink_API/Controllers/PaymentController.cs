@@ -131,52 +131,37 @@ public class PaymentController : ControllerBase
     [HttpPost("webhook")]
     public async Task<IActionResult> PayOSWebhook([FromBody] PayOSWebhookRequest payload, [FromServices] IPaymentService paymentService)
     {
-        try
+        // Lấy checksumKey từ cấu hình
+        var configuration = HttpContext.RequestServices.GetService(typeof(IConfiguration)) as IConfiguration;
+        var checksumKey = configuration["PayOS:ChecksumKey"];
+        if (string.IsNullOrEmpty(checksumKey))
+            return StatusCode(500, new { message = "Missing PayOS checksum key" });
+
+        // Log để debug
+        Console.WriteLine($"Webhook received - orderCode: {payload.data?.orderCode}");
+        Console.WriteLine($"Full payload: {System.Text.Json.JsonSerializer.Serialize(payload)}");
+        Console.WriteLine($"ChecksumKey: {checksumKey}");
+        Console.WriteLine($"Received signature: {payload.signature}");
+
+        // Xác thực signature
+        var signatureString = PayOSWebhookHelper.BuildSignatureString(payload.data);
+        var computedSignature = PayOSWebhookHelper.ComputeHmacSha256(signatureString, checksumKey);
+        
+        Console.WriteLine($"Signature string: {signatureString}");
+        Console.WriteLine($"Computed signature: {computedSignature}");
+        Console.WriteLine($"Signature match: {string.Equals(computedSignature, payload.signature, StringComparison.OrdinalIgnoreCase)}");
+        
+        if (!string.Equals(computedSignature, payload.signature, StringComparison.OrdinalIgnoreCase))
         {
-            Console.WriteLine("🔍 WEBHOOK METHOD CALLED!");
-            
-            // Lấy checksumKey từ cấu hình
-            var configuration = HttpContext.RequestServices.GetService(typeof(IConfiguration)) as IConfiguration;
-            var checksumKey = configuration["PayOS:ChecksumKey"];
-            if (string.IsNullOrEmpty(checksumKey))
-            {
-                Console.WriteLine("❌ Missing PayOS checksum key");
-                return StatusCode(500, new { message = "Missing PayOS checksum key" });
-            }
-
-            // Log chi tiết để debug
-            Console.WriteLine("=== WEBHOOK DEBUG START ===");
-            Console.WriteLine($"Webhook received - orderCode: {payload.data?.orderCode}");
-            Console.WriteLine($"ChecksumKey: {checksumKey}");
-            Console.WriteLine($"Received signature: {payload.signature}");
-            Console.WriteLine($"Full payload: {System.Text.Json.JsonSerializer.Serialize(payload)}");
-
-            // Xác thực signature
-            var signatureString = PayOSWebhookHelper.BuildSignatureString(payload.data);
-            var computedSignature = PayOSWebhookHelper.ComputeHmacSha256(signatureString, checksumKey);
-            
-            Console.WriteLine($"Signature string: {signatureString}");
-            Console.WriteLine($"Computed signature: {computedSignature}");
-            Console.WriteLine($"Received signature: {payload.signature}");
-            Console.WriteLine($"Signature match: {string.Equals(computedSignature, payload.signature, StringComparison.OrdinalIgnoreCase)}");
-            Console.WriteLine("=== WEBHOOK DEBUG END ===");
-            
-            if (!string.Equals(computedSignature, payload.signature, StringComparison.OrdinalIgnoreCase))
-            {
-                Console.WriteLine("❌ Signature validation failed!");
-                return Unauthorized(new { message = "Invalid signature" });
-            }
-
-            Console.WriteLine("✅ Signature validation successful!");
-            // Gọi service để xử lý cập nhật trạng thái payment/booking
-            await paymentService.HandlePayOSWebhookAsync(payload);
-            return Ok(new { message = "Webhook processed" });
+            Console.WriteLine("Signature validation failed!");
+            Console.WriteLine($"Expected: {payload.signature}");
+            Console.WriteLine($"Computed: {computedSignature}");
+            return Unauthorized(new { message = "Invalid signature" });
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ WEBHOOK ERROR: {ex.Message}");
-            Console.WriteLine($"❌ WEBHOOK STACK TRACE: {ex.StackTrace}");
-            return StatusCode(500, new { message = $"Webhook error: {ex.Message}" });
-        }
+
+        Console.WriteLine("Signature validation successful!");
+        // Gọi service để xử lý cập nhật trạng thái payment/booking
+        await paymentService.HandlePayOSWebhookAsync(payload);
+        return Ok(new { message = "Webhook processed" });
     }
 } 
