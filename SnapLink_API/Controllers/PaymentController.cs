@@ -156,36 +156,6 @@ public class PaymentController : ControllerBase
         _logger.LogInformation($"Computed signature: {computedSignature}");
         _logger.LogInformation($"Received signature: {payload.signature}");
         
-        // Test với payload mẫu từ tài liệu để kiểm tra logic
-        var testData = new PayOSWebhookData
-        {
-            orderCode = 123,
-            amount = 3000,
-            description = "VQRIO123",
-            accountNumber = "12345678",
-            reference = "TF230204212323",
-            transactionDateTime = "2023-02-04 18:25:00",
-            currency = "VND",
-            paymentLinkId = "124c33293c43417ab7879e14c8d9eb18",
-            code = "00",
-            desc = "Thành công",
-            counterAccountBankId = "",
-            counterAccountBankName = "",
-            counterAccountName = "",
-            counterAccountNumber = "",
-            virtualAccountName = "",
-            virtualAccountNumber = ""
-        };
-        
-        var testSignatureString = PayOSWebhookHelper.BuildSignatureString(testData);
-        var testComputedSignature = PayOSWebhookHelper.ComputeHmacSha256(testSignatureString, checksumKey);
-        var expectedSignature = "8d8640d802576397a1ce45ebda7f835055768ac7ad2e0bfb77f9b8f12cca4c7f";
-        
-        _logger.LogInformation($"Test signature string: {testSignatureString}");
-        _logger.LogInformation($"Test computed signature: {testComputedSignature}");
-        _logger.LogInformation($"Expected signature: {expectedSignature}");
-        _logger.LogInformation($"Test signature match: {testComputedSignature == expectedSignature}");
-        
         if (!string.Equals(computedSignature, payload.signature, StringComparison.OrdinalIgnoreCase))
         {
             _logger.LogError("Signature verification failed");
