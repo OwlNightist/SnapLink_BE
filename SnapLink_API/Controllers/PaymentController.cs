@@ -137,14 +137,26 @@ public class PaymentController : ControllerBase
         if (string.IsNullOrEmpty(checksumKey))
             return StatusCode(500, new { message = "Missing PayOS checksum key" });
 
+        // Log để debug
+        Console.WriteLine($"Webhook received - orderCode: {payload.data?.orderCode}");
+        Console.WriteLine($"ChecksumKey: {checksumKey}");
+        Console.WriteLine($"Received signature: {payload.signature}");
+
         // Xác thực signature
         var signatureString = PayOSWebhookHelper.BuildSignatureString(payload.data);
         var computedSignature = PayOSWebhookHelper.ComputeHmacSha256(signatureString, checksumKey);
+        
+        Console.WriteLine($"Signature string: {signatureString}");
+        Console.WriteLine($"Computed signature: {computedSignature}");
+        Console.WriteLine($"Signature match: {string.Equals(computedSignature, payload.signature, StringComparison.OrdinalIgnoreCase)}");
+        
         if (!string.Equals(computedSignature, payload.signature, StringComparison.OrdinalIgnoreCase))
         {
+            Console.WriteLine("Signature validation failed!");
             return Unauthorized(new { message = "Invalid signature" });
         }
 
+        Console.WriteLine("Signature validation successful!");
         // Gọi service để xử lý cập nhật trạng thái payment/booking
         await paymentService.HandlePayOSWebhookAsync(payload);
         return Ok(new { message = "Webhook processed" });
