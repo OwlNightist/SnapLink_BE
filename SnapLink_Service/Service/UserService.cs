@@ -83,11 +83,30 @@ namespace SnapLink_Service.Service
 
             return "User deleted successfully.";
         }
+        public async Task<string> HardDeleteUserAsync(int userId)
+        {
+            var user = await _repo.GetUserByIdAsync(userId);
+            if (user == null)
+                return "User not found.";
+
+            await _repo.HardDeleteUserAsync(user);
+            await _repo.SaveChangesAsync();
+            return "User permanently deleted.";
+        }
         public async Task<List<User>> GetAllUsersAsync()
         {
             return await _repo.GetAllUsersAsync();
         }
+        public async Task<string> DeleteUserAsyncs(int userId)
+        {
+            var user = await _repo.GetUserByIdAsync(userId);
+            if (user == null || user.Status == "Deleted")
+                return "User not found or already deleted.";
 
+            await _repo.DeleteUserAsync(user); // thực hiện soft-delete
+            await _repo.SaveChangesAsync();
+            return "User deleted successfully.";
+        }
         public async Task<User?> GetUserByIdAsync(int userId)
         {
             return await _repo.GetUserByIdAsync(userId);

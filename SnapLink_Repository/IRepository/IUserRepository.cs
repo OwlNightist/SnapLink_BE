@@ -15,6 +15,7 @@ namespace SnapLink_Repository.IRepository
         Task<User?> GetUserByIdAsync(int userId);
         Task UpdateUserAsync(User user);
         Task DeleteUserAsync(User user);
+        Task HardDeleteUserAsync(User user);
         Task<List<User>> GetAllUsersAsync();
         Task<List<User>> GetUsersByRoleNameAsync(string roleName);
         Task<User?> GetByEmailAsync(string email);

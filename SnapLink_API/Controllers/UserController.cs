@@ -62,6 +62,15 @@ namespace SnapLink_API.Controllers
             var result = await _userService.DeleteUserAsync(userId);
             return Ok(result);
         }
+
+        [HttpDelete("hard-delete/{userId}")]
+        public async Task<IActionResult> HardDeleteAccount(int userId)
+        {
+            var result = await _userService.HardDeleteUserAsync(userId);
+            if (result.Contains("deleted"))
+                return Ok(result);
+            return NotFound(result);
+        }
         [HttpGet("all")]
         public async Task<IActionResult> GetAllUsers()
         {
