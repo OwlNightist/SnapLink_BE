@@ -401,6 +401,9 @@ public class PaymentService : IPaymentService
             Console.WriteLine("Webhook missing orderCode");
             return;
         }
+        
+        Console.WriteLine($"Processing webhook for orderCode: {orderCode}");
+        
         // Tìm payment theo ExternalTransactionId (orderCode)
         var payment = await _context.Payments.FirstOrDefaultAsync(p => p.ExternalTransactionId == orderCode.ToString());
         if (payment == null)
@@ -408,39 +411,57 @@ public class PaymentService : IPaymentService
             Console.WriteLine($"No payment found for orderCode {orderCode}");
             return;
         }
-        // Nếu đã thành công thì cập nhật trạng thái
-        if (payload.data.code == "00" && payload.data.desc?.ToLower().Contains("thành công") == true)
+        
+        Console.WriteLine($"Found payment {payment.PaymentId} with status: {payment.Status}");
+        Console.WriteLine($"Webhook data - code: {payload.data.code}, desc: {payload.data.desc}");
+        
+        // Nếu code == "00" thì coi như thành công (không cần kiểm tra desc)
+        if (payload.data.code == "00")
         {
             if (payment.Status != PaymentStatus.Success)
             {
                 payment.Status = PaymentStatus.Success;
                 payment.UpdatedAt = DateTime.UtcNow;
+                
                 // Cập nhật booking nếu cần
                 var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == payment.BookingId);
                 if (booking != null && booking.Status == "Pending")
                 {
                     booking.Status = "Confirmed";
                     booking.UpdatedAt = DateTime.UtcNow;
+                    Console.WriteLine($"Updated booking {booking.BookingId} to Confirmed");
                 }
+                
                 await _unitOfWork.SaveChangesAsync();
                 Console.WriteLine($"Payment {payment.PaymentId} marked as Success by webhook");
             }
+            else
+            {
+                Console.WriteLine($"Payment {payment.PaymentId} already has Success status");
+            }
         }
-        // Nếu thất bại hoặc huỷ thì cập nhật trạng thái
-        else if (payload.data.code != "00")
+        // Nếu code khác "00" thì coi như thất bại/hủy
+        else
         {
             if (payment.Status != PaymentStatus.Cancelled && payment.Status != PaymentStatus.Failed)
             {
                 payment.Status = PaymentStatus.Failed;
                 payment.UpdatedAt = DateTime.UtcNow;
+                
                 var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == payment.BookingId);
                 if (booking != null && booking.Status == "Pending")
                 {
                     booking.Status = "Cancelled";
                     booking.UpdatedAt = DateTime.UtcNow;
+                    Console.WriteLine($"Updated booking {booking.BookingId} to Cancelled");
                 }
+                
                 await _unitOfWork.SaveChangesAsync();
                 Console.WriteLine($"Payment {payment.PaymentId} marked as Failed/Cancelled by webhook");
+            }
+            else
+            {
+                Console.WriteLine($"Payment {payment.PaymentId} already has Failed/Cancelled status");
             }
         }
     }
