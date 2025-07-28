@@ -100,5 +100,12 @@ namespace SnapLink_API.Controllers
                 return Ok("Roles assigned successfully.");
             return BadRequest("Failed to assign roles.");
         }
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailDto dto)
+        {
+            var success = await _userService.VerifyEmailAsync(dto.Email, dto.Code);
+            if (!success) return BadRequest("Invalid or expired verification code.");
+            return Ok("Email verified successfully.");
+        }
     }
 }
