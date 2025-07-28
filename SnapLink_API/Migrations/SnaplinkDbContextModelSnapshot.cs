@@ -359,12 +359,18 @@ namespace SnapLink_API.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("indoor");
 
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("float");
+
                     b.Property<int>("LocationOwnerId")
                         .HasColumnType("int")
                         .HasColumnName("locationOwnerId");
 
                     b.Property<string>("LocationType")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("float");
 
                     b.Property<string>("Name")
                         .HasMaxLength(255)
