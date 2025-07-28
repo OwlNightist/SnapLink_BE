@@ -4,6 +4,7 @@ using SnapLink_Model.DTO.Request;
 using SnapLink_Model.DTO.Response;
 using SnapLink_Service.IService;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace SnapLink_API.Controllers;
 
@@ -12,10 +13,12 @@ namespace SnapLink_API.Controllers;
 public class PaymentController : ControllerBase
 {
     private readonly IPaymentService _paymentService;
+    private readonly ILogger<PaymentController> _logger;
 
-    public PaymentController(IPaymentService paymentService)
+    public PaymentController(IPaymentService paymentService, ILogger<PaymentController> logger)
     {
         _paymentService = paymentService;
+        _logger = logger;
     }
 // need userid for now , add to jwt token later
     [HttpPost("create")]
@@ -36,7 +39,7 @@ public class PaymentController : ControllerBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error in CreatePaymentLink: {ex.Message}");
+            _logger.LogError(ex, "Error in CreatePaymentLink");
             return StatusCode(500, new PaymentResponse
             {
                 Error = -1,
@@ -51,10 +54,10 @@ public class PaymentController : ControllerBase
     {
         try
         {
-            Console.WriteLine($"Controller: Getting payment status for ID: {paymentId}");
+            _logger.LogInformation($"Controller: Getting payment status for ID: {paymentId}");
             var result = await _paymentService.GetPaymentStatusAsync(paymentId);
             
-            Console.WriteLine($"Controller: Service returned Error={result.Error}, Message={result.Message}");
+            _logger.LogInformation($"Controller: Service returned Error={result.Error}, Message={result.Message}");
             
             if (result.Error == 0)
             {
@@ -67,8 +70,8 @@ public class PaymentController : ControllerBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error in GetPaymentStatus: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            _logger.LogError(ex, $"Error in GetPaymentStatus for paymentId: {paymentId}");
+            _logger.LogDebug($"Stack trace: {ex.StackTrace}");
             return StatusCode(500, new PaymentResponse
             {
                 Error = -1,
@@ -96,7 +99,7 @@ public class PaymentController : ControllerBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error in CancelPayment: {ex.Message}");
+            _logger.LogError(ex, $"Error in CancelPayment for paymentId: {paymentId}");
             return StatusCode(500, new PaymentResponse
             {
                 Error = -1,
@@ -131,20 +134,35 @@ public class PaymentController : ControllerBase
     [HttpPost("webhook")]
     public async Task<IActionResult> PayOSWebhook([FromBody] PayOSWebhookRequest payload, [FromServices] IPaymentService paymentService)
     {
+        // Log payload nhận được
+        _logger.LogInformation($"Webhook received - Payload: {System.Text.Json.JsonSerializer.Serialize(payload)}");
+        
         // Lấy checksumKey từ cấu hình
         var configuration = HttpContext.RequestServices.GetService(typeof(IConfiguration)) as IConfiguration;
         var checksumKey = configuration["PayOS:ChecksumKey"];
         if (string.IsNullOrEmpty(checksumKey))
+        {
+            _logger.LogError("Missing PayOS checksum key");
             return StatusCode(500, new { message = "Missing PayOS checksum key" });
+        }
+        
+        _logger.LogInformation($"ChecksumKey: {checksumKey}");
 
         // Xác thực signature
         var signatureString = PayOSWebhookHelper.BuildSignatureString(payload.data);
         var computedSignature = PayOSWebhookHelper.ComputeHmacSha256(signatureString, checksumKey);
+        
+        _logger.LogInformation($"Signature string: {signatureString}");
+        _logger.LogInformation($"Computed signature: {computedSignature}");
+        _logger.LogInformation($"Received signature: {payload.signature}");
+        
         if (!string.Equals(computedSignature, payload.signature, StringComparison.OrdinalIgnoreCase))
         {
+            _logger.LogError("Signature verification failed");
             return Unauthorized(new { message = "Invalid signature" });
         }
 
+        _logger.LogInformation("Signature verification successful");
         // Gọi service để xử lý cập nhật trạng thái payment/booking
         await paymentService.HandlePayOSWebhookAsync(payload);
         return Ok(new { message = "Webhook processed" });
