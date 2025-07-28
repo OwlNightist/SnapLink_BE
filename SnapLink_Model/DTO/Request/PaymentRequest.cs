@@ -2,9 +2,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace SnapLink_Model.DTO.Request;
 
@@ -57,12 +54,12 @@ public static class PayOSWebhookHelper
             .OrderBy(p => p.Name)
             .ToDictionary(p => p.Name, p => {
                 var value = p.Value?.ToString();
-                // Xử lý null/undefined thành chuỗi rỗng
+                // Xử lý null/undefined thành chuỗi rỗng như JavaScript
                 if (value == null || value == "null" || value == "undefined")
                     return "";
                 return value;
             });
-        return string.Join("&", dict.Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}"));
+        return string.Join("&", dict.Select(kv => $"{kv.Key}={kv.Value}"));
     }
     
     public static string ComputeHmacSha256(string data, string key)
