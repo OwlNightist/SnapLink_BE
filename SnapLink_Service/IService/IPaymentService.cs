@@ -1,12 +1,14 @@
 using SnapLink_Model.DTO.Request;
 using SnapLink_Model.DTO.Response;
+using Net.payOS.Types;
 
-namespace SnapLink_Service.IService;
-
-public interface IPaymentService
+namespace SnapLink_Service.IService
 {
-    Task<PaymentResponse> CreatePaymentLinkAsync(CreatePaymentLinkRequest request, int userId);
-    Task<PaymentResponse> GetPaymentStatusAsync(int paymentId);
-    Task<PaymentResponse> CancelPaymentAsync(int paymentId);
-    Task HandlePayOSWebhookAsync(PayOSWebhookRequest payload);
+    public interface IPaymentService
+    {
+        Task<PaymentResponse> CreatePaymentLinkAsync(CreatePaymentLinkRequest request, int userId);
+        Task<PaymentResponse> GetPaymentStatusAsync(int paymentId);
+        Task<PaymentResponse> CancelPaymentAsync(int paymentId);
+        Task HandlePayOSWebhookAsync(WebhookType payload);
+    }
 } 

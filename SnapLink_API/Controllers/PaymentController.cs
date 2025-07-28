@@ -5,6 +5,7 @@ using SnapLink_Model.DTO.Response;
 using SnapLink_Service.IService;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Net.payOS.Types;
 
 namespace SnapLink_API.Controllers;
 
@@ -109,62 +110,35 @@ public class PaymentController : ControllerBase
         }
     }
 
-    [HttpGet("success")]
-    public IActionResult PaymentSuccess([FromQuery] string? code, [FromQuery] string? id, [FromQuery] string? orderCode, [FromQuery] string? status)
-    {
-        // Chỉ trả về thông báo, không cập nhật trạng thái
-        return Ok(new {
-            message = "Cảm ơn bạn đã thanh toán. Hệ thống sẽ xác nhận giao dịch khi nhận được thông báo từ PayOS.",
-            orderCode = orderCode,
-            status = "pending"
-        });
-    }
-
-    [HttpGet("cancel")]
-    public IActionResult PaymentCancel([FromQuery] string? code, [FromQuery] string? id, [FromQuery] string? orderCode, [FromQuery] string? status)
-    {
-        // Chỉ trả về thông báo, không cập nhật trạng thái
-        return Ok(new {
-            message = "Bạn đã hủy thanh toán hoặc giao dịch chưa hoàn tất.",
-                    orderCode = orderCode,
-            status = "cancelled"
-        });
-    }
 
     [HttpPost("webhook")]
-    public async Task<IActionResult> PayOSWebhook([FromBody] PayOSWebhookRequest payload, [FromServices] IPaymentService paymentService)
+    public async Task<IActionResult> PayOSWebhook([FromBody] WebhookType payload, [FromServices] IPaymentService paymentService)
     {
         // Log payload nhận được
         _logger.LogInformation($"Webhook received - Payload: {System.Text.Json.JsonSerializer.Serialize(payload)}");
         
-        // Lấy checksumKey từ cấu hình
-        var configuration = HttpContext.RequestServices.GetService(typeof(IConfiguration)) as IConfiguration;
-        var checksumKey = configuration["PayOS:ChecksumKey"];
-        if (string.IsNullOrEmpty(checksumKey))
+        // Lấy PayOS instance từ DI
+        var payOS = HttpContext.RequestServices.GetService(typeof(Net.payOS.PayOS)) as Net.payOS.PayOS;
+        if (payOS == null)
         {
-            _logger.LogError("Missing PayOS checksum key");
-            return StatusCode(500, new { message = "Missing PayOS checksum key" });
+            _logger.LogError("PayOS service not found in DI");
+            return StatusCode(500, new { message = "PayOS service not configured" });
         }
         
-        _logger.LogInformation($"ChecksumKey: {checksumKey}");
-
-        // Xác thực signature
-        var signatureString = PayOSWebhookHelper.BuildSignatureString(payload.data);
-        var computedSignature = PayOSWebhookHelper.ComputeHmacSha256(signatureString, checksumKey);
-        
-        _logger.LogInformation($"Signature string: {signatureString}");
-        _logger.LogInformation($"Computed signature: {computedSignature}");
-        _logger.LogInformation($"Received signature: {payload.signature}");
-        
-        if (!string.Equals(computedSignature, payload.signature, StringComparison.OrdinalIgnoreCase))
+        try
         {
-            _logger.LogError("Signature verification failed");
-            return Unauthorized(new { message = "Invalid signature" });
+            // Sử dụng SDK để verify webhook
+            WebhookData verifiedData = payOS.verifyPaymentWebhookData(payload);
+            _logger.LogInformation("Webhook verification successful using SDK");
+            
+            // Gọi service để xử lý cập nhật trạng thái payment/booking
+            await paymentService.HandlePayOSWebhookAsync(payload);
+            return Ok(new { message = "Webhook processed" });
         }
-
-        _logger.LogInformation("Signature verification successful");
-        // Gọi service để xử lý cập nhật trạng thái payment/booking
-        await paymentService.HandlePayOSWebhookAsync(payload);
-        return Ok(new { message = "Webhook processed" });
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Webhook verification failed using SDK");
+            return Unauthorized(new { message = "Invalid webhook signature" });
+        }
     }
 } 

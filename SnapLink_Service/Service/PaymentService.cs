@@ -392,7 +392,7 @@ public class PaymentService : IPaymentService
         }
     }
 
-        public async Task HandlePayOSWebhookAsync(PayOSWebhookRequest payload)
+        public async Task HandlePayOSWebhookAsync(WebhookType payload)
     {
         // Lấy orderCode từ webhook
         var orderCode = payload.data?.orderCode;
