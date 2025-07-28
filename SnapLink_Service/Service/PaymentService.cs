@@ -154,11 +154,18 @@ public class PaymentService : IPaymentService
                 ItemData item = new ItemData(request.ProductName, 1, (int)paymentAmount);
             List<ItemData> items = new List<ItemData> { item };
             
-                // Construct URLs using base URL from configuration
-                string baseUrl = _configuration["PaymentSettings:BaseUrl"] 
-                    ?? throw new InvalidOperationException("PaymentSettings:BaseUrl is not configured in appsettings.json");
-                string cancelUrl = $"{baseUrl}/api/payment/cancel";
-                string returnUrl = $"{baseUrl}/api/payment/success";
+                // Chỉ lấy successUrl và cancelUrl từ request, nếu không có thì báo lỗi
+                if (string.IsNullOrEmpty(request.SuccessUrl) || string.IsNullOrEmpty(request.CancelUrl))
+                {
+                    return new PaymentResponse
+                    {
+                        Error = -1,
+                        Message = "Missing SuccessUrl or CancelUrl in request.",
+                        Data = null
+                    };
+                }
+                string successUrl = request.SuccessUrl;
+                string cancelUrl = request.CancelUrl;
                 
                 // Create payment data
             PaymentData paymentData = new PaymentData(
@@ -167,7 +174,7 @@ public class PaymentService : IPaymentService
                 request.Description, 
                 items, 
                 cancelUrl, 
-                returnUrl
+                successUrl
             );
 
             // Create payment link with PayOS
@@ -203,7 +210,7 @@ public class PaymentService : IPaymentService
             return new PaymentResponse
             {
                 Error = -1,
-                Message = "Failed to create payment link",
+                Message = $"Failed to create payment link: {ex.Message}",
                 Data = null
             };
         }
@@ -382,6 +389,59 @@ public class PaymentService : IPaymentService
                     Message = "Failed to cancel payment",
                 Data = null
             };
+        }
+    }
+
+        public async Task HandlePayOSWebhookAsync(PayOSWebhookRequest payload)
+    {
+        // Lấy orderCode từ webhook
+        var orderCode = payload.data?.orderCode;
+        if (orderCode == null)
+        {
+            Console.WriteLine("Webhook missing orderCode");
+            return;
+        }
+        // Tìm payment theo ExternalTransactionId (orderCode)
+        var payment = await _context.Payments.FirstOrDefaultAsync(p => p.ExternalTransactionId == orderCode.ToString());
+        if (payment == null)
+        {
+            Console.WriteLine($"No payment found for orderCode {orderCode}");
+            return;
+        }
+        // Nếu đã thành công thì cập nhật trạng thái
+        if (payload.data.code == "00" && payload.data.desc?.ToLower().Contains("thành công") == true)
+        {
+            if (payment.Status != PaymentStatus.Success)
+            {
+                payment.Status = PaymentStatus.Success;
+                payment.UpdatedAt = DateTime.UtcNow;
+                // Cập nhật booking nếu cần
+                var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == payment.BookingId);
+                if (booking != null && booking.Status == "Pending")
+                {
+                    booking.Status = "Confirmed";
+                    booking.UpdatedAt = DateTime.UtcNow;
+                }
+                await _unitOfWork.SaveChangesAsync();
+                Console.WriteLine($"Payment {payment.PaymentId} marked as Success by webhook");
+            }
+        }
+        // Nếu thất bại hoặc huỷ thì cập nhật trạng thái
+        else if (payload.data.code != "00")
+        {
+            if (payment.Status != PaymentStatus.Cancelled && payment.Status != PaymentStatus.Failed)
+            {
+                payment.Status = PaymentStatus.Failed;
+                payment.UpdatedAt = DateTime.UtcNow;
+                var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == payment.BookingId);
+                if (booking != null && booking.Status == "Pending")
+                {
+                    booking.Status = "Cancelled";
+                    booking.UpdatedAt = DateTime.UtcNow;
+                }
+                await _unitOfWork.SaveChangesAsync();
+                Console.WriteLine($"Payment {payment.PaymentId} marked as Failed/Cancelled by webhook");
+            }
         }
     }
 

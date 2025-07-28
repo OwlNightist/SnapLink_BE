@@ -8,4 +8,5 @@ public interface IPaymentService
     Task<PaymentResponse> CreatePaymentLinkAsync(CreatePaymentLinkRequest request, int userId);
     Task<PaymentResponse> GetPaymentStatusAsync(int paymentId);
     Task<PaymentResponse> CancelPaymentAsync(int paymentId);
+    Task HandlePayOSWebhookAsync(PayOSWebhookRequest payload);
 } 

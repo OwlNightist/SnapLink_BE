@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SnapLink_Model.DTO.Request;
 using SnapLink_Model.DTO.Response;
 using SnapLink_Service.IService;
+using Microsoft.Extensions.Configuration;
 
 namespace SnapLink_API.Controllers;
 
@@ -106,104 +107,46 @@ public class PaymentController : ControllerBase
     }
 
     [HttpGet("success")]
-    public async Task<IActionResult> PaymentSuccess([FromQuery] string? code, [FromQuery] string? id, [FromQuery] string? orderCode, [FromQuery] string? status)
+    public IActionResult PaymentSuccess([FromQuery] string? code, [FromQuery] string? id, [FromQuery] string? orderCode, [FromQuery] string? status)
     {
-        try
-        {
-            Console.WriteLine($"PaymentSuccess callback - code: {code}, id: {id}, orderCode: {orderCode}, status: {status}");
-            
-            // PayOS sends orderCode as the payment identifier
-            if (string.IsNullOrEmpty(orderCode))
-            {
-                return BadRequest(new { 
-                    message = "Missing orderCode parameter",
-                    status = "error"
-                });
-            }
-
-            // Try to parse orderCode as payment ID
-            if (!int.TryParse(orderCode, out int paymentId))
-            {
-                return BadRequest(new { 
-                    message = "Invalid orderCode format",
-                    orderCode = orderCode,
-                    status = "error"
-                });
-            }
-
-            var result = await _paymentService.GetPaymentStatusAsync(paymentId);
-            
-            if (result.Error == 0)
-            {
-                return Ok(new { 
-                    message = "Payment completed successfully",
-                    paymentId = paymentId,
-                    orderCode = orderCode,
-                    status = "success"
-                });
-            }
-            else
-            {
-                return BadRequest(new { 
-                    message = "Payment verification failed",
-                    paymentId = paymentId,
-                    orderCode = orderCode,
-                    status = "error"
-                });
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in PaymentSuccess: {ex.Message}");
-            return StatusCode(500, new { 
-                message = "Internal server error",
-                status = "error"
-            });
-        }
+        // Chỉ trả về thông báo, không cập nhật trạng thái
+        return Ok(new {
+            message = "Cảm ơn bạn đã thanh toán. Hệ thống sẽ xác nhận giao dịch khi nhận được thông báo từ PayOS.",
+            orderCode = orderCode,
+            status = "pending"
+        });
     }
 
     [HttpGet("cancel")]
-    public async Task<IActionResult> PaymentCancel([FromQuery] string? code, [FromQuery] string? id, [FromQuery] string? orderCode, [FromQuery] string? status)
+    public IActionResult PaymentCancel([FromQuery] string? code, [FromQuery] string? id, [FromQuery] string? orderCode, [FromQuery] string? status)
     {
-        try
-        {
-            Console.WriteLine($"PaymentCancel callback - code: {code}, id: {id}, orderCode: {orderCode}, status: {status}");
-            
-            // PayOS sends orderCode as the payment identifier
-            if (string.IsNullOrEmpty(orderCode))
-            {
-                return BadRequest(new { 
-                    message = "Missing orderCode parameter",
-                    status = "error"
-                });
-            }
+        // Chỉ trả về thông báo, không cập nhật trạng thái
+        return Ok(new {
+            message = "Bạn đã hủy thanh toán hoặc giao dịch chưa hoàn tất.",
+            orderCode = orderCode,
+            status = "cancelled"
+        });
+    }
 
-            // Try to parse orderCode as payment ID
-            if (!int.TryParse(orderCode, out int paymentId))
-            {
-                return BadRequest(new { 
-                    message = "Invalid orderCode format",
-                    orderCode = orderCode,
-                    status = "error"
-                });
-            }
+    [HttpPost("webhook")]
+    public async Task<IActionResult> PayOSWebhook([FromBody] PayOSWebhookRequest payload, [FromServices] IPaymentService paymentService)
+    {
+        // Lấy checksumKey từ cấu hình
+        var configuration = HttpContext.RequestServices.GetService(typeof(IConfiguration)) as IConfiguration;
+        var checksumKey = configuration["PayOS:ChecksumKey"];
+        if (string.IsNullOrEmpty(checksumKey))
+            return StatusCode(500, new { message = "Missing PayOS checksum key" });
 
-            var result = await _paymentService.CancelPaymentAsync(paymentId);
-            
-            return Ok(new { 
-                message = "Payment cancelled",
-                paymentId = paymentId,
-                orderCode = orderCode,
-                status = "cancelled"
-            });
-        }
-        catch (Exception ex)
+        // Xác thực signature
+        var signatureString = PayOSWebhookHelper.BuildSignatureString(payload.data);
+        var computedSignature = PayOSWebhookHelper.ComputeHmacSha256(signatureString, checksumKey);
+        if (!string.Equals(computedSignature, payload.signature, StringComparison.OrdinalIgnoreCase))
         {
-            Console.WriteLine($"Error in PaymentCancel: {ex.Message}");
-            return StatusCode(500, new { 
-                message = "Internal server error",
-                status = "error"
-            });
+            return Unauthorized(new { message = "Invalid signature" });
         }
+
+        // Gọi service để xử lý cập nhật trạng thái payment/booking
+        await paymentService.HandlePayOSWebhookAsync(payload);
+        return Ok(new { message = "Webhook processed" });
     }
 } 
