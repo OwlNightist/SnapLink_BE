@@ -348,11 +348,9 @@ public class PaymentService : IPaymentService
         try
         {
                 PaymentLinkInformation paymentLinkInformation = await _payOS.cancelPaymentLink(paymentId);
-            
-            // Update payment status to cancelled
+
             var payment = await _context.Payments
-                    .FirstOrDefaultAsync(p => p.PaymentId == paymentId);
-            
+                    .FirstOrDefaultAsync(p => p.ExternalTransactionId == paymentId.ToString());     
             if (payment != null)
             {
                 payment.Status = PaymentStatus.Cancelled;
