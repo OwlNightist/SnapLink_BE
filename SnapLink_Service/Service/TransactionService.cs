@@ -15,13 +15,23 @@ namespace SnapLink_Service.Service
             _context = context;
         }
 
-        public async Task<IEnumerable<TransactionResponse>> GetUserTransactionHistoryAsync(int userId, int page = 1, int pageSize = 10)
+        public async Task<IEnumerable<TransactionResponse>> GetUserTransactionHistoryAsync(int userId, int page = 1, int pageSize = 10, int? year = null, int? month = null)
         {
-            var transactions = await _context.Transactions
+            var query = _context.Transactions
                 .Include(t => t.FromUser)
                 .Include(t => t.ToUser)
                 .Include(t => t.ReferencePayment)
-                .Where(t => t.FromUserId == userId || t.ToUserId == userId)
+                .Where(t => t.FromUserId == userId || t.ToUserId == userId);
+
+            // Apply year and month filter if provided
+            if (year.HasValue && month.HasValue)
+            {
+                var startDate = new DateTime(year.Value, month.Value, 1);
+                var endDate = startDate.AddMonths(1).AddDays(-1);
+                query = query.Where(t => t.CreatedAt >= startDate && t.CreatedAt <= endDate);
+            }
+
+            var transactions = await query
                 .OrderByDescending(t => t.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -49,7 +59,7 @@ namespace SnapLink_Service.Service
             return transactions;
         }
 
-        public async Task<IEnumerable<TransactionResponse>> GetPhotographerTransactionHistoryAsync(int photographerId, int page = 1, int pageSize = 10)
+        public async Task<IEnumerable<TransactionResponse>> GetPhotographerTransactionHistoryAsync(int photographerId, int page = 1, int pageSize = 10, int? year = null, int? month = null)
         {
             var photographer = await _context.Photographers
                 .Include(p => p.User)
@@ -58,11 +68,21 @@ namespace SnapLink_Service.Service
             if (photographer?.User == null)
                 return Enumerable.Empty<TransactionResponse>();
 
-            var transactions = await _context.Transactions
+            var query = _context.Transactions
                 .Include(t => t.FromUser)
                 .Include(t => t.ToUser)
                 .Include(t => t.ReferencePayment)
-                .Where(t => t.FromUserId == photographer.User.UserId || t.ToUserId == photographer.User.UserId)
+                .Where(t => t.FromUserId == photographer.User.UserId || t.ToUserId == photographer.User.UserId);
+
+            // Apply year and month filter if provided
+            if (year.HasValue && month.HasValue)
+            {
+                var startDate = new DateTime(year.Value, month.Value, 1);
+                var endDate = startDate.AddMonths(1).AddDays(-1);
+                query = query.Where(t => t.CreatedAt >= startDate && t.CreatedAt <= endDate);
+            }
+
+            var transactions = await query
                 .OrderByDescending(t => t.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -90,7 +110,7 @@ namespace SnapLink_Service.Service
             return transactions;
         }
 
-        public async Task<IEnumerable<TransactionResponse>> GetLocationOwnerTransactionHistoryAsync(int locationOwnerId, int page = 1, int pageSize = 10)
+        public async Task<IEnumerable<TransactionResponse>> GetLocationOwnerTransactionHistoryAsync(int locationOwnerId, int page = 1, int pageSize = 10, int? year = null, int? month = null)
         {
             var locationOwner = await _context.LocationOwners
                 .Include(lo => lo.User)
@@ -99,11 +119,21 @@ namespace SnapLink_Service.Service
             if (locationOwner?.User == null)
                 return Enumerable.Empty<TransactionResponse>();
 
-            var transactions = await _context.Transactions
+            var query = _context.Transactions
                 .Include(t => t.FromUser)
                 .Include(t => t.ToUser)
                 .Include(t => t.ReferencePayment)
-                .Where(t => t.FromUserId == locationOwner.User.UserId || t.ToUserId == locationOwner.User.UserId)
+                .Where(t => t.FromUserId == locationOwner.User.UserId || t.ToUserId == locationOwner.User.UserId);
+
+            // Apply year and month filter if provided
+            if (year.HasValue && month.HasValue)
+            {
+                var startDate = new DateTime(year.Value, month.Value, 1);
+                var endDate = startDate.AddMonths(1).AddDays(-1);
+                query = query.Where(t => t.CreatedAt >= startDate && t.CreatedAt <= endDate);
+            }
+
+            var transactions = await query
                 .OrderByDescending(t => t.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -163,13 +193,23 @@ namespace SnapLink_Service.Service
             };
         }
 
-        public async Task<int> GetUserTransactionCountAsync(int userId)
+        public async Task<int> GetUserTransactionCountAsync(int userId, int? year = null, int? month = null)
         {
-            return await _context.Transactions
-                .CountAsync(t => t.FromUserId == userId || t.ToUserId == userId);
+            var query = _context.Transactions
+                .Where(t => t.FromUserId == userId || t.ToUserId == userId);
+
+            // Apply year and month filter if provided
+            if (year.HasValue && month.HasValue)
+            {
+                var startDate = new DateTime(year.Value, month.Value, 1);
+                var endDate = startDate.AddMonths(1).AddDays(-1);
+                query = query.Where(t => t.CreatedAt >= startDate && t.CreatedAt <= endDate);
+            }
+
+            return await query.CountAsync();
         }
 
-        public async Task<int> GetPhotographerTransactionCountAsync(int photographerId)
+        public async Task<int> GetPhotographerTransactionCountAsync(int photographerId, int? year = null, int? month = null)
         {
             var photographer = await _context.Photographers
                 .Include(p => p.User)
@@ -178,11 +218,21 @@ namespace SnapLink_Service.Service
             if (photographer?.User == null)
                 return 0;
 
-            return await _context.Transactions
-                .CountAsync(t => t.FromUserId == photographer.User.UserId || t.ToUserId == photographer.User.UserId);
+            var query = _context.Transactions
+                .Where(t => t.FromUserId == photographer.User.UserId || t.ToUserId == photographer.User.UserId);
+
+            // Apply year and month filter if provided
+            if (year.HasValue && month.HasValue)
+            {
+                var startDate = new DateTime(year.Value, month.Value, 1);
+                var endDate = startDate.AddMonths(1).AddDays(-1);
+                query = query.Where(t => t.CreatedAt >= startDate && t.CreatedAt <= endDate);
+            }
+
+            return await query.CountAsync();
         }
 
-        public async Task<int> GetLocationOwnerTransactionCountAsync(int locationOwnerId)
+        public async Task<int> GetLocationOwnerTransactionCountAsync(int locationOwnerId, int? year = null, int? month = null)
         {
             var locationOwner = await _context.LocationOwners
                 .Include(p => p.User)
@@ -191,8 +241,18 @@ namespace SnapLink_Service.Service
             if (locationOwner?.User == null)
                 return 0;
 
-            return await _context.Transactions
-                .CountAsync(t => t.FromUserId == locationOwner.User.UserId || t.ToUserId == locationOwner.User.UserId);
+            var query = _context.Transactions
+                .Where(t => t.FromUserId == locationOwner.User.UserId || t.ToUserId == locationOwner.User.UserId);
+
+            // Apply year and month filter if provided
+            if (year.HasValue && month.HasValue)
+            {
+                var startDate = new DateTime(year.Value, month.Value, 1);
+                var endDate = startDate.AddMonths(1).AddDays(-1);
+                query = query.Where(t => t.CreatedAt >= startDate && t.CreatedAt <= endDate);
+            }
+
+            return await query.CountAsync();
         }
 
         public async Task CreatePaymentDistributionTransactionsAsync(int paymentId, decimal platformFee, decimal photographerPayout, decimal locationFee)
@@ -303,6 +363,89 @@ namespace SnapLink_Service.Service
             catch (Exception ex)
             {
                 Console.WriteLine($"Error creating payment distribution transactions: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<MonthlyIncomeResponse> GetMonthlyIncomeAsync(int userId, int year, int month)
+        {
+            try
+            {
+                // Calculate date range for the specified month
+                var startDate = new DateTime(year, month, 1);
+                var endDate = startDate.AddMonths(1).AddDays(-1);
+
+                // Get all transactions for the user in the specified month
+                var transactions = await _context.Transactions
+                    .Include(t => t.FromUser)
+                    .Include(t => t.ToUser)
+                    .Include(t => t.ReferencePayment)
+                    .Where(t => (t.FromUserId == userId || t.ToUserId == userId) &&
+                               t.CreatedAt >= startDate && t.CreatedAt <= endDate &&
+                               t.Status == TransactionStatus.Success)
+                    .OrderByDescending(t => t.CreatedAt)
+                    .ToListAsync();
+
+                var response = new MonthlyIncomeResponse
+                {
+                    UserId = userId,
+                    Year = year,
+                    Month = month,
+                    TotalTransactions = transactions.Count
+                };
+
+                // Calculate income and expense
+                foreach (var transaction in transactions)
+                {
+                    if (transaction.ToUserId == userId)
+                    {
+                        // Income: Money received by the user
+                        response.TotalIncome += transaction.Amount;
+                        
+                        // Group by transaction type
+                        var typeKey = transaction.Type.ToString();
+                        if (!response.IncomeByType.ContainsKey(typeKey))
+                            response.IncomeByType[typeKey] = 0;
+                        response.IncomeByType[typeKey] += transaction.Amount;
+                    }
+                    else if (transaction.FromUserId == userId)
+                    {
+                        // Expense: Money paid by the user
+                        response.TotalExpense += transaction.Amount;
+                    }
+                }
+
+                response.NetIncome = response.TotalIncome - response.TotalExpense;
+
+                // Get recent transactions (last 10)
+                response.RecentTransactions = transactions
+                    .Take(10)
+                    .Select(t => new TransactionResponse
+                    {
+                        TransactionId = t.TransactionId,
+                        ReferencePaymentId = t.ReferencePaymentId,
+                        FromUserId = t.FromUserId,
+                        FromUserName = t.FromUser != null ? t.FromUser.FullName ?? "" : "System",
+                        ToUserId = t.ToUserId,
+                        ToUserName = t.ToUser != null ? t.ToUser.FullName ?? "" : "System",
+                        Amount = t.Amount,
+                        Currency = t.Currency,
+                        Type = t.Type.ToString(),
+                        Status = t.Status.ToString(),
+                        Note = t.Note,
+                        CreatedAt = t.CreatedAt,
+                        UpdatedAt = t.UpdatedAt,
+                        PaymentMethod = t.ReferencePayment != null ? t.ReferencePayment.Method : null,
+                        PaymentAmount = t.ReferencePayment != null ? t.ReferencePayment.TotalAmount : null,
+                        PaymentStatus = t.ReferencePayment != null ? t.ReferencePayment.Status.ToString() : null
+                    })
+                    .ToList();
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting monthly income: {ex.Message}");
                 throw;
             }
         }

@@ -15,12 +15,12 @@ public class TransactionController : ControllerBase
     }
 
     [HttpGet("history/user/{userId}")]
-    public async Task<IActionResult> GetTransactionHistoryByUser(int userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetTransactionHistoryByUser(int userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] int? year = null, [FromQuery] int? month = null)
     {
         try
         {
-            var transactions = await _transactionService.GetUserTransactionHistoryAsync(userId, page, pageSize);
-            var totalCount = await _transactionService.GetUserTransactionCountAsync(userId);
+            var transactions = await _transactionService.GetUserTransactionHistoryAsync(userId, page, pageSize, year, month);
+            var totalCount = await _transactionService.GetUserTransactionCountAsync(userId, year, month);
             
             return Ok(new
             {
@@ -32,7 +32,9 @@ public class TransactionController : ControllerBase
                     TotalCount = totalCount,
                     Page = page,
                     PageSize = pageSize,
-                    TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+                    TotalPages = (int)Math.Ceiling((double)totalCount / pageSize),
+                    Year = year,
+                    Month = month
                 }
             });
         }
@@ -49,12 +51,12 @@ public class TransactionController : ControllerBase
     }
 
     [HttpGet("history/photographer/{photographerId}")]
-    public async Task<IActionResult> GetTransactionHistoryByPhotographer(int photographerId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetTransactionHistoryByPhotographer(int photographerId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] int? year = null, [FromQuery] int? month = null)
     {
         try
         {
-            var transactions = await _transactionService.GetPhotographerTransactionHistoryAsync(photographerId, page, pageSize);
-            var totalCount = await _transactionService.GetPhotographerTransactionCountAsync(photographerId);
+            var transactions = await _transactionService.GetPhotographerTransactionHistoryAsync(photographerId, page, pageSize, year, month);
+            var totalCount = await _transactionService.GetPhotographerTransactionCountAsync(photographerId, year, month);
             
             return Ok(new
             {
@@ -66,7 +68,9 @@ public class TransactionController : ControllerBase
                     TotalCount = totalCount,
                     Page = page,
                     PageSize = pageSize,
-                    TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+                    TotalPages = (int)Math.Ceiling((double)totalCount / pageSize),
+                    Year = year,
+                    Month = month
                 }
             });
         }
@@ -83,12 +87,12 @@ public class TransactionController : ControllerBase
     }
 
     [HttpGet("history/location-owner/{locationOwnerId}")]
-    public async Task<IActionResult> GetTransactionHistoryByLocationOwner(int locationOwnerId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetTransactionHistoryByLocationOwner(int locationOwnerId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] int? year = null, [FromQuery] int? month = null)
     {
         try
         {
-            var transactions = await _transactionService.GetLocationOwnerTransactionHistoryAsync(locationOwnerId, page, pageSize);
-            var totalCount = await _transactionService.GetLocationOwnerTransactionCountAsync(locationOwnerId);
+            var transactions = await _transactionService.GetLocationOwnerTransactionHistoryAsync(locationOwnerId, page, pageSize, year, month);
+            var totalCount = await _transactionService.GetLocationOwnerTransactionCountAsync(locationOwnerId, year, month);
             
             return Ok(new
             {
@@ -100,7 +104,9 @@ public class TransactionController : ControllerBase
                     TotalCount = totalCount,
                     Page = page,
                     PageSize = pageSize,
-                    TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+                    TotalPages = (int)Math.Ceiling((double)totalCount / pageSize),
+                    Year = year,
+                    Month = month
                 }
             });
         }
@@ -143,6 +149,53 @@ public class TransactionController : ControllerBase
         catch (Exception ex)
         {
             Console.WriteLine($"Error in GetTransactionById: {ex.Message}");
+            return StatusCode(500, new
+            {
+                Error = -1,
+                Message = "Internal server error",
+                Data = (object?)null
+            });
+        }
+    }
+
+    [HttpGet("monthly-income/{userId}")]
+    public async Task<IActionResult> GetMonthlyIncome(int userId, [FromQuery] int year, [FromQuery] int month)
+    {
+        try
+        {
+            // Validate year and month
+            if (year < 2020 || year > 2099)
+            {
+                return BadRequest(new
+                {
+                    Error = -1,
+                    Message = "Invalid year. Must be between 2020 and 2099",
+                    Data = (object?)null
+                });
+            }
+
+            if (month < 1 || month > 12)
+            {
+                return BadRequest(new
+                {
+                    Error = -1,
+                    Message = "Invalid month. Must be between 1 and 12",
+                    Data = (object?)null
+                });
+            }
+
+            var monthlyIncome = await _transactionService.GetMonthlyIncomeAsync(userId, year, month);
+            
+            return Ok(new
+            {
+                Error = 0,
+                Message = "Monthly income retrieved successfully",
+                Data = monthlyIncome
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in GetMonthlyIncome: {ex.Message}");
             return StatusCode(500, new
             {
                 Error = -1,
