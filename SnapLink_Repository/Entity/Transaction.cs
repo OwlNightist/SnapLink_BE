@@ -32,13 +32,13 @@ public partial class Transaction
 
 public enum TransactionType
 {
-    Payout,       // Trả tiền cho người nhận
-    Commission,   // Hoa hồng nền tảng
-    Refund,       // Hoàn tiền
-    Adjustment,   // Điều chỉnh số dư
-    Bonus,        // Thưởng
-    Topup,        // Nạp tiền
-    Withdraw      // Rút tiền
+    Purchase,           // Giao dịch chính: Người dùng thanh toán cho đơn hàng (bao gồm tiền thợ, địa điểm, và phí nền tảng)
+    PhotographerFee,    // Phí phân bổ cho thợ chụp hình
+    VenueFee,          // Phí phân bổ cho nơi cho thuê địa điểm
+    PlatformFee,       // Phí phân bổ cho nền tảng
+    Refund,            // Hoàn tiền (nếu người dùng hủy đơn hàng hoặc giao dịch thất bại)
+    Deposit,           // Nạp tiền vào ví (nếu người dùng nạp tiền vào ví của mình)
+    Withdrawal         // Rút tiền từ ví (nếu người dùng hoặc thợ chụp rút tiền ra ngoài)
 }
 
 public enum TransactionStatus

@@ -23,14 +23,16 @@ public class PaymentService : IPaymentService
     private readonly SnaplinkDbContext _context;
         private readonly IWalletService _walletService;
         private readonly IConfiguration _configuration;
+        private readonly ITransactionService _transactionService;
 
-        public PaymentService(PayOS payOS, IUnitOfWork unitOfWork, SnaplinkDbContext context, IWalletService walletService, IConfiguration configuration)
+        public PaymentService(PayOS payOS, IUnitOfWork unitOfWork, SnaplinkDbContext context, IWalletService walletService, IConfiguration configuration, ITransactionService transactionService)
     {
         _payOS = payOS;
         _unitOfWork = unitOfWork;
         _context = context;
             _walletService = walletService;
             _configuration = configuration;
+            _transactionService = transactionService;
     }
 // need userid for now , add to jwt token later
     public async Task<PaymentResponse> CreatePaymentLinkAsync(CreatePaymentLinkRequest request, int userId)
@@ -392,29 +394,36 @@ public class PaymentService : IPaymentService
         }
     }
 
-        public async Task HandlePayOSWebhookAsync(PayOSWebhookRequest payload)
+        public async Task HandlePayOSWebhookAsync(WebhookType payload)
     {
         // Lấy orderCode từ webhook
         var orderCode = payload.data?.orderCode;
         if (orderCode == null)
         {
-            Console.WriteLine("Webhook missing orderCode");
             return;
         }
+             
         // Tìm payment theo ExternalTransactionId (orderCode)
         var payment = await _context.Payments.FirstOrDefaultAsync(p => p.ExternalTransactionId == orderCode.ToString());
         if (payment == null)
         {
-            Console.WriteLine($"No payment found for orderCode {orderCode}");
             return;
         }
-        // Nếu đã thành công thì cập nhật trạng thái
-        if (payload.data.code == "00" && payload.data.desc?.ToLower().Contains("thành công") == true)
+        
+        // Kiểm tra desc để xác định thành công (thay vì code)
+        if (payload.data.desc?.ToLower() == "success")
+        {
+            await HandlePaymentSuccessAsync(payment);
+        }
+    }
+
+        private async Task HandlePaymentSuccessAsync(Payment payment)
         {
             if (payment.Status != PaymentStatus.Success)
             {
                 payment.Status = PaymentStatus.Success;
                 payment.UpdatedAt = DateTime.UtcNow;
+                
                 // Cập nhật booking nếu cần
                 var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == payment.BookingId);
                 if (booking != null && booking.Status == "Pending")
@@ -422,118 +431,75 @@ public class PaymentService : IPaymentService
                     booking.Status = "Confirmed";
                     booking.UpdatedAt = DateTime.UtcNow;
                 }
-                await _unitOfWork.SaveChangesAsync();
-                Console.WriteLine($"Payment {payment.PaymentId} marked as Success by webhook");
-            }
-        }
-        // Nếu thất bại hoặc huỷ thì cập nhật trạng thái
-        else if (payload.data.code != "00")
-        {
-            if (payment.Status != PaymentStatus.Cancelled && payment.Status != PaymentStatus.Failed)
-            {
-                payment.Status = PaymentStatus.Failed;
-                payment.UpdatedAt = DateTime.UtcNow;
-                var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == payment.BookingId);
-                if (booking != null && booking.Status == "Pending")
-                {
-                    booking.Status = "Cancelled";
-                    booking.UpdatedAt = DateTime.UtcNow;
-                }
-                await _unitOfWork.SaveChangesAsync();
-                Console.WriteLine($"Payment {payment.PaymentId} marked as Failed/Cancelled by webhook");
-            }
-        }
-    }
-
-        private async Task CreateFeeDistributionTransactionsAsync(Payment payment, decimal platformFee, decimal photographerPayout, decimal locationFee)
-        {
-            try
-            {
-                // Get photographer user ID
-                var photographer = await _context.Photographers
-                    .Include(p => p.User)
-                    .FirstOrDefaultAsync(p => p.PhotographerId == payment.Booking.PhotographerId);
                 
-                if (photographer?.User == null)
+                await _unitOfWork.SaveChangesAsync();
+
+                // Calculate fee distribution
+                decimal platformFeePercentage = _configuration.GetValue<decimal>("PaymentSettings:PlatformFeePercentage", 10);
+                decimal platformFee = payment.TotalAmount * (platformFeePercentage / 100m);
+                decimal locationFee = 0m;
+                decimal photographerPayout;
+
+                // Get location info for fee calculation
+                var location = await _context.Locations
+                    .FirstOrDefaultAsync(l => l.LocationId == booking.LocationId);
+
+                if (location != null && (location.LocationType == "Registered" || location.LocationType == null))
                 {
-                    Console.WriteLine($"Photographer not found for payment {payment.PaymentId}");
-                    return;
+                    locationFee = location.HourlyRate ?? 0;
                 }
 
-                // Create platform fee transaction (system transaction)
-                var platformFeeTransaction = new SnapLink_Repository.Entity.Transaction
-                {
-                    ReferencePaymentId = payment.PaymentId,
-                    FromUserId = payment.CustomerId,
-                    ToUserId = null, // System receives the fee
-                    Amount = platformFee,
-                    Type = TransactionType.Commission,
-                    Status = TransactionStatus.Success,
-                    Note = $"Platform commission for payment {payment.PaymentId}",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
-                await _unitOfWork.TransactionRepository.AddAsync(platformFeeTransaction);
-
-                // Create photographer payout transaction
-                var photographerTransaction = new SnapLink_Repository.Entity.Transaction
-                {
-                    ReferencePaymentId = payment.PaymentId,
-                    FromUserId = payment.CustomerId,
-                    ToUserId = photographer.User.UserId,
-                    Amount = photographerPayout,
-                    Type = TransactionType.Payout,
-                    Status = TransactionStatus.Success,
-                    Note = $"Photographer payout for payment {payment.PaymentId}",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
-                await _unitOfWork.TransactionRepository.AddAsync(photographerTransaction);
-
-                // Create location fee transaction (if applicable)
-                SnapLink_Repository.Entity.Transaction? locationFeeTransaction = null;
+                // Calculate photographer payout
                 if (locationFee > 0)
                 {
-                    var location = await _context.Locations
-                        .Include(l => l.LocationOwner)
-                        .ThenInclude(lo => lo.User)
-                        .FirstOrDefaultAsync(l => l.LocationId == payment.Booking.LocationId);
+                    photographerPayout = payment.TotalAmount - platformFee - locationFee;
+                }
+                else
+                {
+                    photographerPayout = payment.TotalAmount - platformFee;
+                }
 
-                    if (location?.LocationOwner?.User != null)
+                // Create distribution transactions
+                await _transactionService.CreatePaymentDistributionTransactionsAsync(payment.PaymentId, platformFee, photographerPayout, locationFee);
+
+                // Update photographer wallet using WalletService
+                if (booking?.PhotographerId != null && photographerPayout > 0)
+                {
+                    var photographer = await _context.Photographers
+                        .FirstOrDefaultAsync(p => p.PhotographerId == booking.PhotographerId);
+                    
+                    if (photographer != null)
                     {
-                        locationFeeTransaction = new SnapLink_Repository.Entity.Transaction
+                        bool success = await _walletService.AddFundsToWalletAsync(photographer.UserId, photographerPayout);
+                        if (!success)
                         {
-                            ReferencePaymentId = payment.PaymentId,
-                            FromUserId = payment.CustomerId,
-                            ToUserId = location.LocationOwner.User.UserId,
-                            Amount = locationFee,
-                            Type = TransactionType.Payout,
-                            Status = TransactionStatus.Success,
-                            Note = $"Location fee for payment {payment.PaymentId}",
-                            CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow
-                        };
-
-                        await _unitOfWork.TransactionRepository.AddAsync(locationFeeTransaction);
-                        Console.WriteLine($"Created location fee transaction: {locationFeeTransaction.TransactionId}");
+                            Console.WriteLine($"Failed to add funds to photographer wallet: UserId={photographer.UserId}, Amount={photographerPayout}");
+                        }
                     }
                 }
 
-                await _unitOfWork.SaveChangesAsync();
-                
-                Console.WriteLine($"Created fee distribution transactions for payment {payment.PaymentId}:");
-                Console.WriteLine($"- Platform commission: {platformFeeTransaction.TransactionId} (${platformFee})");
-                Console.WriteLine($"- Photographer payout: {photographerTransaction.TransactionId} (${photographerPayout})");
-                if (locationFee > 0 && locationFeeTransaction != null)
+                // Update location owner wallet using WalletService (only for registered locations)
+                if (booking?.LocationId != null && locationFee > 0)
                 {
-                    Console.WriteLine($"- Location fee: {locationFeeTransaction.TransactionId} (${locationFee})");
+                    var locationWithOwner = await _context.Locations
+                        .Include(l => l.LocationOwner)
+                        .FirstOrDefaultAsync(l => l.LocationId == booking.LocationId);
+                    
+                    // Only pay location owner if it's a registered location
+                    if (locationWithOwner?.LocationOwner != null && 
+                        (locationWithOwner.LocationType == "Registered" || locationWithOwner.LocationType == null))
+                    {
+                        bool success = await _walletService.AddFundsToWalletAsync(locationWithOwner.LocationOwner.UserId, locationFee);
+                        if (!success)
+                        {
+                            Console.WriteLine($"Failed to add funds to location owner wallet: UserId={locationWithOwner.LocationOwner.UserId}, Amount={locationFee}");
+                        }
+                    }
                 }
             }
-            catch (Exception ex)
+            else
             {
-                Console.WriteLine($"Error creating fee distribution transactions: {ex.Message}");
+                Console.WriteLine($"Payment {payment.PaymentId} already has Success status");
             }
         }
     }
