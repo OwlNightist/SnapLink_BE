@@ -11,5 +11,6 @@ namespace SnapLink_Service.IService
         Task<int> GetUserTransactionCountAsync(int userId);
         Task<int> GetPhotographerTransactionCountAsync(int photographerId);
         Task<int> GetLocationOwnerTransactionCountAsync(int locationOwnerId);
+        Task CreatePaymentDistributionTransactionsAsync(int paymentId, decimal platformFee, decimal photographerPayout, decimal locationFee);
     }
 } 

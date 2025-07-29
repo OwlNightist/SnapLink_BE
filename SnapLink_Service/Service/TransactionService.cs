@@ -194,5 +194,117 @@ namespace SnapLink_Service.Service
             return await _context.Transactions
                 .CountAsync(t => t.FromUserId == locationOwner.User.UserId || t.ToUserId == locationOwner.User.UserId);
         }
+
+        public async Task CreatePaymentDistributionTransactionsAsync(int paymentId, decimal platformFee, decimal photographerPayout, decimal locationFee)
+        {
+            try
+            {
+                // Get payment with related data
+                var payment = await _context.Payments
+                    .Include(p => p.Booking)
+                        .ThenInclude(b => b.Photographer)
+                            .ThenInclude(p => p.User)
+                    .Include(p => p.Booking)
+                        .ThenInclude(b => b.Location)
+                            .ThenInclude(l => l.LocationOwner)
+                                .ThenInclude(lo => lo.User)
+                    .FirstOrDefaultAsync(p => p.PaymentId == paymentId);
+
+                if (payment == null)
+                {
+                    Console.WriteLine($"Payment not found for ID: {paymentId}");
+                    return;
+                }
+
+                // Create main purchase transaction
+                var purchaseTransaction = new Transaction
+                {
+                    ReferencePaymentId = paymentId,
+                    FromUserId = payment.CustomerId,
+                    ToUserId = null, // System receives the payment
+                    Amount = payment.TotalAmount,
+                    Type = TransactionType.Purchase,
+                    Status = TransactionStatus.Success,
+                    Note = $"Payment completed for booking {payment.BookingId}",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                await _context.Transactions.AddAsync(purchaseTransaction);
+
+                // Create platform fee transaction
+                var platformFeeTransaction = new Transaction
+                {
+                    ReferencePaymentId = paymentId,
+                    FromUserId = payment.CustomerId,
+                    ToUserId = null, // System receives the fee
+                    Amount = platformFee,
+                    Type = TransactionType.PlatformFee,
+                    Status = TransactionStatus.Success,
+                    Note = $"Platform commission for payment {paymentId}",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                await _context.Transactions.AddAsync(platformFeeTransaction);
+
+                // Create photographer fee transaction
+                if (photographerPayout > 0 && payment.Booking?.Photographer?.User != null)
+                {
+                    var photographerTransaction = new Transaction
+                    {
+                        ReferencePaymentId = paymentId,
+                        FromUserId = payment.CustomerId,
+                        ToUserId = payment.Booking.Photographer.User.UserId,
+                        Amount = photographerPayout,
+                        Type = TransactionType.PhotographerFee,
+                        Status = TransactionStatus.Success,
+                        Note = $"Photographer fee for payment {paymentId}",
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+
+                    await _context.Transactions.AddAsync(photographerTransaction);
+                }
+
+                // Create venue fee transaction (if applicable)
+                if (locationFee > 0 && payment.Booking?.Location?.LocationOwner?.User != null)
+                {
+                    var venueTransaction = new Transaction
+                    {
+                        ReferencePaymentId = paymentId,
+                        FromUserId = payment.CustomerId,
+                        ToUserId = payment.Booking.Location.LocationOwner.User.UserId,
+                        Amount = locationFee,
+                        Type = TransactionType.VenueFee,
+                        Status = TransactionStatus.Success,
+                        Note = $"Venue fee for payment {paymentId}",
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+
+                    await _context.Transactions.AddAsync(venueTransaction);
+                }
+
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine($"Created payment distribution transactions for payment {paymentId}:");
+                Console.WriteLine($"- Purchase transaction: {purchaseTransaction.TransactionId} (${payment.TotalAmount})");
+                Console.WriteLine($"- Platform fee: {platformFeeTransaction.TransactionId} (${platformFee})");
+                if (photographerPayout > 0)
+                {
+                    Console.WriteLine($"- Photographer fee: (${photographerPayout})");
+                }
+                if (locationFee > 0)
+                {
+                    Console.WriteLine($"- Venue fee: (${locationFee})");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating payment distribution transactions: {ex.Message}");
+                throw;
+            }
+        }
     }
 } 
