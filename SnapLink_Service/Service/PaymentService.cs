@@ -392,29 +392,48 @@ public class PaymentService : IPaymentService
 
         public async Task HandlePayOSWebhookAsync(WebhookType payload)
     {
+        // Log the complete webhook payload received from PayOS
+        var webhookJson = System.Text.Json.JsonSerializer.Serialize(payload, new System.Text.Json.JsonSerializerOptions 
+        { 
+            WriteIndented = true 
+        });
+        Console.WriteLine($"=== PayOS Webhook Received ===");
+        Console.WriteLine($"Timestamp: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss UTC}");
+        Console.WriteLine($"Webhook JSON Payload:");
+        Console.WriteLine(webhookJson);
+        Console.WriteLine($"=== End Webhook Payload ===");
+
         // Lấy orderCode từ webhook
         var orderCode = payload.data?.orderCode;
         if (orderCode == null)
         {
-            Console.WriteLine("Webhook missing orderCode");
+            Console.WriteLine("Warning: orderCode is null in webhook payload");
             return;
         }
-        
-        Console.WriteLine($"Processing webhook for orderCode: {orderCode}");
-        
+             
         // Tìm payment theo ExternalTransactionId (orderCode)
         var payment = await _context.Payments.FirstOrDefaultAsync(p => p.ExternalTransactionId == orderCode.ToString());
         if (payment == null)
         {
-            Console.WriteLine($"No payment found for orderCode {orderCode}");
+            Console.WriteLine($"Warning: Payment not found for orderCode: {orderCode}");
             return;
         }
         
-        Console.WriteLine($"Found payment {payment.PaymentId} with status: {payment.Status}");
-        Console.WriteLine($"Webhook data - code: {payload.data.code}, desc: {payload.data.desc}");
-        
         // Nếu code == "00" thì coi như thành công (không cần kiểm tra desc)
         if (payload.data.code == "00")
+        {
+            Console.WriteLine($"Processing successful payment for orderCode: {orderCode}, PaymentId: {payment.PaymentId}");
+            await HandlePaymentSuccessAsync(payment);
+        }
+        // Nếu code khác "00" thì coi như thất bại/hủy
+        else
+        {
+            Console.WriteLine($"Processing failed payment for orderCode: {orderCode}, PaymentId: {payment.PaymentId}, Code: {payload.data.code}");
+            await HandlePaymentFailureAsync(payment);
+        }
+    }
+
+        private async Task HandlePaymentSuccessAsync(Payment payment)
         {
             if (payment.Status != PaymentStatus.Success)
             {
@@ -427,19 +446,17 @@ public class PaymentService : IPaymentService
                 {
                     booking.Status = "Confirmed";
                     booking.UpdatedAt = DateTime.UtcNow;
-                    Console.WriteLine($"Updated booking {booking.BookingId} to Confirmed");
                 }
                 
                 await _unitOfWork.SaveChangesAsync();
-                Console.WriteLine($"Payment {payment.PaymentId} marked as Success by webhook");
             }
             else
             {
                 Console.WriteLine($"Payment {payment.PaymentId} already has Success status");
             }
         }
-        // Nếu code khác "00" thì coi như thất bại/hủy
-        else
+
+        private async Task HandlePaymentFailureAsync(Payment payment)
         {
             if (payment.Status != PaymentStatus.Cancelled && payment.Status != PaymentStatus.Failed)
             {
@@ -451,18 +468,15 @@ public class PaymentService : IPaymentService
                 {
                     booking.Status = "Cancelled";
                     booking.UpdatedAt = DateTime.UtcNow;
-                    Console.WriteLine($"Updated booking {booking.BookingId} to Cancelled");
                 }
                 
                 await _unitOfWork.SaveChangesAsync();
-                Console.WriteLine($"Payment {payment.PaymentId} marked as Failed/Cancelled by webhook");
             }
             else
             {
                 Console.WriteLine($"Payment {payment.PaymentId} already has Failed/Cancelled status");
             }
         }
-    }
 
         private async Task CreateFeeDistributionTransactionsAsync(Payment payment, decimal platformFee, decimal photographerPayout, decimal locationFee)
         {
