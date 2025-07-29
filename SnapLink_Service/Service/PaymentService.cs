@@ -35,6 +35,39 @@ public class PaymentService : IPaymentService
             _transactionService = transactionService;
     }
 // need userid for now , add to jwt token later
+    private async Task<int> GenerateUniquePaymentCodeAsync()
+    {
+        int maxAttempts = 10;
+        int attempt = 0;
+        
+        while (attempt < maxAttempts)
+        {
+            // Generate a more unique code using timestamp + random number
+            var timestamp = DateTimeOffset.Now;
+            var random = new Random();
+            var randomPart = random.Next(1000, 9999); // 4-digit random number
+            
+            // Combine timestamp (6 digits) + random (4 digits) = 10 digits
+            var paymentCode = int.Parse($"{timestamp.ToString("ffffff")}{randomPart}");
+            
+            // Check if this code already exists in database
+            var existingPayment = await _context.Payments
+                .FirstOrDefaultAsync(p => p.ExternalTransactionId == paymentCode.ToString());
+            
+            if (existingPayment == null)
+            {
+                return paymentCode;
+            }
+            
+            attempt++;
+            // Small delay to ensure different timestamp
+            await Task.Delay(1);
+        }
+        
+        // If we can't generate a unique code after max attempts, throw exception
+        throw new InvalidOperationException("Unable to generate unique payment code after multiple attempts");
+    }
+
     public async Task<PaymentResponse> CreatePaymentLinkAsync(CreatePaymentLinkRequest request, int userId)
     {
         try
@@ -150,7 +183,7 @@ public class PaymentService : IPaymentService
                 }
 
                 // Generate unique payment code
-                int paymentCode = int.Parse(DateTimeOffset.Now.ToString("ffffff"));
+                int paymentCode = await GenerateUniquePaymentCodeAsync();
                 
                 // Create PayOS item data using payment amount (capped for testing)
                 ItemData item = new ItemData(request.ProductName, 1, (int)paymentAmount);
