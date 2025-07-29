@@ -62,6 +62,15 @@ namespace SnapLink_API.Controllers
             var result = await _userService.DeleteUserAsync(userId);
             return Ok(result);
         }
+
+        [HttpDelete("hard-delete/{userId}")]
+        public async Task<IActionResult> HardDeleteAccount(int userId)
+        {
+            var result = await _userService.HardDeleteUserAsync(userId);
+            if (result.Contains("deleted"))
+                return Ok(result);
+            return NotFound(result);
+        }
         [HttpGet("all")]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -99,6 +108,13 @@ namespace SnapLink_API.Controllers
             if (result)
                 return Ok("Roles assigned successfully.");
             return BadRequest("Failed to assign roles.");
+        }
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailDto dto)
+        {
+            var success = await _userService.VerifyEmailAsync(dto.Email, dto.Code);
+            if (!success) return BadRequest("Invalid or expired verification code.");
+            return Ok("Email verified successfully.");
         }
     }
 }

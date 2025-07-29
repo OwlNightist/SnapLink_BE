@@ -13,11 +13,14 @@ namespace SnapLink_Service.IService
         Task<string> CreateUserWithRoleAsync(CreateUserDto dto, string roleName);
         Task<string> UpdateUserAsync(UpdateUserDto dto);
         Task<string> DeleteUserAsync(int userId);
+        Task<string> HardDeleteUserAsync(int userId);
+
         Task<List<User>> GetAllUsersAsync();
         Task<User?> GetUserByIdAsync(int userId);
         Task<List<UserDto>> GetUsersByRoleNameAsync(string roleName);
         Task<UserDto?> GetUserByEmailAsync(string email);
         Task<bool> AssignRolesToUserAsync(AssignRolesDto request);
+        Task<bool> VerifyEmailAsync(string email, string code);
 
     }
 }

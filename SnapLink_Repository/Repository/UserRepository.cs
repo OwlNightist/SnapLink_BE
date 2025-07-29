@@ -53,6 +53,36 @@ namespace SnapLink_Repository.Repository
             user.UpdateAt = DateTime.UtcNow;
             _context.Users.Update(user);
         }
+        public async Task HardDeleteUserAsync(User user)
+        {
+            var userId = user.UserId;
+            var userStyles = _context.UserStyles.Where(us => us.UserId == userId);
+            _context.UserStyles.RemoveRange(userStyles);
+
+            var photographerIds = _context.Photographers
+        .Where(p => p.UserId == user.UserId)
+        .Select(p => p.PhotographerId)
+        .ToList();
+
+            var photographerStyles = _context.PhotographerStyles
+                .Where(ps => photographerIds.Contains(ps.PhotographerId));
+
+            _context.PhotographerStyles.RemoveRange(photographerStyles);
+            var userRoles = _context.UserRoles.Where(ur => ur.UserId == user.UserId);
+            _context.UserRoles.RemoveRange(userRoles);
+
+            var photographers = _context.Photographers.Where(p => p.UserId == user.UserId);
+            _context.Photographers.RemoveRange(photographers);
+
+            var notifications = _context.Notifications.Where(n => n.UserId == user.UserId);
+            _context.Notifications.RemoveRange(notifications);
+
+            var locationOwners = _context.LocationOwners.Where(lo => lo.UserId == user.UserId);
+            _context.LocationOwners.RemoveRange(locationOwners);
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+        }
         public async Task<List<User>> GetAllUsersAsync()
         {
             return await _context.Users

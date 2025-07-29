@@ -284,7 +284,7 @@ public class PaymentService : IPaymentService
                         FromUserId = payment.CustomerId,
                         ToUserId = null, // System receives the payment
                         Amount = payment.TotalAmount,
-                        Type = TransactionType.Payout,
+                        Type = TransactionType.Deposit,
                         Status = TransactionStatus.Success,
                         Note = $"Payment completed for booking {payment.BookingId}",
                         CreatedAt = DateTime.UtcNow,
@@ -319,7 +319,7 @@ public class PaymentService : IPaymentService
                     }
 
                     // Create fee distribution transactions
-                    await CreateFeeDistributionTransactionsAsync(payment, platformFee, photographerPayout, locationFee);
+                    await _transactionService.CreatePaymentDistributionTransactionsAsync(payment.PaymentId, platformFee, photographerPayout, locationFee);
 
                     // Update booking status
                     if (payment.Booking != null)
