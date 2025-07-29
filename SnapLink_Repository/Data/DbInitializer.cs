@@ -653,11 +653,11 @@ namespace SnapLink_Repository.Data
                 var users = context.Users.Take(5).ToList();
                 var transactions = new[]
                 {
-                    new Transaction { FromUserId = null, ToUserId = users[0].UserId, Amount = 100, Type = TransactionType.Topup, Status = TransactionStatus.Success, Note = "Initial deposit", CreatedAt = DateTime.Now },
-                    new Transaction { FromUserId = users[1].UserId, ToUserId = null, Amount = 50, Type = TransactionType.Withdraw, Status = TransactionStatus.Success, Note = "Withdrawal", CreatedAt = DateTime.Now },
+                    new Transaction { FromUserId = null, ToUserId = users[0].UserId, Amount = 100, Type = TransactionType.VenueFee, Status = TransactionStatus.Success, Note = "Initial deposit", CreatedAt = DateTime.Now },
+                    new Transaction { FromUserId = users[1].UserId, ToUserId = null, Amount = 50, Type = TransactionType.Refund, Status = TransactionStatus.Success, Note = "Withdrawal", CreatedAt = DateTime.Now },
                     new Transaction { FromUserId = null, ToUserId = users[2].UserId, Amount = 75, Type = TransactionType.Refund, Status = TransactionStatus.Success, Note = "Refund for cancelled booking", CreatedAt = DateTime.Now },
-                    new Transaction { FromUserId = users[3].UserId, ToUserId = null, Amount = 120, Type = TransactionType.Payout, Status = TransactionStatus.Pending, Note = "Photographer payout", CreatedAt = DateTime.Now },
-                    new Transaction { FromUserId = null, ToUserId = users[4].UserId, Amount = 200, Type = TransactionType.Bonus, Status = TransactionStatus.Success, Note = "Referral bonus", CreatedAt = DateTime.Now }
+                    new Transaction { FromUserId = users[3].UserId, ToUserId = null, Amount = 120, Type = TransactionType.PhotographerFee, Status = TransactionStatus.Pending, Note = "Photographer payout", CreatedAt = DateTime.Now },
+                    new Transaction { FromUserId = null, ToUserId = users[4].UserId, Amount = 200, Type = TransactionType.PlatformFee, Status = TransactionStatus.Success, Note = "Referral bonus", CreatedAt = DateTime.Now }
                 };
                 context.Transactions.AddRange(transactions);
                 context.SaveChanges();
