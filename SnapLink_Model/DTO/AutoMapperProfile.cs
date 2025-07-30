@@ -72,6 +72,16 @@ namespace SnapLink_Model.DTO
             CreateMap<UpdateImageRequest, Image>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
+            // Availability mappings
+            CreateMap<Availability, AvailabilityResponse>();
+            CreateMap<Availability, AvailabilityDetailResponse>()
+                .ForMember(dest => dest.PhotographerName, opt => opt.MapFrom(src => src.Photographer.User.FullName))
+                .ForMember(dest => dest.PhotographerEmail, opt => opt.MapFrom(src => src.Photographer.User.Email));
+
+            CreateMap<CreateAvailabilityRequest, Availability>();
+            CreateMap<UpdateAvailabilityRequest, Availability>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
             // Style mappings
             CreateMap<Style, StyleResponse>()
                 .ForMember(dest => dest.PhotographerCount, opt => opt.MapFrom(src => src.PhotographerStyles.Count));

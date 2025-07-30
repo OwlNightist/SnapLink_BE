@@ -277,6 +277,73 @@ public class BookingController : ControllerBase
         }
     }
 
+    [HttpGet("availability/location/{locationId}/photographer/{photographerId}")]
+    public async Task<IActionResult> CheckLocationAvailabilityForPhotographer(int locationId, int photographerId, [FromQuery] DateTime startTime, [FromQuery] DateTime endTime)
+    {
+        try
+        {
+            var isAvailable = await _bookingService.IsLocationAvailableForPhotographerAsync(locationId, photographerId, startTime, endTime);
+            
+            return Ok(new
+            {
+                Error = 0,
+                Message = "Photographer-specific location availability check completed",
+                Data = new
+                {
+                    LocationId = locationId,
+                    PhotographerId = photographerId,
+                    StartTime = startTime,
+                    EndTime = endTime,
+                    IsAvailable = isAvailable,
+                    Note = isAvailable ? "Location is available for this photographer" : "Photographer already has a booking at this location during the selected time"
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in CheckLocationAvailabilityForPhotographer: {ex.Message}");
+            return StatusCode(500, new
+            {
+                Error = -1,
+                Message = "Internal server error",
+                Data = (object?)null
+            });
+        }
+    }
+
+    [HttpGet("location/{locationId}/photographers")]
+    public async Task<IActionResult> GetPhotographersAtLocation(int locationId, [FromQuery] DateTime startTime, [FromQuery] DateTime endTime)
+    {
+        try
+        {
+            var photographers = await _bookingService.GetPhotographersAtLocationAsync(locationId, startTime, endTime);
+            
+            return Ok(new
+            {
+                Error = 0,
+                Message = "Photographers at location retrieved successfully",
+                Data = new
+                {
+                    LocationId = locationId,
+                    StartTime = startTime,
+                    EndTime = endTime,
+                    PhotographerCount = photographers.Count(),
+                    Photographers = photographers
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in GetPhotographersAtLocation: {ex.Message}");
+            return StatusCode(500, new
+            {
+                Error = -1,
+                Message = "Internal server error",
+                Data = (object?)null
+            });
+        }
+    }
+
     [HttpGet("calculate-price")]
     public async Task<IActionResult> CalculatePrice([FromQuery] int photographerId, [FromQuery] int? locationId, [FromQuery] DateTime startTime, [FromQuery] DateTime endTime)
     {

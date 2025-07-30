@@ -14,6 +14,8 @@ public interface IBookingService
     Task<BookingResponse> CompleteBookingAsync(int bookingId);
     Task<bool> IsPhotographerAvailableAsync(int photographerId, DateTime startTime, DateTime endTime);
     Task<bool> IsLocationAvailableAsync(int locationId, DateTime startTime, DateTime endTime);
+    Task<bool> IsLocationAvailableForPhotographerAsync(int locationId, int photographerId, DateTime startTime, DateTime endTime);
+    Task<IEnumerable<BookingData>> GetPhotographersAtLocationAsync(int locationId, DateTime startTime, DateTime endTime);
     Task<decimal> CalculateBookingPriceAsync(int photographerId, int? locationId, DateTime startTime, DateTime endTime);
     Task<int> CancelExpiredPendingBookingsAsync();
     Task<int> CancelAllPendingBookingsAsync();

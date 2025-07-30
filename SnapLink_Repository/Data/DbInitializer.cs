@@ -32,7 +32,7 @@ namespace SnapLink_Repository.Data
                 var users = new[]
                 {
                     new User { UserName = "alice", Email = "alice@example.com", PasswordHash = "hash1", PhoneNumber = "1234567890", FullName = "Alice Smith", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "bob", Email = "bob@example.com", PasswordHash = "hash2", PhoneNumber = "1234567891", FullName = "linhka", ProfileImage = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2933653585994336284's2025-7-27-20.14.485%20story.jpg", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "linkka", Email = "linkka@example.com", PasswordHash = "hash2", PhoneNumber = "1234567891", FullName = "linhka", ProfileImage = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2933653585994336284's2025-7-27-20.14.485%20story.jpg", Status = "Active", CreateAt = DateTime.Now },
                     new User { UserName = "carol", Email = "carol@example.com", PasswordHash = "hash3", PhoneNumber = "1234567892", FullName = "Carol White", Status = "Active", CreateAt = DateTime.Now },
                     new User { UserName = "dave", Email = "dave@example.com", PasswordHash = "hash4", PhoneNumber = "1234567893", FullName = "Dave Brown", Status = "Active", CreateAt = DateTime.Now },
                     new User { UserName = "eve", Email = "eve@example.com", PasswordHash = "hash5", PhoneNumber = "1234567894", FullName = "Eve Black", Status = "Active", CreateAt = DateTime.Now },
@@ -815,6 +815,350 @@ namespace SnapLink_Repository.Data
                     new UserStyle { UserId = users[4].UserId, StyleId = styles[4].StyleId, CreatedAt = DateTime.Now }
                 };
                 context.UserStyles.AddRange(userStyles);
+                context.SaveChanges();
+            }
+
+            // Seed Availability
+            if (!context.Availabilities.Any())
+            {
+                var photographers = context.Photographers.Take(15).ToList();
+                var availabilities = new List<Availability>();
+
+                // Photographer 1 (Alice) - Portrait specialist - Available Monday to Friday
+                for (int i = 1; i <= 5; i++) // Monday to Friday
+                {
+                    availabilities.Add(new Availability
+                    {
+                        PhotographerId = photographers[0].PhotographerId,
+                        DayOfWeek = (DayOfWeek)i,
+                        StartTime = new TimeSpan(9, 0, 0), // 9:00 AM
+                        EndTime = new TimeSpan(17, 0, 0),  // 5:00 PM
+                        Status = "Available",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                // Photographer 2 (Bob) - Landscape specialist - Available weekends and evenings
+                availabilities.Add(new Availability
+                {
+                    PhotographerId = photographers[1].PhotographerId,
+                    DayOfWeek = DayOfWeek.Saturday,
+                    StartTime = new TimeSpan(6, 0, 0), // 6:00 AM for sunrise
+                    EndTime = new TimeSpan(18, 0, 0),  // 6:00 PM
+                    Status = "Available",
+                    CreatedAt = DateTime.Now
+                });
+                availabilities.Add(new Availability
+                {
+                    PhotographerId = photographers[1].PhotographerId,
+                    DayOfWeek = DayOfWeek.Sunday,
+                    StartTime = new TimeSpan(6, 0, 0),
+                    EndTime = new TimeSpan(18, 0, 0),
+                    Status = "Available",
+                    CreatedAt = DateTime.Now
+                });
+                // Weekday evenings
+                for (int i = 1; i <= 5; i++)
+                {
+                    availabilities.Add(new Availability
+                    {
+                        PhotographerId = photographers[1].PhotographerId,
+                        DayOfWeek = (DayOfWeek)i,
+                        StartTime = new TimeSpan(18, 0, 0), // 6:00 PM
+                        EndTime = new TimeSpan(22, 0, 0),   // 10:00 PM
+                        Status = "Available",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                // Photographer 3 (Carol) - Wedding specialist - Available all week, flexible hours
+                for (int i = 1; i <= 7; i++) // All days
+                {
+                    availabilities.Add(new Availability
+                    {
+                        PhotographerId = photographers[2].PhotographerId,
+                        DayOfWeek = (DayOfWeek)i,
+                        StartTime = new TimeSpan(8, 0, 0), // 8:00 AM
+                        EndTime = new TimeSpan(20, 0, 0),  // 8:00 PM
+                        Status = "Available",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                // Photographer 4 (Dave) - Event specialist - Available weekdays only
+                for (int i = 1; i <= 5; i++)
+                {
+                    availabilities.Add(new Availability
+                    {
+                        PhotographerId = photographers[3].PhotographerId,
+                        DayOfWeek = (DayOfWeek)i,
+                        StartTime = new TimeSpan(10, 0, 0), // 10:00 AM
+                        EndTime = new TimeSpan(18, 0, 0),   // 6:00 PM
+                        Status = "Available",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                // Photographer 5 (Eve) - Fashion specialist - Available Tuesday to Saturday
+                for (int i = 2; i <= 6; i++) // Tuesday to Saturday
+                {
+                    availabilities.Add(new Availability
+                    {
+                        PhotographerId = photographers[4].PhotographerId,
+                        DayOfWeek = (DayOfWeek)i,
+                        StartTime = new TimeSpan(11, 0, 0), // 11:00 AM
+                        EndTime = new TimeSpan(19, 0, 0),   // 7:00 PM
+                        Status = "Available",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                // Photographer 6 (Frank) - Portrait + Fashion - Available Monday to Friday, morning and evening
+                for (int i = 1; i <= 5; i++)
+                {
+                    // Morning session
+                    availabilities.Add(new Availability
+                    {
+                        PhotographerId = photographers[5].PhotographerId,
+                        DayOfWeek = (DayOfWeek)i,
+                        StartTime = new TimeSpan(9, 0, 0),
+                        EndTime = new TimeSpan(12, 0, 0),
+                        Status = "Available",
+                        CreatedAt = DateTime.Now
+                    });
+                    // Afternoon session
+                    availabilities.Add(new Availability
+                    {
+                        PhotographerId = photographers[5].PhotographerId,
+                        DayOfWeek = (DayOfWeek)i,
+                        StartTime = new TimeSpan(14, 0, 0), // 2:00 PM
+                        EndTime = new TimeSpan(18, 0, 0),   // 6:00 PM
+                        Status = "Available",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                // Photographer 7 (Grace) - Landscape + Event - Available weekends and weekday evenings
+                // Weekends
+                availabilities.Add(new Availability
+                {
+                    PhotographerId = photographers[6].PhotographerId,
+                    DayOfWeek = DayOfWeek.Saturday,
+                    StartTime = new TimeSpan(7, 0, 0),
+                    EndTime = new TimeSpan(19, 0, 0),
+                    Status = "Available",
+                    CreatedAt = DateTime.Now
+                });
+                availabilities.Add(new Availability
+                {
+                    PhotographerId = photographers[6].PhotographerId,
+                    DayOfWeek = DayOfWeek.Sunday,
+                    StartTime = new TimeSpan(7, 0, 0),
+                    EndTime = new TimeSpan(19, 0, 0),
+                    Status = "Available",
+                    CreatedAt = DateTime.Now
+                });
+                // Weekday evenings
+                for (int i = 1; i <= 5; i++)
+                {
+                    availabilities.Add(new Availability
+                    {
+                        PhotographerId = photographers[6].PhotographerId,
+                        DayOfWeek = (DayOfWeek)i,
+                        StartTime = new TimeSpan(17, 0, 0), // 5:00 PM
+                        EndTime = new TimeSpan(21, 0, 0),   // 9:00 PM
+                        Status = "Available",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                // Photographer 8 (Henry) - Wedding + Portrait + Event - Available all week, long hours
+                for (int i = 1; i <= 7; i++)
+                {
+                    availabilities.Add(new Availability
+                    {
+                        PhotographerId = photographers[7].PhotographerId,
+                        DayOfWeek = (DayOfWeek)i,
+                        StartTime = new TimeSpan(7, 0, 0), // 7:00 AM
+                        EndTime = new TimeSpan(22, 0, 0),  // 10:00 PM
+                        Status = "Available",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                // Photographer 9 (Iris) - Event specialist - Available weekdays and Saturday
+                for (int i = 1; i <= 6; i++) // Monday to Saturday
+                {
+                    availabilities.Add(new Availability
+                    {
+                        PhotographerId = photographers[8].PhotographerId,
+                        DayOfWeek = (DayOfWeek)i,
+                        StartTime = new TimeSpan(9, 0, 0),
+                        EndTime = new TimeSpan(17, 0, 0),
+                        Status = "Available",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                // Photographer 10 (Jack) - Fashion + Portrait - Available Tuesday to Sunday
+                for (int i = 2; i <= 7; i++) // Tuesday to Sunday
+                {
+                    availabilities.Add(new Availability
+                    {
+                        PhotographerId = photographers[9].PhotographerId,
+                        DayOfWeek = (DayOfWeek)i,
+                        StartTime = new TimeSpan(10, 0, 0),
+                        EndTime = new TimeSpan(18, 0, 0),
+                        Status = "Available",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                // Photographer 11 (Kate) - Portrait + Wedding - Available Monday to Friday
+                for (int i = 1; i <= 5; i++)
+                {
+                    availabilities.Add(new Availability
+                    {
+                        PhotographerId = photographers[10].PhotographerId,
+                        DayOfWeek = (DayOfWeek)i,
+                        StartTime = new TimeSpan(8, 0, 0),
+                        EndTime = new TimeSpan(16, 0, 0),
+                        Status = "Available",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                // Photographer 12 (Leo) - Landscape specialist - Available weekends and weekday mornings
+                // Weekends
+                availabilities.Add(new Availability
+                {
+                    PhotographerId = photographers[11].PhotographerId,
+                    DayOfWeek = DayOfWeek.Saturday,
+                    StartTime = new TimeSpan(5, 0, 0), // 5:00 AM for sunrise
+                    EndTime = new TimeSpan(17, 0, 0),
+                    Status = "Available",
+                    CreatedAt = DateTime.Now
+                });
+                availabilities.Add(new Availability
+                {
+                    PhotographerId = photographers[11].PhotographerId,
+                    DayOfWeek = DayOfWeek.Sunday,
+                    StartTime = new TimeSpan(5, 0, 0),
+                    EndTime = new TimeSpan(17, 0, 0),
+                    Status = "Available",
+                    CreatedAt = DateTime.Now
+                });
+                // Weekday mornings
+                for (int i = 1; i <= 5; i++)
+                {
+                    availabilities.Add(new Availability
+                    {
+                        PhotographerId = photographers[11].PhotographerId,
+                        DayOfWeek = (DayOfWeek)i,
+                        StartTime = new TimeSpan(6, 0, 0), // 6:00 AM
+                        EndTime = new TimeSpan(12, 0, 0),  // 12:00 PM
+                        Status = "Available",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                // Photographer 13 (Maya) - Wedding + Fashion + Event - Available all week
+                for (int i = 1; i <= 7; i++)
+                {
+                    availabilities.Add(new Availability
+                    {
+                        PhotographerId = photographers[12].PhotographerId,
+                        DayOfWeek = (DayOfWeek)i,
+                        StartTime = new TimeSpan(8, 0, 0),
+                        EndTime = new TimeSpan(20, 0, 0),
+                        Status = "Available",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                // Photographer 14 (Nina) - Event + Landscape - Available weekdays and weekend afternoons
+                // Weekdays
+                for (int i = 1; i <= 5; i++)
+                {
+                    availabilities.Add(new Availability
+                    {
+                        PhotographerId = photographers[13].PhotographerId,
+                        DayOfWeek = (DayOfWeek)i,
+                        StartTime = new TimeSpan(9, 0, 0),
+                        EndTime = new TimeSpan(17, 0, 0),
+                        Status = "Available",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+                // Weekend afternoons
+                availabilities.Add(new Availability
+                {
+                    PhotographerId = photographers[13].PhotographerId,
+                    DayOfWeek = DayOfWeek.Saturday,
+                    StartTime = new TimeSpan(13, 0, 0), // 1:00 PM
+                    EndTime = new TimeSpan(19, 0, 0),   // 7:00 PM
+                    Status = "Available",
+                    CreatedAt = DateTime.Now
+                });
+                availabilities.Add(new Availability
+                {
+                    PhotographerId = photographers[13].PhotographerId,
+                    DayOfWeek = DayOfWeek.Sunday,
+                    StartTime = new TimeSpan(13, 0, 0),
+                    EndTime = new TimeSpan(19, 0, 0),
+                    Status = "Available",
+                    CreatedAt = DateTime.Now
+                });
+
+                // Photographer 15 (Oscar) - Fashion + Portrait + Wedding - Available Tuesday to Sunday
+                for (int i = 2; i <= 7; i++) // Tuesday to Sunday
+                {
+                    availabilities.Add(new Availability
+                    {
+                        PhotographerId = photographers[14].PhotographerId,
+                        DayOfWeek = (DayOfWeek)i,
+                        StartTime = new TimeSpan(10, 0, 0),
+                        EndTime = new TimeSpan(19, 0, 0),
+                        Status = "Available",
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                // Add some unavailable time slots for variety
+                // Photographer 1 - Monday afternoon unavailable
+                availabilities.Add(new Availability
+                {
+                    PhotographerId = photographers[0].PhotographerId,
+                    DayOfWeek = DayOfWeek.Monday,
+                    StartTime = new TimeSpan(13, 0, 0), // 1:00 PM
+                    EndTime = new TimeSpan(15, 0, 0),   // 3:00 PM
+                    Status = "Unavailable",
+                    CreatedAt = DateTime.Now
+                });
+
+                // Photographer 3 - Wednesday morning unavailable
+                availabilities.Add(new Availability
+                {
+                    PhotographerId = photographers[2].PhotographerId,
+                    DayOfWeek = DayOfWeek.Wednesday,
+                    StartTime = new TimeSpan(8, 0, 0),
+                    EndTime = new TimeSpan(12, 0, 0),
+                    Status = "Unavailable",
+                    CreatedAt = DateTime.Now
+                });
+
+                // Photographer 7 - Friday evening unavailable
+                availabilities.Add(new Availability
+                {
+                    PhotographerId = photographers[6].PhotographerId,
+                    DayOfWeek = DayOfWeek.Friday,
+                    StartTime = new TimeSpan(17, 0, 0),
+                    EndTime = new TimeSpan(21, 0, 0),
+                    Status = "Unavailable",
+                    CreatedAt = DateTime.Now
+                });
+
+                context.Availabilities.AddRange(availabilities);
                 context.SaveChanges();
             }
         }

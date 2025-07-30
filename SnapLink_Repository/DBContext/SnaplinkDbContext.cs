@@ -69,6 +69,8 @@ public partial class SnaplinkDbContext : DbContext
 
     public virtual DbSet<PhotographerEventLocation> PhotographerEventLocations { get; set; }
 
+    public virtual DbSet<Availability> Availabilities { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer(GetConnectionString());
 
@@ -893,6 +895,46 @@ public partial class SnaplinkDbContext : DbContext
                 .HasForeignKey(d => d.LocationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PhotographerEventLocation_Location");
+        });
+
+        modelBuilder.Entity<Availability>(entity =>
+        {
+            entity.HasKey(e => e.AvailabilityId).HasName("PK__Availability__AvailabilityId");
+
+            entity.ToTable("Availability");
+
+            entity.Property(e => e.AvailabilityId).HasColumnName("availabilityId");
+            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
+            entity.Property(e => e.DayOfWeek).HasColumnName("dayOfWeek");
+            entity.Property(e => e.StartTime).HasColumnName("startTime");
+            entity.Property(e => e.EndTime).HasColumnName("endTime");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasColumnName("status");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updatedAt");
+
+            entity.HasOne(d => d.Photographer).WithMany(p => p.Availabilities)
+                .HasForeignKey(d => d.PhotographerId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Availability_Photographer");
+
+            // Add indexes for better performance
+            entity.HasIndex(e => e.PhotographerId).HasDatabaseName("IX_Availability_PhotographerId");
+            entity.HasIndex(e => e.DayOfWeek).HasDatabaseName("IX_Availability_DayOfWeek");
+            entity.HasIndex(e => e.Status).HasDatabaseName("IX_Availability_Status");
+            
+            // Composite indexes for complex queries
+            entity.HasIndex(e => new { e.PhotographerId, e.DayOfWeek, e.Status })
+                .HasDatabaseName("IX_Availability_Photographer_Day_Status");
+            
+            entity.HasIndex(e => new { e.DayOfWeek, e.Status, e.StartTime, e.EndTime })
+                .HasDatabaseName("IX_Availability_Day_Status_Time");
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -71,13 +71,13 @@ namespace SnapLink_Service.Service
                         };
                     }
 
-                    // Check location availability
-                    if (!await IsLocationAvailableAsync(locationId.Value, request.StartDatetime, request.EndDatetime))
+                    // Check location availability for this specific photographer
+                    if (!await IsLocationAvailableForPhotographerAsync(locationId.Value, request.PhotographerId, request.StartDatetime, request.EndDatetime))
                     {
                         return new BookingResponse
                         {
                             Error = -1,
-                            Message = "Location is not available for the selected time",
+                            Message = "Photographer already has a booking at this location during the selected time",
                             Data = null
                         };
                     }
@@ -499,12 +499,28 @@ namespace SnapLink_Service.Service
                             (b.StartDatetime >= startTime && b.EndDatetime <= endTime)))
                 .AnyAsync();
 
-            return !conflictingBookings;
+            if (conflictingBookings)
+                return false;
+
+            // Check availability table for the specific day and time
+            var dayOfWeek = startTime.DayOfWeek;
+            var startTimeOfDay = startTime.TimeOfDay;
+            var endTimeOfDay = endTime.TimeOfDay;
+
+            var availableSlots = await _context.Availabilities
+                .Where(a => a.PhotographerId == photographerId &&
+                           a.DayOfWeek == dayOfWeek &&
+                           a.Status == "Available" &&
+                           a.StartTime <= startTimeOfDay &&
+                           a.EndTime >= endTimeOfDay)
+                .AnyAsync();
+
+            return availableSlots;
         }
 
         public async Task<bool> IsLocationAvailableAsync(int locationId, DateTime startTime, DateTime endTime)
         {
-            // Check if location has any conflicting bookings
+            // Check if location has any conflicting bookings for the same time slot
             var conflictingBookings = await _context.Bookings
                 .Where(b => b.LocationId == locationId &&
                            b.Status != "Cancelled" &&
@@ -515,6 +531,55 @@ namespace SnapLink_Service.Service
                 .AnyAsync();
 
             return !conflictingBookings;
+        }
+
+        /// <summary>
+        /// Check if location is available for a specific photographer and time
+        /// This allows multiple photographers to book the same location at the same time
+        /// </summary>
+        public async Task<bool> IsLocationAvailableForPhotographerAsync(int locationId, int photographerId, DateTime startTime, DateTime endTime)
+        {
+            // Check if this specific photographer already has a booking for this location at the same time
+            var photographerConflict = await _context.Bookings
+                .Where(b => b.LocationId == locationId &&
+                           b.PhotographerId == photographerId &&
+                           b.Status != "Cancelled" &&
+                           b.Status != "Completed" &&
+                           ((b.StartDatetime <= startTime && b.EndDatetime > startTime) ||
+                            (b.StartDatetime < endTime && b.EndDatetime >= endTime) ||
+                            (b.StartDatetime >= startTime && b.EndDatetime <= endTime)))
+                .AnyAsync();
+
+            // Only check if this specific photographer has conflict
+            // Multiple photographers can book the same location at the same time
+            return !photographerConflict;
+        }
+
+        /// <summary>
+        /// Get all photographers booking the same location at the same time
+        /// </summary>
+        public async Task<IEnumerable<BookingData>> GetPhotographersAtLocationAsync(int locationId, DateTime startTime, DateTime endTime)
+        {
+            var bookings = await _context.Bookings
+                .Include(b => b.Photographer)
+                .ThenInclude(p => p.User)
+                .Include(b => b.User)
+                .Where(b => b.LocationId == locationId &&
+                           b.Status != "Cancelled" &&
+                           b.Status != "Completed" &&
+                           ((b.StartDatetime <= startTime && b.EndDatetime > startTime) ||
+                            (b.StartDatetime < endTime && b.EndDatetime >= endTime) ||
+                            (b.StartDatetime >= startTime && b.EndDatetime <= endTime)))
+                .ToListAsync();
+
+            var bookingDataList = new List<BookingData>();
+            foreach (var booking in bookings)
+            {
+                var bookingData = await MapBookingToResponseAsync(booking);
+                bookingDataList.Add(bookingData);
+            }
+
+            return bookingDataList;
         }
 
         public async Task<decimal> CalculateBookingPriceAsync(int photographerId, int? locationId, DateTime startTime, DateTime endTime)
