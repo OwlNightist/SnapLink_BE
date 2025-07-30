@@ -71,6 +71,10 @@ public partial class SnaplinkDbContext : DbContext
 
     public virtual DbSet<Availability> Availabilities { get; set; }
 
+    public virtual DbSet<PhotoDelivery> PhotoDeliveries { get; set; }
+
+    public virtual DbSet<DeviceInfo> DeviceInfos { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer(GetConnectionString());
 
@@ -935,6 +939,126 @@ public partial class SnaplinkDbContext : DbContext
             
             entity.HasIndex(e => new { e.DayOfWeek, e.Status, e.StartTime, e.EndTime })
                 .HasDatabaseName("IX_Availability_Day_Status_Time");
+        });
+
+        modelBuilder.Entity<PhotoDelivery>(entity =>
+        {
+            entity.HasKey(e => e.PhotoDeliveryId).HasName("PK__PhotoDelivery__PhotoDeliveryId");
+
+            entity.ToTable("PhotoDelivery");
+
+            entity.Property(e => e.PhotoDeliveryId).HasColumnName("photoDeliveryId");
+            entity.Property(e => e.BookingId).HasColumnName("bookingId");
+            entity.Property(e => e.DeliveryMethod)
+                .HasMaxLength(50)
+                .HasColumnName("deliveryMethod");
+            entity.Property(e => e.DriveLink)
+                .HasMaxLength(500)
+                .HasColumnName("driveLink");
+            entity.Property(e => e.DriveFolderName)
+                .HasMaxLength(100)
+                .HasColumnName("driveFolderName");
+            entity.Property(e => e.PhotoCount).HasColumnName("photoCount");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasColumnName("status");
+            entity.Property(e => e.UploadedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("uploadedAt");
+            entity.Property(e => e.DeliveredAt)
+                .HasColumnType("datetime")
+                .HasColumnName("deliveredAt");
+            entity.Property(e => e.ExpiresAt)
+                .HasColumnType("datetime")
+                .HasColumnName("expiresAt");
+            entity.Property(e => e.Notes)
+                .HasMaxLength(500)
+                .HasColumnName("notes");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updatedAt");
+
+            entity.HasOne(d => d.Booking).WithOne(p => p.PhotoDelivery)
+                .HasForeignKey<PhotoDelivery>(d => d.BookingId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_PhotoDelivery_Booking");
+
+            // Add indexes for better performance
+            entity.HasIndex(e => e.BookingId).HasDatabaseName("IX_PhotoDelivery_BookingId");
+            entity.HasIndex(e => e.Status).HasDatabaseName("IX_PhotoDelivery_Status");
+            entity.HasIndex(e => e.DeliveryMethod).HasDatabaseName("IX_PhotoDelivery_DeliveryMethod");
+        });
+
+        modelBuilder.Entity<DeviceInfo>(entity =>
+        {
+            entity.HasKey(e => e.DeviceInfoId).HasName("PK__DeviceInfo__DeviceInfoId");
+
+            entity.ToTable("DeviceInfo");
+
+            entity.Property(e => e.DeviceInfoId).HasColumnName("deviceInfoId");
+            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
+            entity.Property(e => e.DeviceType)
+                .HasMaxLength(100)
+                .HasColumnName("deviceType");
+            entity.Property(e => e.Brand)
+                .HasMaxLength(100)
+                .HasColumnName("brand");
+            entity.Property(e => e.Model)
+                .HasMaxLength(100)
+                .HasColumnName("model");
+            entity.Property(e => e.OperatingSystem)
+                .HasMaxLength(20)
+                .HasColumnName("operatingSystem");
+            entity.Property(e => e.OsVersion)
+                .HasMaxLength(20)
+                .HasColumnName("osVersion");
+            entity.Property(e => e.ScreenResolution)
+                .HasMaxLength(50)
+                .HasColumnName("screenResolution");
+            entity.Property(e => e.CameraResolution)
+                .HasMaxLength(20)
+                .HasColumnName("cameraResolution");
+            entity.Property(e => e.StorageCapacity)
+                .HasMaxLength(100)
+                .HasColumnName("storageCapacity");
+            entity.Property(e => e.BatteryCapacity)
+                .HasMaxLength(100)
+                .HasColumnName("batteryCapacity");
+            entity.Property(e => e.Features)
+                .HasMaxLength(500)
+                .HasColumnName("features");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasColumnName("status");
+            entity.Property(e => e.Notes)
+                .HasMaxLength(500)
+                .HasColumnName("notes");
+            entity.Property(e => e.LastUsedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("lastUsedAt");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updatedAt");
+
+            entity.HasOne(d => d.Photographer).WithMany(p => p.DeviceInfos)
+                .HasForeignKey(d => d.PhotographerId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_DeviceInfo_Photographer");
+
+            // Add indexes for better performance
+            entity.HasIndex(e => e.PhotographerId).HasDatabaseName("IX_DeviceInfo_PhotographerId");
+            entity.HasIndex(e => e.DeviceType).HasDatabaseName("IX_DeviceInfo_DeviceType");
+            entity.HasIndex(e => e.Brand).HasDatabaseName("IX_DeviceInfo_Brand");
+            entity.HasIndex(e => e.Status).HasDatabaseName("IX_DeviceInfo_Status");
+            entity.HasIndex(e => e.LastUsedAt).HasDatabaseName("IX_DeviceInfo_LastUsedAt");
         });
 
         OnModelCreatingPartial(modelBuilder);

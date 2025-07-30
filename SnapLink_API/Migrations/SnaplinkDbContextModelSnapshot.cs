@@ -111,6 +111,68 @@ namespace SnapLink_API.Migrations
                     b.ToTable("Advertisement", (string)null);
                 });
 
+            modelBuilder.Entity("SnapLink_Repository.Entity.Availability", b =>
+                {
+                    b.Property<int>("AvailabilityId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("availabilityId");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AvailabilityId"));
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("createdAt")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int")
+                        .HasColumnName("dayOfWeek");
+
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("time")
+                        .HasColumnName("endTime");
+
+                    b.Property<int>("PhotographerId")
+                        .HasColumnType("int")
+                        .HasColumnName("photographerId");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time")
+                        .HasColumnName("startTime");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updatedAt");
+
+                    b.HasKey("AvailabilityId")
+                        .HasName("PK__Availability__AvailabilityId");
+
+                    b.HasIndex("DayOfWeek")
+                        .HasDatabaseName("IX_Availability_DayOfWeek");
+
+                    b.HasIndex("PhotographerId")
+                        .HasDatabaseName("IX_Availability_PhotographerId");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Availability_Status");
+
+                    b.HasIndex("PhotographerId", "DayOfWeek", "Status")
+                        .HasDatabaseName("IX_Availability_Photographer_Day_Status");
+
+                    b.HasIndex("DayOfWeek", "Status", "StartTime", "EndTime")
+                        .HasDatabaseName("IX_Availability_Day_Status_Time");
+
+                    b.ToTable("Availability", (string)null);
+                });
+
             modelBuilder.Entity("SnapLink_Repository.Entity.Booking", b =>
                 {
                     b.Property<int>("BookingId")
@@ -250,6 +312,118 @@ namespace SnapLink_API.Migrations
                     b.HasIndex("ReporterId");
 
                     b.ToTable("Complaint", (string)null);
+                });
+
+            modelBuilder.Entity("SnapLink_Repository.Entity.DeviceInfo", b =>
+                {
+                    b.Property<int>("DeviceInfoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("deviceInfoId");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DeviceInfoId"));
+
+                    b.Property<string>("BatteryCapacity")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("batteryCapacity");
+
+                    b.Property<string>("Brand")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("brand");
+
+                    b.Property<string>("CameraResolution")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("cameraResolution");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("createdAt")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<string>("DeviceType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("deviceType");
+
+                    b.Property<string>("Features")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("features");
+
+                    b.Property<DateTime?>("LastUsedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("lastUsedAt");
+
+                    b.Property<string>("Model")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("model");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("notes");
+
+                    b.Property<string>("OperatingSystem")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("operatingSystem");
+
+                    b.Property<string>("OsVersion")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("osVersion");
+
+                    b.Property<int>("PhotographerId")
+                        .HasColumnType("int")
+                        .HasColumnName("photographerId");
+
+                    b.Property<string>("ScreenResolution")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("screenResolution");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("StorageCapacity")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("storageCapacity");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updatedAt");
+
+                    b.HasKey("DeviceInfoId")
+                        .HasName("PK__DeviceInfo__DeviceInfoId");
+
+                    b.HasIndex("Brand")
+                        .HasDatabaseName("IX_DeviceInfo_Brand");
+
+                    b.HasIndex("DeviceType")
+                        .HasDatabaseName("IX_DeviceInfo_DeviceType");
+
+                    b.HasIndex("LastUsedAt")
+                        .HasDatabaseName("IX_DeviceInfo_LastUsedAt");
+
+                    b.HasIndex("PhotographerId")
+                        .HasDatabaseName("IX_DeviceInfo_PhotographerId");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_DeviceInfo_Status");
+
+                    b.ToTable("DeviceInfo", (string)null);
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.Image", b =>
@@ -639,6 +813,88 @@ namespace SnapLink_API.Migrations
                     b.HasIndex("CustomerId");
 
                     b.ToTable("Payment", (string)null);
+                });
+
+            modelBuilder.Entity("SnapLink_Repository.Entity.PhotoDelivery", b =>
+                {
+                    b.Property<int>("PhotoDeliveryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("photoDeliveryId");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PhotoDeliveryId"));
+
+                    b.Property<int>("BookingId")
+                        .HasColumnType("int")
+                        .HasColumnName("bookingId");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("createdAt")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<DateTime?>("DeliveredAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("deliveredAt");
+
+                    b.Property<string>("DeliveryMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("deliveryMethod");
+
+                    b.Property<string>("DriveFolderName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("driveFolderName");
+
+                    b.Property<string>("DriveLink")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("driveLink");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("expiresAt");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("notes");
+
+                    b.Property<int?>("PhotoCount")
+                        .HasColumnType("int")
+                        .HasColumnName("photoCount");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updatedAt");
+
+                    b.Property<DateTime?>("UploadedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("uploadedAt");
+
+                    b.HasKey("PhotoDeliveryId")
+                        .HasName("PK__PhotoDelivery__PhotoDeliveryId");
+
+                    b.HasIndex("BookingId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_PhotoDelivery_BookingId");
+
+                    b.HasIndex("DeliveryMethod")
+                        .HasDatabaseName("IX_PhotoDelivery_DeliveryMethod");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_PhotoDelivery_Status");
+
+                    b.ToTable("PhotoDelivery", (string)null);
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.Photographer", b =>
@@ -1374,6 +1630,18 @@ namespace SnapLink_API.Migrations
                     b.Navigation("Payment");
                 });
 
+            modelBuilder.Entity("SnapLink_Repository.Entity.Availability", b =>
+                {
+                    b.HasOne("SnapLink_Repository.Entity.Photographer", "Photographer")
+                        .WithMany("Availabilities")
+                        .HasForeignKey("PhotographerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Availability_Photographer");
+
+                    b.Navigation("Photographer");
+                });
+
             modelBuilder.Entity("SnapLink_Repository.Entity.Booking", b =>
                 {
                     b.HasOne("SnapLink_Repository.Entity.PhotographerEvent", "Event")
@@ -1439,6 +1707,18 @@ namespace SnapLink_API.Migrations
                     b.Navigation("ReportedUser");
 
                     b.Navigation("Reporter");
+                });
+
+            modelBuilder.Entity("SnapLink_Repository.Entity.DeviceInfo", b =>
+                {
+                    b.HasOne("SnapLink_Repository.Entity.Photographer", "Photographer")
+                        .WithMany("DeviceInfos")
+                        .HasForeignKey("PhotographerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_DeviceInfo_Photographer");
+
+                    b.Navigation("Photographer");
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.Image", b =>
@@ -1543,6 +1823,18 @@ namespace SnapLink_API.Migrations
                     b.Navigation("Booking");
 
                     b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("SnapLink_Repository.Entity.PhotoDelivery", b =>
+                {
+                    b.HasOne("SnapLink_Repository.Entity.Booking", "Booking")
+                        .WithOne("PhotoDelivery")
+                        .HasForeignKey("SnapLink_Repository.Entity.PhotoDelivery", "BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_PhotoDelivery_Booking");
+
+                    b.Navigation("Booking");
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.Photographer", b =>
@@ -1734,6 +2026,8 @@ namespace SnapLink_API.Migrations
 
                     b.Navigation("Payment");
 
+                    b.Navigation("PhotoDelivery");
+
                     b.Navigation("Reviews");
                 });
 
@@ -1769,7 +2063,11 @@ namespace SnapLink_API.Migrations
 
             modelBuilder.Entity("SnapLink_Repository.Entity.Photographer", b =>
                 {
+                    b.Navigation("Availabilities");
+
                     b.Navigation("Bookings");
+
+                    b.Navigation("DeviceInfos");
 
                     b.Navigation("Images");
 

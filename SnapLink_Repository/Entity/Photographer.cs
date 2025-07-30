@@ -53,4 +53,5 @@ public partial class Photographer
     public virtual ICollection<Image> Images { get; set; } = new List<Image>();
 
     public virtual ICollection<Availability> Availabilities { get; set; } = new List<Availability>();
+    public virtual ICollection<DeviceInfo> DeviceInfos { get; set; } = new List<DeviceInfo>();
 }

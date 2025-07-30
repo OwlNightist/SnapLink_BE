@@ -82,6 +82,27 @@ namespace SnapLink_Model.DTO
             CreateMap<UpdateAvailabilityRequest, Availability>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
+            // PhotoDelivery mappings
+            CreateMap<PhotoDelivery, PhotoDeliveryResponse>()
+                .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Booking.User.FullName))
+                .ForMember(dest => dest.PhotographerName, opt => opt.MapFrom(src => src.Booking.Photographer.User.FullName))
+                .ForMember(dest => dest.BookingDate, opt => opt.MapFrom(src => src.Booking.StartDatetime))
+                .ForMember(dest => dest.LocationName, opt => opt.MapFrom(src => src.Booking.Location.Name));
+
+            CreateMap<PhotoDelivery, PhotoDeliveryDetailResponse>()
+                .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Booking.User.FullName))
+                .ForMember(dest => dest.CustomerEmail, opt => opt.MapFrom(src => src.Booking.User.Email))
+                .ForMember(dest => dest.CustomerPhone, opt => opt.MapFrom(src => src.Booking.User.PhoneNumber))
+                .ForMember(dest => dest.PhotographerName, opt => opt.MapFrom(src => src.Booking.Photographer.User.FullName))
+                .ForMember(dest => dest.PhotographerEmail, opt => opt.MapFrom(src => src.Booking.Photographer.User.Email))
+                .ForMember(dest => dest.PhotographerPhone, opt => opt.MapFrom(src => src.Booking.Photographer.User.PhoneNumber))
+                .ForMember(dest => dest.BookingStatus, opt => opt.MapFrom(src => src.Booking.Status))
+                .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Booking.TotalPrice));
+
+            CreateMap<CreatePhotoDeliveryRequest, PhotoDelivery>();
+            CreateMap<UpdatePhotoDeliveryRequest, PhotoDelivery>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
             // Style mappings
             CreateMap<Style, StyleResponse>()
                 .ForMember(dest => dest.PhotographerCount, opt => opt.MapFrom(src => src.PhotographerStyles.Count));

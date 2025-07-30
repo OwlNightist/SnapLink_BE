@@ -99,21 +99,21 @@ namespace SnapLink_Repository.Data
                 var users = context.Users.Take(15).ToList();
                 var photographers = new[]
                 {
-                    new Photographer { UserId = users[0].UserId, YearsExperience = 5, Equipment = "Canon EOS R5", HourlyRate = 100, AvailabilityStatus = "Available", Rating = 4.8M },
-                    new Photographer { UserId = users[1].UserId, YearsExperience = 3, Equipment = "Nikon D850", HourlyRate = 80, AvailabilityStatus = "Available", Rating = 4.5M },
-                    new Photographer { UserId = users[2].UserId, YearsExperience = 7, Equipment = "Sony A7 III", HourlyRate = 120, AvailabilityStatus = "Busy", Rating = 4.9M },
-                    new Photographer { UserId = users[3].UserId, YearsExperience = 2, Equipment = "Fujifilm X-T4", HourlyRate = 70, AvailabilityStatus = "Available", Rating = 4.3M },
-                    new Photographer { UserId = users[4].UserId, YearsExperience = 4, Equipment = "Olympus OM-D E-M1", HourlyRate = 90, AvailabilityStatus = "Available", Rating = 4.7M },
-                    new Photographer { UserId = users[5].UserId, YearsExperience = 6, Equipment = "Canon EOS R6", HourlyRate = 110, AvailabilityStatus = "Available", Rating = 4.6M },
-                    new Photographer { UserId = users[6].UserId, YearsExperience = 4, Equipment = "Nikon Z6", HourlyRate = 85, AvailabilityStatus = "Available", Rating = 4.4M },
-                    new Photographer { UserId = users[7].UserId, YearsExperience = 8, Equipment = "Sony A7R IV", HourlyRate = 130, AvailabilityStatus = "Busy", Rating = 4.9M },
-                    new Photographer { UserId = users[8].UserId, YearsExperience = 3, Equipment = "Fujifilm X-T3", HourlyRate = 75, AvailabilityStatus = "Available", Rating = 4.2M },
-                    new Photographer { UserId = users[9].UserId, YearsExperience = 5, Equipment = "Canon EOS 5D", HourlyRate = 95, AvailabilityStatus = "Available", Rating = 4.5M },
-                    new Photographer { UserId = users[10].UserId, YearsExperience = 7, Equipment = "Nikon D750", HourlyRate = 105, AvailabilityStatus = "Available", Rating = 4.7M },
-                    new Photographer { UserId = users[11].UserId, YearsExperience = 2, Equipment = "Sony A6400", HourlyRate = 65, AvailabilityStatus = "Available", Rating = 4.1M },
-                    new Photographer { UserId = users[12].UserId, YearsExperience = 6, Equipment = "Canon EOS 90D", HourlyRate = 115, AvailabilityStatus = "Busy", Rating = 4.8M },
-                    new Photographer { UserId = users[13].UserId, YearsExperience = 4, Equipment = "Nikon Z50", HourlyRate = 80, AvailabilityStatus = "Available", Rating = 4.3M },
-                    new Photographer { UserId = users[14].UserId, YearsExperience = 9, Equipment = "Sony A9", HourlyRate = 140, AvailabilityStatus = "Available", Rating = 4.9M }
+                    new Photographer { UserId = users[0].UserId, YearsExperience = 5, Equipment = "Canon EOS R5", HourlyRate = 150000, AvailabilityStatus = "Available", Rating = 4.8M },
+                    new Photographer { UserId = users[1].UserId, YearsExperience = 3, Equipment = "Nikon D850", HourlyRate = 200000, AvailabilityStatus = "Available", Rating = 4.5M },
+                    new Photographer { UserId = users[2].UserId, YearsExperience = 7, Equipment = "Sony A7 III", HourlyRate = 120000, AvailabilityStatus = "Busy", Rating = 4.9M },
+                    new Photographer { UserId = users[3].UserId, YearsExperience = 2, Equipment = "Fujifilm X-T4", HourlyRate = 70000, AvailabilityStatus = "Available", Rating = 4.3M },
+                    new Photographer { UserId = users[4].UserId, YearsExperience = 4, Equipment = "Olympus OM-D E-M1", HourlyRate = 90000, AvailabilityStatus = "Available", Rating = 4.7M },
+                    new Photographer { UserId = users[5].UserId, YearsExperience = 6, Equipment = "Canon EOS R6", HourlyRate = 110000, AvailabilityStatus = "Available", Rating = 4.6M },
+                    new Photographer { UserId = users[6].UserId, YearsExperience = 4, Equipment = "Nikon Z6", HourlyRate = 85000, AvailabilityStatus = "Available", Rating = 4.4M },
+                    new Photographer { UserId = users[7].UserId, YearsExperience = 8, Equipment = "Sony A7R IV", HourlyRate = 130000, AvailabilityStatus = "Busy", Rating = 4.9M },
+                    new Photographer { UserId = users[8].UserId, YearsExperience = 3, Equipment = "Fujifilm X-T3", HourlyRate = 75000, AvailabilityStatus = "Available", Rating = 4.2M },
+                    new Photographer { UserId = users[9].UserId, YearsExperience = 5, Equipment = "Canon EOS 5D", HourlyRate = 95000, AvailabilityStatus = "Available", Rating = 4.5M },
+                    new Photographer { UserId = users[10].UserId, YearsExperience = 7, Equipment = "Nikon D750", HourlyRate = 105000, AvailabilityStatus = "Available", Rating = 4.7M },
+                    new Photographer { UserId = users[11].UserId, YearsExperience = 2, Equipment = "Sony A6400", HourlyRate = 65000, AvailabilityStatus = "Available", Rating = 4.1M },
+                    new Photographer { UserId = users[12].UserId, YearsExperience = 6, Equipment = "Canon EOS 90D", HourlyRate = 115000, AvailabilityStatus = "Busy", Rating = 4.8M },
+                    new Photographer { UserId = users[13].UserId, YearsExperience = 4, Equipment = "Nikon Z50", HourlyRate = 80000, AvailabilityStatus = "Available", Rating = 4.3M },
+                    new Photographer { UserId = users[14].UserId, YearsExperience = 9, Equipment = "Sony A9", HourlyRate = 140000, AvailabilityStatus = "Available", Rating = 4.9M }
                 };
                 context.Photographers.AddRange(photographers);
                 context.SaveChanges();
@@ -1159,6 +1159,315 @@ namespace SnapLink_Repository.Data
                 });
 
                 context.Availabilities.AddRange(availabilities);
+                context.SaveChanges();
+            }
+
+            // Seed DeviceInfo
+            if (!context.DeviceInfos.Any())
+            {
+                var photographers = context.Photographers.Take(15).ToList();
+                var deviceInfos = new List<DeviceInfo>();
+
+                // Photographer 1 (Alice) - iPhone 15 Pro
+                deviceInfos.Add(new DeviceInfo
+                {
+                    PhotographerId = photographers[0].PhotographerId,
+                    DeviceType = "Phone",
+                    Brand = "Apple",
+                    Model = "iPhone 15 Pro",
+                    OperatingSystem = "iOS",
+                    OsVersion = "17.2.1",
+                    ScreenResolution = "2556x1179",
+                    CameraResolution = "48MP",
+                    StorageCapacity = "256GB",
+                    BatteryCapacity = "4441mAh",
+                    Features = "{\"NightMode\": true, \"PortraitMode\": true, \"4KVideo\": true, \"ProRAW\": true, \"CinematicMode\": true, \"ActionMode\": true}",
+                    Status = "Active",
+                    Notes = "Primary device for mobile photography",
+                    LastUsedAt = DateTime.Now.AddDays(-2),
+                    CreatedAt = DateTime.Now.AddDays(-30)
+                });
+
+                // Photographer 2 (Bob) - Samsung Galaxy S24 Ultra
+                deviceInfos.Add(new DeviceInfo
+                {
+                    PhotographerId = photographers[1].PhotographerId,
+                    DeviceType = "Phone",
+                    Brand = "Samsung",
+                    Model = "Galaxy S24 Ultra",
+                    OperatingSystem = "Android",
+                    OsVersion = "14.0",
+                    ScreenResolution = "3088x1440",
+                    CameraResolution = "200MP",
+                    StorageCapacity = "512GB",
+                    BatteryCapacity = "5000mAh",
+                    Features = "{\"NightMode\": true, \"PortraitMode\": true, \"8KVideo\": true, \"SpaceZoom\": true, \"S_Pen\": true, \"AI_Features\": true}",
+                    Status = "Active",
+                    Notes = "Professional mobile photography with S Pen",
+                    LastUsedAt = DateTime.Now.AddDays(-1),
+                    CreatedAt = DateTime.Now.AddDays(-25)
+                });
+
+                // Photographer 3 (Carol) - iPhone 15 Pro Max
+                deviceInfos.Add(new DeviceInfo
+                {
+                    PhotographerId = photographers[2].PhotographerId,
+                    DeviceType = "Phone",
+                    Brand = "Apple",
+                    Model = "iPhone 15 Pro Max",
+                    OperatingSystem = "iOS",
+                    OsVersion = "17.2.1",
+                    ScreenResolution = "2796x1290",
+                    CameraResolution = "48MP",
+                    StorageCapacity = "512GB",
+                    BatteryCapacity = "4441mAh",
+                    Features = "{\"NightMode\": true, \"PortraitMode\": true, \"4KVideo\": true, \"ProRAW\": true, \"CinematicMode\": true, \"ActionMode\": true, \"5xOpticalZoom\": true}",
+                    Status = "Active",
+                    Notes = "Premium device with 5x optical zoom for versatile photography",
+                    LastUsedAt = DateTime.Now.AddDays(-3),
+                    CreatedAt = DateTime.Now.AddDays(-40)
+                });
+
+                // Photographer 4 (Dave) - iPhone 14 Pro
+                deviceInfos.Add(new DeviceInfo
+                {
+                    PhotographerId = photographers[3].PhotographerId,
+                    DeviceType = "Phone",
+                    Brand = "Apple",
+                    Model = "iPhone 14 Pro",
+                    OperatingSystem = "iOS",
+                    OsVersion = "17.1.2",
+                    ScreenResolution = "2556x1179",
+                    CameraResolution = "48MP",
+                    StorageCapacity = "128GB",
+                    BatteryCapacity = "3200mAh",
+                    Features = "{\"NightMode\": true, \"PortraitMode\": true, \"4KVideo\": true, \"ProRAW\": true, \"CinematicMode\": true}",
+                    Status = "Active",
+                    Notes = "Reliable device for event photography",
+                    LastUsedAt = DateTime.Now.AddDays(-5),
+                    CreatedAt = DateTime.Now.AddDays(-35)
+                });
+
+                // Photographer 5 (Eve) - Google Pixel 8 Pro
+                deviceInfos.Add(new DeviceInfo
+                {
+                    PhotographerId = photographers[4].PhotographerId,
+                    DeviceType = "Phone",
+                    Brand = "Google",
+                    Model = "Pixel 8 Pro",
+                    OperatingSystem = "Android",
+                    OsVersion = "14.0",
+                    ScreenResolution = "2992x1344",
+                    CameraResolution = "50MP",
+                    StorageCapacity = "256GB",
+                    BatteryCapacity = "4950mAh",
+                    Features = "{\"NightMode\": true, \"PortraitMode\": true, \"4KVideo\": true, \"MagicEraser\": true, \"BestTake\": true, \"AI_Features\": true}",
+                    Status = "Active",
+                    Notes = "AI-powered photography with Google's computational photography",
+                    LastUsedAt = DateTime.Now.AddDays(-1),
+                    CreatedAt = DateTime.Now.AddDays(-45)
+                });
+
+                // Photographer 6 (Frank) - Samsung Galaxy S23 Ultra
+                deviceInfos.Add(new DeviceInfo
+                {
+                    PhotographerId = photographers[5].PhotographerId,
+                    DeviceType = "Phone",
+                    Brand = "Samsung",
+                    Model = "Galaxy S23 Ultra",
+                    OperatingSystem = "Android",
+                    OsVersion = "13.0",
+                    ScreenResolution = "3088x1440",
+                    CameraResolution = "200MP",
+                    StorageCapacity = "256GB",
+                    BatteryCapacity = "5000mAh",
+                    Features = "{\"NightMode\": true, \"PortraitMode\": true, \"8KVideo\": true, \"SpaceZoom\": true, \"S_Pen\": true}",
+                    Status = "Active",
+                    Notes = "Previous generation flagship with excellent camera capabilities",
+                    LastUsedAt = DateTime.Now.AddDays(-2),
+                    CreatedAt = DateTime.Now.AddDays(-20)
+                });
+
+                // Photographer 7 (Grace) - iPhone 14 Pro Max
+                deviceInfos.Add(new DeviceInfo
+                {
+                    PhotographerId = photographers[6].PhotographerId,
+                    DeviceType = "Phone",
+                    Brand = "Apple",
+                    Model = "iPhone 14 Pro Max",
+                    OperatingSystem = "iOS",
+                    OsVersion = "17.1.2",
+                    ScreenResolution = "2796x1290",
+                    CameraResolution = "48MP",
+                    StorageCapacity = "512GB",
+                    BatteryCapacity = "4323mAh",
+                    Features = "{\"NightMode\": true, \"PortraitMode\": true, \"4KVideo\": true, \"ProRAW\": true, \"CinematicMode\": true, \"ActionMode\": true}",
+                    Status = "Active",
+                    Notes = "Large screen device for professional mobile photography",
+                    LastUsedAt = DateTime.Now.AddDays(-4),
+                    CreatedAt = DateTime.Now.AddDays(-50)
+                });
+
+                // Photographer 8 (Henry) - Samsung Galaxy S24+
+                deviceInfos.Add(new DeviceInfo
+                {
+                    PhotographerId = photographers[7].PhotographerId,
+                    DeviceType = "Phone",
+                    Brand = "Samsung",
+                    Model = "Galaxy S24+",
+                    OperatingSystem = "Android",
+                    OsVersion = "14.0",
+                    ScreenResolution = "3088x1440",
+                    CameraResolution = "50MP",
+                    StorageCapacity = "512GB",
+                    BatteryCapacity = "4900mAh",
+                    Features = "{\"NightMode\": true, \"PortraitMode\": true, \"8KVideo\": true, \"SpaceZoom\": true, \"AI_Features\": true}",
+                    Status = "Active",
+                    Notes = "Latest Samsung flagship with advanced AI features",
+                    LastUsedAt = DateTime.Now.AddDays(-1),
+                    CreatedAt = DateTime.Now.AddDays(-15)
+                });
+
+                // Photographer 9 (Iris) - Google Pixel 7 Pro
+                deviceInfos.Add(new DeviceInfo
+                {
+                    PhotographerId = photographers[8].PhotographerId,
+                    DeviceType = "Phone",
+                    Brand = "Google",
+                    Model = "Pixel 7 Pro",
+                    OperatingSystem = "Android",
+                    OsVersion = "14.0",
+                    ScreenResolution = "3120x1440",
+                    CameraResolution = "50MP",
+                    StorageCapacity = "128GB",
+                    BatteryCapacity = "5000mAh",
+                    Features = "{\"NightMode\": true, \"PortraitMode\": true, \"4KVideo\": true, \"MagicEraser\": true, \"BestTake\": true}",
+                    Status = "Active",
+                    Notes = "Previous generation Pixel with excellent computational photography",
+                    LastUsedAt = DateTime.Now.AddDays(-3),
+                    CreatedAt = DateTime.Now.AddDays(-30)
+                });
+
+                // Photographer 10 (Jack) - iPhone 13 Pro Max
+                deviceInfos.Add(new DeviceInfo
+                {
+                    PhotographerId = photographers[9].PhotographerId,
+                    DeviceType = "Phone",
+                    Brand = "Apple",
+                    Model = "iPhone 13 Pro Max",
+                    OperatingSystem = "iOS",
+                    OsVersion = "17.1.2",
+                    ScreenResolution = "2778x1284",
+                    CameraResolution = "12MP",
+                    StorageCapacity = "256GB",
+                    BatteryCapacity = "4352mAh",
+                    Features = "{\"NightMode\": true, \"PortraitMode\": true, \"4KVideo\": true, \"ProRAW\": true, \"CinematicMode\": true}",
+                    Status = "Active",
+                    Notes = "Reliable device for everyday photography",
+                    LastUsedAt = DateTime.Now.AddDays(-6),
+                    CreatedAt = DateTime.Now.AddDays(-60)
+                });
+
+                // Photographer 11 (Kate) - Samsung Galaxy A54
+                deviceInfos.Add(new DeviceInfo
+                {
+                    PhotographerId = photographers[10].PhotographerId,
+                    DeviceType = "Phone",
+                    Brand = "Samsung",
+                    Model = "Galaxy A54",
+                    OperatingSystem = "Android",
+                    OsVersion = "14.0",
+                    ScreenResolution = "2400x1080",
+                    CameraResolution = "50MP",
+                    StorageCapacity = "256GB",
+                    BatteryCapacity = "5000mAh",
+                    Features = "{\"NightMode\": true, \"PortraitMode\": true, \"4KVideo\": true, \"OIS\": true}",
+                    Status = "Active",
+                    Notes = "Mid-range device with excellent camera capabilities",
+                    LastUsedAt = DateTime.Now.AddDays(-2),
+                    CreatedAt = DateTime.Now.AddDays(-35)
+                });
+
+                // Photographer 12 (Leo) - iPhone 12 Pro
+                deviceInfos.Add(new DeviceInfo
+                {
+                    PhotographerId = photographers[11].PhotographerId,
+                    DeviceType = "Phone",
+                    Brand = "Apple",
+                    Model = "iPhone 12 Pro",
+                    OperatingSystem = "iOS",
+                    OsVersion = "17.1.2",
+                    ScreenResolution = "2532x1170",
+                    CameraResolution = "12MP",
+                    StorageCapacity = "256GB",
+                    BatteryCapacity = "2815mAh",
+                    Features = "{\"NightMode\": true, \"PortraitMode\": true, \"4KVideo\": true, \"ProRAW\": true}",
+                    Status = "Active",
+                    Notes = "Reliable device for everyday photography",
+                    LastUsedAt = DateTime.Now.AddDays(-7),
+                    CreatedAt = DateTime.Now.AddDays(-80)
+                });
+
+                // Photographer 13 (Maya) - Google Pixel 6 Pro
+                deviceInfos.Add(new DeviceInfo
+                {
+                    PhotographerId = photographers[12].PhotographerId,
+                    DeviceType = "Phone",
+                    Brand = "Google",
+                    Model = "Pixel 6 Pro",
+                    OperatingSystem = "Android",
+                    OsVersion = "14.0",
+                    ScreenResolution = "3120x1440",
+                    CameraResolution = "50MP",
+                    StorageCapacity = "256GB",
+                    BatteryCapacity = "5003mAh",
+                    Features = "{\"NightMode\": true, \"PortraitMode\": true, \"4KVideo\": true, \"MagicEraser\": true}",
+                    Status = "Active",
+                    Notes = "Previous generation Pixel with excellent camera",
+                    LastUsedAt = DateTime.Now.AddDays(-1),
+                    CreatedAt = DateTime.Now.AddDays(-40)
+                });
+
+                // Photographer 14 (Nina) - Samsung Galaxy S22 Ultra
+                deviceInfos.Add(new DeviceInfo
+                {
+                    PhotographerId = photographers[13].PhotographerId,
+                    DeviceType = "Phone",
+                    Brand = "Samsung",
+                    Model = "Galaxy S22 Ultra",
+                    OperatingSystem = "Android",
+                    OsVersion = "14.0",
+                    ScreenResolution = "3088x1440",
+                    CameraResolution = "108MP",
+                    StorageCapacity = "256GB",
+                    BatteryCapacity = "5000mAh",
+                    Features = "{\"NightMode\": true, \"PortraitMode\": true, \"8KVideo\": true, \"SpaceZoom\": true, \"S_Pen\": true}",
+                    Status = "Active",
+                    Notes = "Previous generation Ultra with S Pen",
+                    LastUsedAt = DateTime.Now.AddDays(-4),
+                    CreatedAt = DateTime.Now.AddDays(-70)
+                });
+
+                // Photographer 15 (Oscar) - iPhone 11 Pro Max
+                deviceInfos.Add(new DeviceInfo
+                {
+                    PhotographerId = photographers[14].PhotographerId,
+                    DeviceType = "Phone",
+                    Brand = "Apple",
+                    Model = "iPhone 11 Pro Max",
+                    OperatingSystem = "iOS",
+                    OsVersion = "17.1.2",
+                    ScreenResolution = "2688x1242",
+                    CameraResolution = "12MP",
+                    StorageCapacity = "256GB",
+                    BatteryCapacity = "3969mAh",
+                    Features = "{\"NightMode\": true, \"PortraitMode\": true, \"4KVideo\": true}",
+                    Status = "Active",
+                    Notes = "Older but still capable device",
+                    LastUsedAt = DateTime.Now.AddDays(-3),
+                    CreatedAt = DateTime.Now.AddDays(-55)
+                });
+                context.DeviceInfos.AddRange(deviceInfos);
                 context.SaveChanges();
             }
         }
