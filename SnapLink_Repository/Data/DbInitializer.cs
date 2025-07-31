@@ -1470,6 +1470,96 @@ namespace SnapLink_Repository.Data
                 context.DeviceInfos.AddRange(deviceInfos);
                 context.SaveChanges();
             }
+
+            // Seed PhotoDeliveries
+            if (!context.PhotoDeliveries.Any())
+            {
+                var bookings = context.Bookings.Take(5).ToList();
+                var photoDeliveries = new[]
+                {
+                    // PhotoDelivery 1 - Completed delivery via Google Drive
+                    new PhotoDelivery { 
+                        BookingId = bookings[0].BookingId, 
+                        DeliveryMethod = "PhotographerDevice", 
+                        DriveLink = "https://drive.google.com/drive/folders/1ABC123DEF456GHI789JKL", 
+                        DriveFolderName = "Alice_Smith_Portrait_Session_2024", 
+                        PhotoCount = 45, 
+                        Status = "Delivered", 
+                        UploadedAt = DateTime.Now.AddDays(-2), 
+                        DeliveredAt = DateTime.Now.AddDays(-1), 
+                        ExpiresAt = DateTime.Now.AddDays(30), 
+                        Notes = "Portrait session photos - 45 high-quality images delivered", 
+                        CreatedAt = DateTime.Now.AddDays(-3), 
+                        UpdatedAt = DateTime.Now.AddDays(-1) 
+                    },
+                    
+                    // PhotoDelivery 2 - Pending delivery
+                    new PhotoDelivery { 
+                        BookingId = bookings[1].BookingId, 
+                        DeliveryMethod = "CustomerDevice", 
+                        DriveLink = null, 
+                        DriveFolderName = null, 
+                        PhotoCount = null, 
+                        Status = "Pending", 
+                        UploadedAt = null, 
+                        DeliveredAt = null, 
+                        ExpiresAt = null, 
+                        Notes = "Customer will provide device for direct transfer", 
+                        CreatedAt = DateTime.Now.AddDays(-1), 
+                        UpdatedAt = DateTime.Now.AddDays(-1) 
+                    },
+                    
+                    // PhotoDelivery 3 - Currently uploading
+                    new PhotoDelivery { 
+                        BookingId = bookings[2].BookingId, 
+                        DeliveryMethod = "PhotographerDevice", 
+                        DriveLink = "https://drive.google.com/drive/folders/2XYZ789ABC123DEF456GHI", 
+                        DriveFolderName = "Carol_White_Wedding_Photos", 
+                        PhotoCount = 120, 
+                        Status = "Uploading", 
+                        UploadedAt = DateTime.Now.AddHours(-2), 
+                        DeliveredAt = null, 
+                        ExpiresAt = DateTime.Now.AddDays(60), 
+                        Notes = "Wedding photography session - uploading 120 photos", 
+                        CreatedAt = DateTime.Now.AddDays(-2), 
+                        UpdatedAt = DateTime.Now.AddHours(-2) 
+                    },
+                    
+                    // PhotoDelivery 4 - Not required (customer took photos themselves)
+                    new PhotoDelivery { 
+                        BookingId = bookings[3].BookingId, 
+                        DeliveryMethod = "CustomerDevice", 
+                        DriveLink = null, 
+                        DriveFolderName = null, 
+                        PhotoCount = 0, 
+                        Status = "NotRequired", 
+                        UploadedAt = null, 
+                        DeliveredAt = null, 
+                        ExpiresAt = null, 
+                        Notes = "Customer used their own device for photos", 
+                        CreatedAt = DateTime.Now.AddDays(-1), 
+                        UpdatedAt = DateTime.Now.AddDays(-1) 
+                    },
+                    
+                    // PhotoDelivery 5 - Delivered with short expiration
+                    new PhotoDelivery { 
+                        BookingId = bookings[4].BookingId, 
+                        DeliveryMethod = "PhotographerDevice", 
+                        DriveLink = "https://drive.google.com/drive/folders/3MNO456PQR789STU012VWX", 
+                        DriveFolderName = "Eve_Black_Fashion_Shoot", 
+                        PhotoCount = 78, 
+                        Status = "Delivered", 
+                        UploadedAt = DateTime.Now.AddDays(-3), 
+                        DeliveredAt = DateTime.Now.AddDays(-2), 
+                        ExpiresAt = DateTime.Now.AddDays(7), // Short expiration for fashion shoot
+                        Notes = "Fashion photography session - 78 photos with 7-day access", 
+                        CreatedAt = DateTime.Now.AddDays(-4), 
+                        UpdatedAt = DateTime.Now.AddDays(-2) 
+                    }
+                };
+                context.PhotoDeliveries.AddRange(photoDeliveries);
+                context.SaveChanges();
+            }
         }
     }
 }

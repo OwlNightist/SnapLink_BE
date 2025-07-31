@@ -45,32 +45,32 @@ namespace SnapLink_API.Controllers
             }
         }
 
-        /// <summary>
-        /// Get photographer availability with details
-        /// </summary>
-        [HttpGet("photographer/{photographerId}/details")]
-        public async Task<IActionResult> GetPhotographerAvailabilityDetails(int photographerId)
-        {
-            try
-            {
-                var availability = await _availabilityService.GetPhotographerAvailabilityAsync(photographerId);
-                return Ok(new
-                {
-                    Error = 0,
-                    Message = "Photographer availability retrieved successfully",
-                    Data = availability
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    Error = -1,
-                    Message = "Internal server error",
-                    Data = (object?)null
-                });
-            }
-        }
+        // /// <summary>
+        // /// Get photographer availability with details
+        // /// </summary>
+        // [HttpGet("photographer/{photographerId}/details")]
+        // public async Task<IActionResult> GetPhotographerAvailabilityDetails(int photographerId)
+        // {
+        //     try
+        //     {
+        //         var availability = await _availabilityService.GetPhotographerAvailabilityAsync(photographerId);
+        //         return Ok(new
+        //         {
+        //             Error = 0,
+        //             Message = "Photographer availability retrieved successfully",
+        //             Data = availability
+        //         });
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return StatusCode(500, new
+        //         {
+        //             Error = -1,
+        //             Message = "Internal server error",
+        //             Data = (object?)null
+        //         });
+        //     }
+        // }
 
         /// <summary>
         /// Get availabilities by day of week
