@@ -136,6 +136,8 @@ builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IAvailabilityRepository, AvailabilityRepository>();
 builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
+builder.Services.AddScoped<IPhotoDeliveryRepository, PhotoDeliveryRepository>();
+builder.Services.AddScoped<IPhotoDeliveryService, PhotoDeliveryService>();
 
 
 
