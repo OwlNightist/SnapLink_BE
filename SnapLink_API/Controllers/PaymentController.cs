@@ -51,7 +51,7 @@ public class PaymentController : ControllerBase
     }
 
     [HttpGet("{paymentId}")]
-    public async Task<IActionResult> GetPaymentStatus([FromRoute] int paymentId)
+    public async Task<IActionResult> GetPaymentStatus([FromRoute] long paymentId)
     {
         try
         {
@@ -82,12 +82,12 @@ public class PaymentController : ControllerBase
         }
     }
 
-    [HttpPut("{paymentId}/cancel")]
-    public async Task<IActionResult> CancelPayment([FromRoute] int paymentId)
+    [HttpPut("booking/{bookingId}/cancel")]
+    public async Task<IActionResult> CancelPayment([FromRoute] int bookingId)
     {
         try
         {
-            var result = await _paymentService.CancelPaymentAsync(paymentId);
+            var result = await _paymentService.CancelPaymentAsync(bookingId);
             
             if (result.Error == 0)
             {
@@ -100,7 +100,7 @@ public class PaymentController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error in CancelPayment for paymentId: {paymentId}");
+            _logger.LogError(ex, $"Error in CancelPayment for bookingId: {bookingId}");
             return StatusCode(500, new PaymentResponse
             {
                 Error = -1,

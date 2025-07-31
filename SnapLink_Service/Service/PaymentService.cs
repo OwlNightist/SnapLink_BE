@@ -34,42 +34,42 @@ public class PaymentService : IPaymentService
             _configuration = configuration;
             _transactionService = transactionService;
     }
-// need userid for now , add to jwt token later
-    private async Task<int> GenerateUniquePaymentCodeAsync()
-    {
-        int maxAttempts = 10;
-        int attempt = 0;
-        
-        while (attempt < maxAttempts)
+        // need userid for now , add to jwt token later
+        private async Task<long> GenerateUniquePaymentCodeAsync()
         {
-            // Generate a more unique code using timestamp + random number
-            var timestamp = DateTimeOffset.Now;
-            var random = new Random();
-            var randomPart = random.Next(1000, 9999); // 4-digit random number
-            
-            // Combine timestamp (6 digits) + random (4 digits) = 10 digits
-            var paymentCode = int.Parse($"{timestamp.ToString("ffffff")}{randomPart}");
-            
-            // Check if this code already exists in database
-            var existingPayment = await _context.Payments
-                .FirstOrDefaultAsync(p => p.ExternalTransactionId == paymentCode.ToString());
-            
-            if (existingPayment == null)
-            {
-                return paymentCode;
-            }
-            
-            attempt++;
-            // Small delay to ensure different timestamp
-            await Task.Delay(1);
-        }
-        
-        // If we can't generate a unique code after max attempts, throw exception
-        throw new InvalidOperationException("Unable to generate unique payment code after multiple attempts");
-    }
+            int maxAttempts = 10;
+            int attempt = 0;
 
-    public async Task<PaymentResponse> CreatePaymentLinkAsync(CreatePaymentLinkRequest request, int userId)
-    {
+            while (attempt < maxAttempts)
+            {
+                // Generate a more unique code using timestamp + random number
+                var timestamp = DateTimeOffset.Now;
+                var random = new Random();
+                var randomPart = random.Next(1000, 9999); // 4-digit random number
+
+                // Combine timestamp (6 digits) + random (4 digits) = 10 digits
+                var paymentCode = long.Parse($"{timestamp.ToString("ffffff")}{randomPart}");
+
+                // Check if this code already exists in database
+                var existingPayment = await _context.Payments
+                    .FirstOrDefaultAsync(p => p.ExternalTransactionId == paymentCode.ToString());
+
+                if (existingPayment == null)
+                {
+                    return paymentCode;
+                }
+
+                attempt++;
+                // Small delay to ensure different timestamp
+                await Task.Delay(1);
+            }
+
+            // If we can't generate a unique code after max attempts, throw exception
+            throw new InvalidOperationException("Unable to generate unique payment code after multiple attempts");
+        }
+
+        public async Task<PaymentResponse> CreatePaymentLinkAsync(CreatePaymentLinkRequest request, int userId)
+         {
         try
         {
                 // Validate booking exists and belongs to the user
@@ -183,7 +183,7 @@ public class PaymentService : IPaymentService
                 }
 
                 // Generate unique payment code
-                int paymentCode = await GenerateUniquePaymentCodeAsync();
+                long paymentCode = await GenerateUniquePaymentCodeAsync();
                 
                 // Create PayOS item data using payment amount (capped for testing)
                 ItemData item = new ItemData(request.ProductName, 1, (int)paymentAmount);
@@ -251,7 +251,7 @@ public class PaymentService : IPaymentService
         }
     }
 
-        public async Task<PaymentResponse> GetPaymentStatusAsync(int paymentId)
+        public async Task<PaymentResponse> GetPaymentStatusAsync(long paymentId)
     {
         try
         {
@@ -378,35 +378,45 @@ public class PaymentService : IPaymentService
         }
     }
 
-        public async Task<PaymentResponse> CancelPaymentAsync(int paymentId)
+
+        public async Task<PaymentResponse> CancelPaymentAsync(int bookingId)
     {
         try
         {
-                PaymentLinkInformation paymentLinkInformation = await _payOS.cancelPaymentLink(paymentId);
+            // Find payment by booking ID
+            var payment = await _context.Payments
+                    .FirstOrDefaultAsync(p => p.BookingId == bookingId);
+            
+            if (payment == null)
+            {
+                return new PaymentResponse
+                {
+                    Error = -1,
+                    Message = "Payment not found for this booking",
+                    Data = null
+                };
+            }
+
+            // Cancel payment in PayOS using the external transaction ID
+            PaymentLinkInformation paymentLinkInformation = await _payOS.cancelPaymentLink(long.Parse(payment.ExternalTransactionId));
             
             // Update payment status to cancelled
-            var payment = await _context.Payments
-                    .FirstOrDefaultAsync(p => p.ExternalTransactionId == paymentId.ToString());
+            payment.Status = PaymentStatus.Cancelled;
+            payment.UpdatedAt = DateTime.UtcNow;
             
-            if (payment != null)
+            // No transaction to update since we only create transactions for completed payments
+            Console.WriteLine($"Payment {payment.PaymentId} cancelled - no transaction to update");
+            
+            // Update booking status
+            var booking = await _context.Bookings
+                .FirstOrDefaultAsync(b => b.BookingId == bookingId);
+            if (booking != null)
             {
-                payment.Status = PaymentStatus.Cancelled;
-                payment.UpdatedAt = DateTime.UtcNow;
-                
-                // No transaction to update since we only create transactions for completed payments
-                Console.WriteLine($"Payment {paymentId} cancelled - no transaction to update");
-                
-                // Update booking status
-                var booking = await _context.Bookings
-                    .FirstOrDefaultAsync(b => b.BookingId == payment.BookingId);
-                if (booking != null)
-                {
-                    booking.Status = "Cancelled";
-                    booking.UpdatedAt = DateTime.UtcNow;
-                }
-                
-                await _unitOfWork.SaveChangesAsync();
+                booking.Status = "Cancelled";
+                booking.UpdatedAt = DateTime.UtcNow;
             }
+            
+            await _unitOfWork.SaveChangesAsync();
 
             return new PaymentResponse
             {
