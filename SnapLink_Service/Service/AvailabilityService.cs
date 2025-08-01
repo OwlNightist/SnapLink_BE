@@ -70,11 +70,11 @@ namespace SnapLink_Service.Service
             if (request.StartTime >= request.EndTime)
                 throw new ArgumentException("Start time must be before end time");
 
-            // Check for conflicts
-            var isAvailable = await IsTimeSlotAvailableAsync(
+            // Check for conflicts with existing availabilities
+            var hasConflicts = await HasTimeSlotConflictsAsync(
                 request.PhotographerId, request.DayOfWeek, request.StartTime, request.EndTime);
 
-            if (!isAvailable)
+            if (hasConflicts)
                 throw new InvalidOperationException("Time slot conflicts with existing availability");
 
             var availability = _mapper.Map<Availability>(request);
@@ -253,6 +253,22 @@ namespace SnapLink_Service.Service
                            a.EndTime >= endTime);
 
             return availableSlots.Any();
+        }
+
+        private async Task<bool> HasTimeSlotConflictsAsync(int photographerId, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime)
+        {
+            // Validate input
+            if (startTime >= endTime)
+                return false;
+
+            // Check for any existing availabilities that overlap with the requested time slot
+            var conflictingSlots = await _unitOfWork.AvailabilityRepository.GetAsync(
+                filter: a => a.PhotographerId == photographerId &&
+                           a.DayOfWeek == dayOfWeek &&
+                           a.Status == "Available" &&
+                           ((a.StartTime < endTime && a.EndTime > startTime)));
+
+            return conflictingSlots.Any();
         }
 
         private async Task<IEnumerable<Availability>> GetConflictingAvailabilitiesAsync(int photographerId, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime)
