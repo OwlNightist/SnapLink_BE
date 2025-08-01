@@ -38,6 +38,7 @@ namespace SnapLink_Repository.Repository
         private IGenericRepository<PhotographerEvent> _photographerEventRepository;
         private IGenericRepository<PhotographerEventLocation> _photographerEventLocationRepository;
         private IGenericRepository<Image> _imageRepository;
+        private IGenericRepository<Availability> _availabilityRepository;
 
         public UnitOfWork(SnaplinkDbContext context)
         {
@@ -122,6 +123,9 @@ namespace SnapLink_Repository.Repository
 
         public IGenericRepository<Image> ImageRepository =>
             _imageRepository ??= new GenericRepository<Image>(_context);
+
+        public IGenericRepository<Availability> AvailabilityRepository =>
+            _availabilityRepository ??= new GenericRepository<Availability>(_context);
 
         // Transaction methods
         public async Task<int> SaveChangesAsync()

@@ -12,11 +12,13 @@ namespace SnapLink_Service.Service
     {
         private readonly SnaplinkDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IAvailabilityService _availabilityService;
 
-        public BookingService(SnaplinkDbContext context, IUnitOfWork unitOfWork)
+        public BookingService(SnaplinkDbContext context, IUnitOfWork unitOfWork, IAvailabilityService availabilityService)
         {
             _context = context;
             _unitOfWork = unitOfWork;
+            _availabilityService = availabilityService;
         }
 
         public async Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request, int userId)
@@ -502,20 +504,8 @@ namespace SnapLink_Service.Service
             if (conflictingBookings)
                 return false;
 
-            // Check availability table for the specific day and time
-            var dayOfWeek = startTime.DayOfWeek;
-            var startTimeOfDay = startTime.TimeOfDay;
-            var endTimeOfDay = endTime.TimeOfDay;
-
-            var availableSlots = await _context.Availabilities
-                .Where(a => a.PhotographerId == photographerId &&
-                           a.DayOfWeek == dayOfWeek &&
-                           a.Status == "Available" &&
-                           a.StartTime <= startTimeOfDay &&
-                           a.EndTime >= endTimeOfDay)
-                .AnyAsync();
-
-            return availableSlots;
+            // Use AvailabilityService to check photographer's availability schedule
+            return await _availabilityService.IsPhotographerAvailableAsync(photographerId, startTime, endTime);
         }
 
         public async Task<bool> IsLocationAvailableAsync(int locationId, DateTime startTime, DateTime endTime)

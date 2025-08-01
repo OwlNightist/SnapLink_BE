@@ -6,43 +6,55 @@ using AutoMapper;
 using SnapLink_Model.DTO.Request;
 using SnapLink_Model.DTO.Response;
 using SnapLink_Repository.Entity;
-using SnapLink_Repository.IRepository;
+using SnapLink_Repository.Repository;
 using SnapLink_Service.IService;
 
 namespace SnapLink_Service.Service
 {
     public class AvailabilityService : IAvailabilityService
     {
-        private readonly IAvailabilityRepository _availabilityRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public AvailabilityService(IAvailabilityRepository availabilityRepository, IMapper mapper)
+        public AvailabilityService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _availabilityRepository = availabilityRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
         public async Task<IEnumerable<AvailabilityResponse>> GetAvailabilitiesByPhotographerIdAsync(int photographerId)
         {
-            var availabilities = await _availabilityRepository.GetAvailabilitiesByPhotographerIdAsync(photographerId);
+            var availabilities = await _unitOfWork.AvailabilityRepository.GetAsync(
+                filter: a => a.PhotographerId == photographerId,
+                orderBy: q => q.OrderBy(a => a.DayOfWeek).ThenBy(a => a.StartTime),
+                includeProperties: "Photographer");
             return _mapper.Map<IEnumerable<AvailabilityResponse>>(availabilities);
         }
 
         public async Task<IEnumerable<AvailabilityResponse>> GetAvailabilitiesByDayOfWeekAsync(DayOfWeek dayOfWeek)
         {
-            var availabilities = await _availabilityRepository.GetAvailabilitiesByDayOfWeekAsync(dayOfWeek);
+            var availabilities = await _unitOfWork.AvailabilityRepository.GetAsync(
+                filter: a => a.DayOfWeek == dayOfWeek && a.Status == "Available",
+                orderBy: q => q.OrderBy(a => a.StartTime),
+                includeProperties: "Photographer");
             return _mapper.Map<IEnumerable<AvailabilityResponse>>(availabilities);
         }
 
         public async Task<AvailabilityResponse?> GetAvailabilityByIdAsync(int availabilityId)
         {
-            var availability = await _availabilityRepository.GetAvailabilityByIdAsync(availabilityId);
+            var availabilities = await _unitOfWork.AvailabilityRepository.GetAsync(
+                filter: a => a.AvailabilityId == availabilityId,
+                includeProperties: "Photographer");
+            var availability = availabilities.FirstOrDefault();
             return _mapper.Map<AvailabilityResponse>(availability);
         }
 
         public async Task<PhotographerAvailabilityResponse> GetPhotographerAvailabilityAsync(int photographerId)
         {
-            var availabilities = await _availabilityRepository.GetAvailabilitiesByPhotographerIdAsync(photographerId);
+            var availabilities = await _unitOfWork.AvailabilityRepository.GetAsync(
+                filter: a => a.PhotographerId == photographerId,
+                orderBy: q => q.OrderBy(a => a.DayOfWeek).ThenBy(a => a.StartTime),
+                includeProperties: "Photographer");
             var availabilityResponses = _mapper.Map<IEnumerable<AvailabilityResponse>>(availabilities);
 
             return new PhotographerAvailabilityResponse
@@ -59,22 +71,23 @@ namespace SnapLink_Service.Service
                 throw new ArgumentException("Start time must be before end time");
 
             // Check for conflicts
-            var isAvailable = await _availabilityRepository.IsTimeSlotAvailableAsync(
+            var isAvailable = await IsTimeSlotAvailableAsync(
                 request.PhotographerId, request.DayOfWeek, request.StartTime, request.EndTime);
 
             if (!isAvailable)
                 throw new InvalidOperationException("Time slot conflicts with existing availability");
 
             var availability = _mapper.Map<Availability>(request);
-            await _availabilityRepository.AddAvailabilityAsync(availability);
-            await _availabilityRepository.SaveChangesAsync();
+            availability.CreatedAt = DateTime.UtcNow;
+            await _unitOfWork.AvailabilityRepository.AddAsync(availability);
+            await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<AvailabilityResponse>(availability);
         }
 
         public async Task<AvailabilityResponse> UpdateAvailabilityAsync(int availabilityId, UpdateAvailabilityRequest request)
         {
-            var availability = await _availabilityRepository.GetAvailabilityByIdAsync(availabilityId);
+            var availability = await _unitOfWork.AvailabilityRepository.GetByIdAsync(availabilityId);
             if (availability == null)
                 throw new ArgumentException($"Availability with ID {availabilityId} not found");
 
@@ -92,8 +105,9 @@ namespace SnapLink_Service.Service
             if (request.StartTime.HasValue && request.EndTime.HasValue && request.StartTime >= request.EndTime)
                 throw new ArgumentException("Start time must be before end time");
 
-            await _availabilityRepository.UpdateAvailabilityAsync(availability);
-            await _availabilityRepository.SaveChangesAsync();
+            availability.UpdatedAt = DateTime.UtcNow;
+            _unitOfWork.AvailabilityRepository.Update(availability);
+            await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<AvailabilityResponse>(availability);
         }
@@ -117,32 +131,55 @@ namespace SnapLink_Service.Service
 
         public async Task<bool> DeleteAvailabilityAsync(int availabilityId)
         {
-            var availability = await _availabilityRepository.GetAvailabilityByIdAsync(availabilityId);
+            var availability = await _unitOfWork.AvailabilityRepository.GetByIdAsync(availabilityId);
             if (availability == null)
                 return false;
 
-            await _availabilityRepository.DeleteAvailabilityAsync(availability);
-            await _availabilityRepository.SaveChangesAsync();
+            _unitOfWork.AvailabilityRepository.Remove(availability);
+            await _unitOfWork.SaveChangesAsync();
             return true;
         }
 
         public async Task<bool> DeleteAvailabilitiesByPhotographerIdAsync(int photographerId)
         {
-            await _availabilityRepository.DeleteAvailabilitiesByPhotographerIdAsync(photographerId);
-            await _availabilityRepository.SaveChangesAsync();
+            var availabilities = await _unitOfWork.AvailabilityRepository.GetAsync(
+                filter: a => a.PhotographerId == photographerId);
+            
+            if (availabilities.Any())
+            {
+                _unitOfWork.AvailabilityRepository.RemoveRange(availabilities);
+                await _unitOfWork.SaveChangesAsync();
+            }
             return true;
         }
 
         public async Task<AvailabilityCheckResponse> CheckAvailabilityAsync(CheckAvailabilityRequest request)
         {
+            // Validate input first
+            if (request.StartTime >= request.EndTime)
+            {
+                return new AvailabilityCheckResponse
+                {
+                    PhotographerId = request.PhotographerId,
+                    StartTime = request.StartTime,
+                    EndTime = request.EndTime,
+                    IsAvailable = false,
+                    Message = "Invalid booking duration: start time must be before end time",
+                    ConflictingAvailabilities = new List<AvailabilityResponse>()
+                };
+            }
+
+            // Use the same logic as IsPhotographerAvailableAsync
+            var isAvailable = await IsPhotographerAvailableAsync(
+                request.PhotographerId, request.StartTime, request.EndTime);
+
+            // For conflicting availabilities, we'll check the first day only
+            // (This could be enhanced to show conflicts for all days in multi-day bookings)
             var dayOfWeek = request.StartTime.DayOfWeek;
             var startTime = request.StartTime.TimeOfDay;
             var endTime = request.EndTime.TimeOfDay;
 
-            var isAvailable = await _availabilityRepository.IsTimeSlotAvailableAsync(
-                request.PhotographerId, dayOfWeek, startTime, endTime);
-
-            var conflictingAvailabilities = await _availabilityRepository.GetConflictingAvailabilitiesAsync(
+            var conflictingAvailabilities = await GetConflictingAvailabilitiesAsync(
                 request.PhotographerId, dayOfWeek, startTime, endTime);
 
             return new AvailabilityCheckResponse
@@ -158,36 +195,108 @@ namespace SnapLink_Service.Service
 
         public async Task<bool> IsPhotographerAvailableAsync(int photographerId, DateTime startTime, DateTime endTime)
         {
-            var dayOfWeek = startTime.DayOfWeek;
-            var startTimeOfDay = startTime.TimeOfDay;
-            var endTimeOfDay = endTime.TimeOfDay;
+            // Validate input - ensure booking has a reasonable duration
+            if (startTime >= endTime)
+            {
+                return false; // Invalid booking duration
+            }
 
-            return await _availabilityRepository.IsTimeSlotAvailableAsync(
-                photographerId, dayOfWeek, startTimeOfDay, endTimeOfDay);
+            // Check if start and end time are on the same day
+            if (startTime.Date != endTime.Date)
+            {
+                // For multi-day bookings, check each day separately
+                var currentDate = startTime.Date;
+                var endDate = endTime.Date;
+                
+                while (currentDate <= endDate)
+                {
+                    var dayStart = currentDate == startTime.Date ? startTime : currentDate.Date;
+                    var dayEnd = currentDate == endTime.Date ? endTime : currentDate.Date.AddDays(1);
+                    
+                    var dayOfWeek = currentDate.DayOfWeek;
+                    var startTimeOfDay = dayStart.TimeOfDay;
+                    var endTimeOfDay = dayEnd.TimeOfDay;
+                    
+                    var isAvailableForDay = await IsTimeSlotAvailableAsync(
+                        photographerId, dayOfWeek, startTimeOfDay, endTimeOfDay);
+                    
+                    if (!isAvailableForDay)
+                        return false;
+                    
+                    currentDate = currentDate.AddDays(1);
+                }
+                
+                return true;
+            }
+            
+            // Single day booking
+            var singleDayOfWeek = startTime.DayOfWeek;
+            var singleStartTimeOfDay = startTime.TimeOfDay;
+            var singleEndTimeOfDay = endTime.TimeOfDay;
+
+            return await IsTimeSlotAvailableAsync(
+                photographerId, singleDayOfWeek, singleStartTimeOfDay, singleEndTimeOfDay);
+        }
+
+        private async Task<bool> IsTimeSlotAvailableAsync(int photographerId, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime)
+        {
+            // Validate input
+            if (startTime >= endTime)
+                return false;
+
+            // Check if there's any available slot that covers the requested time
+            var availableSlots = await _unitOfWork.AvailabilityRepository.GetAsync(
+                filter: a => a.PhotographerId == photographerId &&
+                           a.DayOfWeek == dayOfWeek &&
+                           a.Status == "Available" &&
+                           a.StartTime <= startTime &&
+                           a.EndTime >= endTime);
+
+            return availableSlots.Any();
+        }
+
+        private async Task<IEnumerable<Availability>> GetConflictingAvailabilitiesAsync(int photographerId, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime)
+        {
+            // Validate input
+            if (startTime >= endTime)
+                return new List<Availability>();
+
+            // Find all available slots that overlap with the requested time
+            return await _unitOfWork.AvailabilityRepository.GetAsync(
+                filter: a => a.PhotographerId == photographerId &&
+                           a.DayOfWeek == dayOfWeek &&
+                           a.Status == "Available" &&
+                           ((a.StartTime <= startTime && a.EndTime > startTime) ||
+                            (a.StartTime < endTime && a.EndTime >= endTime) ||
+                            (a.StartTime >= startTime && a.EndTime <= endTime)));
         }
 
         public async Task<bool> UpdateAvailabilityStatusAsync(int availabilityId, string status)
         {
-            var availability = await _availabilityRepository.GetAvailabilityByIdAsync(availabilityId);
+            var availabilities = await _unitOfWork.AvailabilityRepository.GetAsync(
+                filter: a => a.AvailabilityId == availabilityId);
+            var availability = availabilities.FirstOrDefault();
+            
             if (availability == null)
                 return false;
 
             availability.Status = status;
-            await _availabilityRepository.UpdateAvailabilityAsync(availability);
-            await _availabilityRepository.SaveChangesAsync();
+            availability.UpdatedAt = DateTime.UtcNow;
+            _unitOfWork.AvailabilityRepository.Update(availability);
+            await _unitOfWork.SaveChangesAsync();
             return true;
         }
 
         public async Task<IEnumerable<AvailabilityResponse>> GetAvailablePhotographersByTimeAsync(DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime)
         {
-            var availabilities = await _availabilityRepository.GetAvailabilitiesByDayOfWeekAsync(dayOfWeek);
+            var availabilities = await _unitOfWork.AvailabilityRepository.GetAsync(
+                filter: a => a.DayOfWeek == dayOfWeek && 
+                           a.Status == "Available" &&
+                           a.StartTime <= startTime && 
+                           a.EndTime >= endTime,
+                includeProperties: "Photographer");
             
-            var availableSlots = availabilities.Where(a => 
-                a.Status == "Available" &&
-                a.StartTime <= startTime && 
-                a.EndTime >= endTime);
-
-            return _mapper.Map<IEnumerable<AvailabilityResponse>>(availableSlots);
+            return _mapper.Map<IEnumerable<AvailabilityResponse>>(availabilities);
         }
     }
 } 
