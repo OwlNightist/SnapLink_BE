@@ -185,7 +185,7 @@ public class BookingController : ControllerBase
         }
     }
 
-    [HttpPut("{bookingId}/complete")]
+    [HttpPut("{bookingId}/Confirmed")]
     public async Task<IActionResult> CompleteBooking(int bookingId)
     {
         try
