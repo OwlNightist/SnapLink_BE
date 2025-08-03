@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SnapLink_Model.DTO;
 using SnapLink_Service.IService;
+using SnapLink_Service.Service;
 
 namespace SnapLink_API.Controllers
 {
@@ -43,6 +44,28 @@ namespace SnapLink_API.Controllers
         {
             await _service.DeleteAsync(id);
             return Ok("Deleted");
+        }
+        [HttpPost("nearby")]
+        public async Task<IActionResult> GetNearbyLocations([FromBody] AddressRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Address))
+                return BadRequest("Address is required.");
+
+            var locations = await _service.GetNearbyLocationsAsync(request.Address);
+            return Ok(locations);
+        }
+        [HttpPut("update-location-coordinates")]
+        public async Task<IActionResult> UpdateCoordinates([FromBody] UpdateLocationCoordinatesRequest request)
+        {
+            try
+            {
+                await _service.UpdateCoordinatesAsync(request.LocationId);
+                return Ok("Coordinates updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

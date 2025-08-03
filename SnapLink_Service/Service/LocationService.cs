@@ -2,12 +2,16 @@
 using SnapLink_Model.DTO;
 using SnapLink_Repository.Entity;
 using SnapLink_Repository.IRepository;
+using SnapLink_Repository.Repository;
 using SnapLink_Service.IService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace SnapLink_Service.Service
 {
@@ -15,11 +19,13 @@ namespace SnapLink_Service.Service
     {
         private readonly ILocationRepository _repo;
         private readonly IMapper _mapper;
+        private readonly HttpClient _httpClient;
 
-        public LocationService(ILocationRepository repo, IMapper mapper)
+        public LocationService(HttpClient httpClient,ILocationRepository repo, IMapper mapper)
         {
             _repo = repo;
             _mapper = mapper;
+            _httpClient = httpClient;
         }
 
         public async Task<IEnumerable<Location>> GetAllAsync() => await _repo.GetAllAsync();
@@ -80,36 +86,68 @@ namespace SnapLink_Service.Service
             await _repo.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Location>> GetLocationsWithinRadiusAsync(double latitude, double longitude, double radiusKm)
+        public async Task<List<LocationNearbyDto>> GetNearbyLocationsAsync(string address)
         {
-            // TODO: Add Latitude/Longitude fields to Location entity for real geospatial queries
-            // For now, return an empty list to satisfy the interface
-            return new List<Location>();
+            var (latitude, longitude) = await GetLatLongFromAddress(address);
+            var locations = await _repo.GetAllLocationsAsync();
+            return locations
+            .Select(loc => new LocationNearbyDto
+            {
+                LocationId = loc.LocationId,
+                Name = loc.Name,
+                Address = loc.Address,
+                DistanceInKm = GetDistance(latitude, longitude, (double)loc.Latitude!, (double)loc.Longitude!)
+            })
+            .OrderBy(x => x.DistanceInKm)
+            .ToList();
+        }
+        public async Task UpdateCoordinatesAsync(int locationId)
+        {
+            var location = await _repo.GetByIdAsync(locationId);
+            if (location == null) throw new Exception("Location not found.");
+            if (string.IsNullOrWhiteSpace(location.Address)) throw new Exception("Address is empty.");
+
+            var (lat, lon) = await GetLatLongFromAddress(location.Address);
+            location.Latitude = lat;
+            location.Longitude = lon;
+            location.UpdatedAt = DateTime.UtcNow;
+
+            await _repo.UpdateAsync(location);
+            await _repo.SaveChangesAsync();
+        }
+        private async Task<(double lat, double lon)> GetLatLongFromAddress(string address)
+        {
+            string encoded = HttpUtility.UrlEncode(address);
+            string url = $"https://nominatim.openstreetmap.org/search?q={encoded}&format=json&limit=1";
+
+            var response = await _httpClient.GetAsync(url);
+            var content = await response.Content.ReadAsStringAsync();
+
+            var result = JsonSerializer.Deserialize<List<NominatimResponse>>(content);
+            if (result == null || result.Count == 0)
+                throw new Exception("Không tìm thấy tọa độ cho địa chỉ.");
+
+            return (double.Parse(result[0].Lat), double.Parse(result[0].Lon));
+        }
+        private class NominatimResponse
+        {
+            public string Lat { get; set; } = "";
+            public string Lon { get; set; } = "";
         }
 
-      
-        public Task<double> CalculateDistanceAsync(double lat1, double lon1, double lat2, double lon2)
+        private double GetDistance(double lat1, double lon1, double lat2, double lon2)
         {
-            var distance = CalculateDistance(lat1, lon1, lat2, lon2);
-            return Task.FromResult(distance);
-        }
-
-        private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
-        {
-            const double R = 6371; // Radius of the earth in km
-            var dLat = ToRadians(lat2 - lat1);
-            var dLon = ToRadians(lon2 - lon1);
-            var a =
-                Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
-                Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
-                Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+            var R = 6371; // km
+            var dLat = DegreesToRadians(lat2 - lat1);
+            var dLon = DegreesToRadians(lon2 - lon1);
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(DegreesToRadians(lat1)) * Math.Cos(DegreesToRadians(lat2)) *
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
             var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
             return R * c;
         }
 
-        private double ToRadians(double deg)
-        {
-            return deg * (Math.PI / 180);
-        }
+        private double DegreesToRadians(double deg) => deg * (Math.PI / 180);
+
     }
 }

@@ -38,6 +38,12 @@ namespace SnapLink_Repository.Repository
             _context.Locations.Remove(location);
             return Task.CompletedTask;
         }
+        public async Task<List<Location>> GetAllLocationsAsync()
+        {
+            return await _context.Locations
+                .Where(l => l.Latitude != null && l.Longitude != null)
+                .ToListAsync();
+        }
 
         public async Task SaveChangesAsync() => await _context.SaveChangesAsync();
     }
