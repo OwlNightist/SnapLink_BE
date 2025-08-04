@@ -304,6 +304,12 @@ public partial class SnaplinkDbContext : DbContext
             entity.Property(e => e.IsPrimary).HasDefaultValue(false).HasColumnName("is_primary");
             entity.Property(e => e.Caption).HasColumnName("caption");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())").HasColumnType("datetime").HasColumnName("created_at");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.Images)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(e => e.Photographer)
                 .WithMany(p => p.Images)

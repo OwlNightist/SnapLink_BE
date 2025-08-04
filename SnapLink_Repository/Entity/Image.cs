@@ -10,6 +10,9 @@ namespace SnapLink_Repository.Entity
         public string? Caption { get; set; }
         public DateTime CreatedAt { get; set; }
 
+        public int? UserId { get; set; }
+        public User? User { get; set; }
+
         public int? PhotographerId { get; set; }
         public Photographer? Photographer { get; set; }
 

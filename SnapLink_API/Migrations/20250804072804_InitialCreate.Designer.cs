@@ -12,7 +12,7 @@ using SnapLink_Repository.DBContext;
 namespace SnapLink_API.Migrations
 {
     [DbContext(typeof(SnaplinkDbContext))]
-    [Migration("20250730072539_InitialCreate")]
+    [Migration("20250804072804_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -469,6 +469,10 @@ namespace SnapLink_API.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("url");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("user_id");
+
                     b.HasKey("Id")
                         .HasName("PK_Image_Id");
 
@@ -477,6 +481,8 @@ namespace SnapLink_API.Migrations
                     b.HasIndex("PhotographerEventId");
 
                     b.HasIndex("PhotographerId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Image", (string)null);
                 });
@@ -1741,11 +1747,18 @@ namespace SnapLink_API.Migrations
                         .HasForeignKey("PhotographerId")
                         .OnDelete(DeleteBehavior.Cascade);
 
+                    b.HasOne("SnapLink_Repository.Entity.User", "User")
+                        .WithMany("Images")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.Navigation("Location");
 
                     b.Navigation("Photographer");
 
                     b.Navigation("PhotographerEvent");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.Location", b =>
@@ -2118,6 +2131,8 @@ namespace SnapLink_API.Migrations
                     b.Navigation("ComplaintReporters");
 
                     b.Navigation("FromTransactions");
+
+                    b.Navigation("Images");
 
                     b.Navigation("LocationOwners");
 

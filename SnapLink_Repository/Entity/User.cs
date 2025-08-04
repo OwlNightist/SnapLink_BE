@@ -59,4 +59,6 @@ public partial class User
     public virtual ICollection<UserStyle> UserStyles { get; set; } = new List<UserStyle>();
     
     public virtual ICollection<Wallet> Wallets { get; set; } = new List<Wallet>();
+
+    public virtual ICollection<Image> Images { get; set; } = new List<Image>();
 }

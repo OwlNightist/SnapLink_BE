@@ -30,7 +30,7 @@ namespace SnapLink_Service.Service
             _containerClient.CreateIfNotExists(PublicAccessType.Blob);
         }
 
-        public async Task<string> UploadImageAsync(IFormFile file, int? photographerId, int? locationId, int? photographerEventId)
+        public async Task<string> UploadImageAsync(IFormFile file, int? userId, int? photographerId, int? locationId, int? photographerEventId)
         {
             if (file == null || file.Length == 0)
                 throw new ArgumentException("File is empty or null");
@@ -49,7 +49,12 @@ namespace SnapLink_Service.Service
             // Determine entity type and id
             string entityType;
             int entityId;
-            if (photographerId.HasValue)
+            if (userId.HasValue)
+            {
+                entityType = "user";
+                entityId = userId.Value;
+            }
+            else if (photographerId.HasValue)
             {
                 entityType = "photographer";
                 entityId = photographerId.Value;

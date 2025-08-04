@@ -16,6 +16,29 @@ namespace SnapLink_API.Controllers
             _imageService = imageService;
         }
 
+        // GET: api/image/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ImageResponse>> GetById(int id)
+        {
+            try
+            {
+                var image = await _imageService.GetByIdAsync(id);
+                return Ok(image);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        // GET: api/image/user/{userId}
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<ImageResponse>>> GetByUserId(int userId)
+        {
+            var images = await _imageService.GetByUserIdAsync(userId);
+            return Ok(images);
+        }
+
         // GET: api/image/photographer/{photographerId}
         [HttpGet("photographer/{photographerId}")]
         public async Task<ActionResult<IEnumerable<ImageResponse>>> GetByPhotographerId(int photographerId)
@@ -38,6 +61,16 @@ namespace SnapLink_API.Controllers
         {
             var images = await _imageService.GetByPhotographerEventIdAsync(eventId);
             return Ok(images);
+        }
+
+        // GET: api/image/user/{userId}/primary
+        [HttpGet("user/{userId}/primary")]
+        public async Task<ActionResult<ImageResponse>> GetPrimaryByUserId(int userId)
+        {
+            var image = await _imageService.GetPrimaryByUserIdAsync(userId);
+            if (image == null)
+                return NotFound($"No primary image found for user with ID {userId}");
+            return Ok(image);
         }
 
         // GET: api/image/photographer/{photographerId}/primary

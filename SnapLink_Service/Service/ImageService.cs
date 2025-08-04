@@ -37,6 +37,15 @@ namespace SnapLink_Service.Service
             return _mapper.Map<ImageResponse>(imageEntity);
         }
 
+        public async Task<IEnumerable<ImageResponse>> GetByUserIdAsync(int userId)
+        {
+            var images = await _unitOfWork.ImageRepository.GetAsync(
+                filter: img => img.UserId == userId,
+                orderBy: q => q.OrderByDescending(img => img.IsPrimary).ThenBy(img => img.CreatedAt)
+            );
+            return _mapper.Map<IEnumerable<ImageResponse>>(images);
+        }
+
         public async Task<IEnumerable<ImageResponse>> GetByPhotographerIdAsync(int photographerId)
         {
             var images = await _unitOfWork.ImageRepository.GetAsync(
@@ -62,6 +71,15 @@ namespace SnapLink_Service.Service
                 orderBy: q => q.OrderByDescending(img => img.IsPrimary).ThenBy(img => img.CreatedAt)
             );
             return _mapper.Map<IEnumerable<ImageResponse>>(images);
+        }
+
+        public async Task<ImageResponse?> GetPrimaryByUserIdAsync(int userId)
+        {
+            var primaryImage = await _unitOfWork.ImageRepository.GetAsync(
+                filter: img => img.UserId == userId && img.IsPrimary
+            );
+            var imageEntity = primaryImage.FirstOrDefault();
+            return imageEntity != null ? _mapper.Map<ImageResponse>(imageEntity) : null;
         }
 
         public async Task<ImageResponse?> GetPrimaryByPhotographerIdAsync(int photographerId)
@@ -97,6 +115,7 @@ namespace SnapLink_Service.Service
             // Upload file to Azure Storage
             var blobName = await _azureStorageService.UploadImageAsync(
                 request.File,
+                request.UserId,
                 request.PhotographerId,
                 request.LocationId,
                 request.PhotographerEventId
@@ -108,6 +127,7 @@ namespace SnapLink_Service.Service
             var image = new Image
             {
                 Url = imageUrl,
+                UserId = request.UserId,
                 PhotographerId = request.PhotographerId,
                 LocationId = request.LocationId,
                 PhotographerEventId = request.PhotographerEventId,
@@ -131,6 +151,8 @@ namespace SnapLink_Service.Service
                 throw new ArgumentException($"Image with ID {request.Id} not found");
 
             // Update only provided fields
+            if (request.UserId.HasValue)
+                imageEntity.UserId = request.UserId.Value;
             if (!string.IsNullOrEmpty(request.Url))
                 imageEntity.Url = request.Url;
             if (request.Caption != null)
@@ -144,7 +166,8 @@ namespace SnapLink_Service.Service
                 {
                     var existingPrimaryImages = await _unitOfWork.ImageRepository.GetAsync(
                         filter: img =>
-                            ((img.PhotographerId != null && img.PhotographerId == imageEntity.PhotographerId) ||
+                            ((img.UserId != null && img.UserId == imageEntity.UserId) ||
+                             (img.PhotographerId != null && img.PhotographerId == imageEntity.PhotographerId) ||
                              (img.LocationId != null && img.LocationId == imageEntity.LocationId) ||
                              (img.PhotographerEventId != null && img.PhotographerEventId == imageEntity.PhotographerEventId)) &&
                             img.Id != request.Id &&
@@ -207,7 +230,8 @@ namespace SnapLink_Service.Service
             // Unset all other primary images for the same entity
             var existingPrimaryImages = await _unitOfWork.ImageRepository.GetAsync(
                 filter: img =>
-                    ((img.PhotographerId != null && img.PhotographerId == imageEntity.PhotographerId) ||
+                    ((img.UserId != null && img.UserId == imageEntity.UserId) ||
+                     (img.PhotographerId != null && img.PhotographerId == imageEntity.PhotographerId) ||
                      (img.LocationId != null && img.LocationId == imageEntity.LocationId) ||
                      (img.PhotographerEventId != null && img.PhotographerEventId == imageEntity.PhotographerEventId)) &&
                     img.Id != imageId &&

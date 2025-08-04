@@ -31,27 +31,27 @@ namespace SnapLink_Repository.Data
             {
                 var users = new[]
                 {
-                    new User { UserName = "alice", Email = "alice@example.com", PasswordHash = "hash1", PhoneNumber = "1234567890", FullName = "Alice Smith", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "linkka", Email = "linkka@example.com", PasswordHash = "hash2", PhoneNumber = "1234567891", FullName = "linhka", ProfileImage = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2933653585994336284's2025-7-27-20.14.485%20story.jpg", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "carol", Email = "carol@example.com", PasswordHash = "hash3", PhoneNumber = "1234567892", FullName = "Carol White", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "dave", Email = "dave@example.com", PasswordHash = "hash4", PhoneNumber = "1234567893", FullName = "Dave Brown", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "eve", Email = "eve@example.com", PasswordHash = "hash5", PhoneNumber = "1234567894", FullName = "Eve Black", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "frank", Email = "frank@example.com", PasswordHash = "hash6", PhoneNumber = "1234567895", FullName = "Frank Miller", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "grace", Email = "grace@example.com", PasswordHash = "hash7", PhoneNumber = "1234567896", FullName = "Grace Lee", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "henry", Email = "henry@example.com", PasswordHash = "hash8", PhoneNumber = "1234567897", FullName = "Henry Wilson", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "iris", Email = "iris@example.com", PasswordHash = "hash9", PhoneNumber = "1234567898", FullName = "Iris Davis", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "jack", Email = "jack@example.com", PasswordHash = "hash10", PhoneNumber = "1234567899", FullName = "Jack Taylor", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "kate", Email = "kate@example.com", PasswordHash = "hash11", PhoneNumber = "1234567900", FullName = "Kate Anderson", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "leo", Email = "leo@example.com", PasswordHash = "hash12", PhoneNumber = "1234567901", FullName = "Leo Martinez", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "maya", Email = "maya@example.com", PasswordHash = "hash13", PhoneNumber = "1234567902", FullName = "Maya Rodriguez", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "nina", Email = "nina@example.com", PasswordHash = "hash14", PhoneNumber = "1234567903", FullName = "Nina Thompson", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "oscar", Email = "oscar@example.com", PasswordHash = "hash15", PhoneNumber = "1234567904", FullName = "Oscar Garcia", Status = "Active", CreateAt = DateTime.Now },
+                    new User { UserName = "alice", Email = "alice@example.com", PasswordHash = "hash1", PhoneNumber = "1234567890", FullName = "Alice Smith", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "linkka", Email = "linkka@example.com", PasswordHash = "hash2", PhoneNumber = "1234567891", FullName = "linhka", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "carol", Email = "carol@example.com", PasswordHash = "hash3", PhoneNumber = "1234567892", FullName = "Carol White", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "dave", Email = "dave@example.com", PasswordHash = "hash4", PhoneNumber = "1234567893", FullName = "Dave Brown", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "eve", Email = "eve@example.com", PasswordHash = "hash5", PhoneNumber = "1234567894", FullName = "Eve Black", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "frank", Email = "frank@example.com", PasswordHash = "hash6", PhoneNumber = "1234567895", FullName = "Frank Miller", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "grace", Email = "grace@example.com", PasswordHash = "hash7", PhoneNumber = "1234567896", FullName = "Grace Lee", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "henry", Email = "henry@example.com", PasswordHash = "hash8", PhoneNumber = "1234567897", FullName = "Henry Wilson", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "iris", Email = "iris@example.com", PasswordHash = "hash9", PhoneNumber = "1234567898", FullName = "Iris Davis", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "jack", Email = "jack@example.com", PasswordHash = "hash10", PhoneNumber = "1234567899", FullName = "Jack Taylor", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "kate", Email = "kate@example.com", PasswordHash = "hash11", PhoneNumber = "1234567900", FullName = "Kate Anderson", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "leo", Email = "leo@example.com", PasswordHash = "hash12", PhoneNumber = "1234567901", FullName = "Leo Martinez", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "maya", Email = "maya@example.com", PasswordHash = "hash13", PhoneNumber = "1234567902", FullName = "Maya Rodriguez", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "nina", Email = "nina@example.com", PasswordHash = "hash14", PhoneNumber = "1234567903", FullName = "Nina Thompson", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "oscar", Email = "oscar@example.com", PasswordHash = "hash15", PhoneNumber = "1234567904", FullName = "Oscar Garcia", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
                     // Additional users for location owners
-                    new User { UserName = "peter", Email = "peter@example.com", PasswordHash = "hash16", PhoneNumber = "1234567905", FullName = "Peter Chen", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "sarah", Email = "sarah@example.com", PasswordHash = "hash17", PhoneNumber = "1234567906", FullName = "Sarah Kim", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "mike", Email = "mike@example.com", PasswordHash = "hash18", PhoneNumber = "1234567907", FullName = "Mike Johnson", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "lisa", Email = "lisa@example.com", PasswordHash = "hash19", PhoneNumber = "1234567908", FullName = "Lisa Wang", Status = "Active", CreateAt = DateTime.Now },
-                    new User { UserName = "david", Email = "david@example.com", PasswordHash = "hash20", PhoneNumber = "1234567909", FullName = "David Park", Status = "Active", CreateAt = DateTime.Now }
+                    new User { UserName = "peter", Email = "peter@example.com", PasswordHash = "hash16", PhoneNumber = "1234567905", FullName = "Peter Chen", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "sarah", Email = "sarah@example.com", PasswordHash = "hash17", PhoneNumber = "1234567906", FullName = "Sarah Kim", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "mike", Email = "mike@example.com", PasswordHash = "hash18", PhoneNumber = "1234567907", FullName = "Mike Johnson", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "lisa", Email = "lisa@example.com", PasswordHash = "hash19", PhoneNumber = "1234567908", FullName = "Lisa Wang", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "david", Email = "david@example.com", PasswordHash = "hash20", PhoneNumber = "1234567909", FullName = "David Park", Status = "Active", IsVerified = true, CreateAt = DateTime.Now }
                 };
                 context.Users.AddRange(users);
                 context.SaveChanges();

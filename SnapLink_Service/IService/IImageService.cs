@@ -8,9 +8,12 @@ namespace SnapLink_Service.IService
 {
     public interface IImageService
     {
+        Task<ImageResponse> GetByIdAsync(int id);
+        Task<IEnumerable<ImageResponse>> GetByUserIdAsync(int userId);
         Task<IEnumerable<ImageResponse>> GetByPhotographerIdAsync(int photographerId);
         Task<IEnumerable<ImageResponse>> GetByLocationIdAsync(int locationId);
         Task<IEnumerable<ImageResponse>> GetByPhotographerEventIdAsync(int photographerEventId);
+        Task<ImageResponse?> GetPrimaryByUserIdAsync(int userId);
         Task<ImageResponse?> GetPrimaryByPhotographerIdAsync(int photographerId);
         Task<ImageResponse?> GetPrimaryByLocationIdAsync(int locationId);
         Task<ImageResponse?> GetPrimaryByPhotographerEventIdAsync(int photographerEventId);

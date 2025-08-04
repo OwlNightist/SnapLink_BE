@@ -6,6 +6,7 @@ namespace SnapLink_Model.DTO.Response
     {
         public int Id { get; set; }
         public string Url { get; set; } = string.Empty;
+        public int? UserId { get; set; }
         public int? PhotographerId { get; set; }
         public int? LocationId { get; set; }
         public int? PhotographerEventId { get; set; }

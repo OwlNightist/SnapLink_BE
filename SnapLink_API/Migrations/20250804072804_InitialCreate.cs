@@ -529,6 +529,7 @@ namespace SnapLink_API.Migrations
                     is_primary = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     caption = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
+                    user_id = table.Column<int>(type: "int", nullable: true),
                     PhotographerId = table.Column<int>(type: "int", nullable: true),
                     LocationId = table.Column<int>(type: "int", nullable: true),
                     PhotographerEventId = table.Column<int>(type: "int", nullable: true)
@@ -553,6 +554,12 @@ namespace SnapLink_API.Migrations
                         column: x => x.PhotographerId,
                         principalTable: "Photographer",
                         principalColumn: "photographerId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Image_Users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "Users",
+                        principalColumn: "userId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -929,6 +936,11 @@ namespace SnapLink_API.Migrations
                 name: "IX_Image_PhotographerId",
                 table: "Image",
                 column: "PhotographerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Image_user_id",
+                table: "Image",
+                column: "user_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Location_locationOwnerId",
