@@ -15,9 +15,8 @@ namespace SnapLink_Service.IService
         Task CreateAsync(LocationDto dto);
         Task UpdateAsync(int id, LocationDto dto);
         Task DeleteAsync(int id);
-        
-        // New location-based search methods
-        Task<IEnumerable<Location>> GetLocationsWithinRadiusAsync(double latitude, double longitude, double radiusKm);
-        Task<double> CalculateDistanceAsync(double lat1, double lon1, double lat2, double lon2);
+
+        Task<List<LocationNearbyDto>> GetNearbyLocationsAsync(string address);
+        Task UpdateCoordinatesAsync(int locationId);
     }
 }

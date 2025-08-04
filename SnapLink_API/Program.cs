@@ -56,7 +56,7 @@ builder.Services.AddControllers()
 //builder.Services.AddDbContext<SnaplinkDbContext>(options =>
 //  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
