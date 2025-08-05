@@ -19,36 +19,95 @@ namespace SnapLink_Service.Service
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<ChatResponse> SendMessageAsync(SendMessageRequest request, int senderId)
+        #region Message Operations
+
+        public async Task<SendMessageResponse> SendMessageAsync(SendMessageRequest request, int senderId)
         {
             try
             {
-                // Validate sender exists
-                var sender = await _context.Users
-                    .FirstOrDefaultAsync(u => u.UserId == senderId);
-                
-                if (sender == null)
+                // Validate sender and recipient exist
+                var sender = await _context.Users.FindAsync(senderId);
+                var recipient = await _context.Users.FindAsync(request.RecipientId);
+
+                if (sender == null || recipient == null)
                 {
-                    return new ChatResponse
+                    return new SendMessageResponse
                     {
-                        Error = -1,
-                        Message = "Sender not found",
-                        Data = null
+                        Success = false,
+                        Message = "Sender or recipient not found"
                     };
                 }
 
-                // Validate recipient exists
-                var recipient = await _context.Users
-                    .FirstOrDefaultAsync(u => u.UserId == request.RecipientId);
-                
-                if (recipient == null)
+                // Get or create conversation
+                int conversationId;
+                if (request.ConversationId.HasValue)
                 {
-                    return new ChatResponse
+                    // Use existing conversation
+                    var existingConversation = await _context.Conversations
+                        .Include(c => c.Participants)
+                        .FirstOrDefaultAsync(c => c.ConversationId == request.ConversationId.Value);
+
+                    if (existingConversation == null)
                     {
-                        Error = -1,
-                        Message = "Recipient not found",
-                        Data = null
+                        return new SendMessageResponse
+                        {
+                            Success = false,
+                            Message = "Conversation not found"
+                        };
+                    }
+
+                    // Check if sender is participant
+                    if (!existingConversation.Participants.Any(p => p.UserId == senderId && p.IsActive))
+                    {
+                        return new SendMessageResponse
+                        {
+                            Success = false,
+                            Message = "You are not a participant in this conversation"
+                        };
+                    }
+
+                    conversationId = request.ConversationId.Value;
+                }
+                else
+                {
+                    // Create new direct conversation
+                    var conversation = new Conversation
+                    {
+                        Title = $"Chat between {sender.UserName} and {recipient.UserName}",
+                        Type = "Direct",
+                        Status = "Active",
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
                     };
+
+                    _context.Conversations.Add(conversation);
+                    await _context.SaveChangesAsync();
+
+                    // Add participants
+                    var participants = new List<ConversationParticipant>
+                    {
+                        new ConversationParticipant
+                        {
+                            ConversationId = conversation.ConversationId,
+                            UserId = senderId,
+                            JoinedAt = DateTime.UtcNow,
+                            Role = "Member",
+                            IsActive = true
+                        },
+                        new ConversationParticipant
+                        {
+                            ConversationId = conversation.ConversationId,
+                            UserId = request.RecipientId,
+                            JoinedAt = DateTime.UtcNow,
+                            Role = "Member",
+                            IsActive = true
+                        }
+                    };
+
+                    _context.ConversationParticipants.AddRange(participants);
+                    await _context.SaveChangesAsync();
+
+                    conversationId = conversation.ConversationId;
                 }
 
                 // Create message
@@ -56,331 +115,505 @@ namespace SnapLink_Service.Service
                 {
                     SenderId = senderId,
                     RecipientId = request.RecipientId,
+                    ConversationId = conversationId,
                     Content = request.Content,
-                    AttachmentUrl = request.AttachmentUrl,
-                    ReadStatus = false,
+                    MessageType = request.MessageType ?? "Text",
+                    Status = "sent",
                     CreatedAt = DateTime.UtcNow
                 };
 
-                await _unitOfWork.MessagessRepository.AddAsync(message);
-                await _unitOfWork.SaveChangesAsync();
+                _context.Messagesses.Add(message);
+                await _context.SaveChangesAsync();
+
+                // Update conversation's UpdatedAt
+                var conversationToUpdate = await _context.Conversations.FindAsync(conversationId);
+                if (conversationToUpdate != null)
+                {
+                    conversationToUpdate.UpdatedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+                }
 
                 // Map to response
-                var messageData = await MapMessageToResponseAsync(message);
-                
-                return new ChatResponse
+                var messageResponse = new MessageResponse
                 {
-                    Error = 0,
+                    MessageId = message.MessageId,
+                    SenderId = message.SenderId.Value,
+                    RecipientId = message.RecipientId,
+                    ConversationId = message.ConversationId,
+                    Content = message.Content,
+                    CreatedAt = message.CreatedAt.Value,
+                    MessageType = message.MessageType,
+                    Status = message.Status,
+                    ReadAt = message.ReadAt,
+                    SenderName = sender.UserName,
+                    SenderProfileImage = sender.ProfileImage
+                };
+
+                return new SendMessageResponse
+                {
+                    Success = true,
                     Message = "Message sent successfully",
-                    Data = messageData
+                    MessageData = messageResponse,
+                    ConversationId = conversationId
                 };
             }
             catch (Exception ex)
             {
-                return new ChatResponse
+                return new SendMessageResponse
                 {
-                    Error = -1,
-                    Message = $"Failed to send message: {ex.Message}",
-                    Data = null
+                    Success = false,
+                    Message = $"Error sending message: {ex.Message}"
                 };
             }
         }
 
-        public async Task<ChatListResponse> GetConversationMessagesAsync(int userId, int otherUserId, int page = 1, int pageSize = 20)
+        public async Task<MessageResponse?> GetMessageByIdAsync(int messageId)
         {
-            try
-            {
-                // Get messages between the two users
-                var query = _context.Messagesses
-                    .Include(m => m.Sender)
-                    .Include(m => m.Recipient)
-                    .Where(m => (m.SenderId == userId && m.RecipientId == otherUserId) ||
-                               (m.SenderId == otherUserId && m.RecipientId == userId))
-                    .OrderByDescending(m => m.CreatedAt);
+            var message = await _context.Messagesses
+                .Include(m => m.Sender)
+                .FirstOrDefaultAsync(m => m.MessageId == messageId);
 
-                var totalCount = await query.CountAsync();
-                var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            if (message == null) return null;
 
-                var messages = await query
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .OrderBy(m => m.CreatedAt) // Show oldest first for chat
-                    .ToListAsync();
-
-                var messageDataList = new List<MessageData>();
-                foreach (var message in messages)
-                {
-                    messageDataList.Add(await MapMessageToResponseAsync(message));
-                }
-
-                return new ChatListResponse
-                {
-                    Error = 0,
-                    Message = "Conversation messages retrieved successfully",
-                    Data = new ChatListData
-                    {
-                        Messages = messageDataList,
-                        TotalCount = totalCount,
-                        Page = page,
-                        PageSize = pageSize,
-                        TotalPages = totalPages
-                    }
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ChatListResponse
-                {
-                    Error = -1,
-                    Message = $"Failed to get conversation messages: {ex.Message}",
-                    Data = null
-                };
-            }
-        }
-
-        public async Task<ConversationListResponse> GetUserConversationsAsync(int userId, int page = 1, int pageSize = 10)
-        {
-            try
-            {
-                // Get all unique conversations for the user
-                var conversations = await _context.Messagesses
-                    .Where(m => m.SenderId == userId || m.RecipientId == userId)
-                    .GroupBy(m => m.SenderId == userId ? m.RecipientId : m.SenderId)
-                    .Select(g => new
-                    {
-                        OtherUserId = g.Key,
-                        LastMessage = g.OrderByDescending(m => m.CreatedAt).First(),
-                        UnreadCount = g.Count(m => m.RecipientId == userId && (m.ReadStatus != true))
-                    })
-                    .OrderByDescending(c => c.LastMessage.CreatedAt)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
-
-                var conversationDataList = new List<ConversationData>();
-                foreach (var conv in conversations)
-                {
-                    var otherUser = await _context.Users
-                        .FirstOrDefaultAsync(u => u.UserId == conv.OtherUserId);
-
-                    if (otherUser != null)
-                    {
-                        conversationDataList.Add(new ConversationData
-                        {
-                            OtherUserId = conv.OtherUserId.Value,
-                            OtherUserName = otherUser.FullName ?? otherUser.UserName ?? "",
-                            OtherUserEmail = otherUser.Email ?? "",
-                            OtherUserProfileImage = otherUser.ProfileImage,
-                            LastMessage = conv.LastMessage.Content ?? "",
-                            LastMessageTime = conv.LastMessage.CreatedAt ?? DateTime.UtcNow,
-                            UnreadCount = conv.UnreadCount,
-                            IsOnline = false // TODO: Implement online status tracking
-                        });
-                    }
-                }
-
-                var totalCount = await _context.Messagesses
-                    .Where(m => m.SenderId == userId || m.RecipientId == userId)
-                    .GroupBy(m => m.SenderId == userId ? m.RecipientId : m.SenderId)
-                    .CountAsync();
-
-                var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
-
-                return new ConversationListResponse
-                {
-                    Error = 0,
-                    Message = "User conversations retrieved successfully",
-                    Data = new ConversationListData
-                    {
-                        Conversations = conversationDataList,
-                        TotalCount = totalCount,
-                        Page = page,
-                        PageSize = pageSize,
-                        TotalPages = totalPages
-                    }
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ConversationListResponse
-                {
-                    Error = -1,
-                    Message = $"Failed to get user conversations: {ex.Message}",
-                    Data = null
-                };
-            }
-        }
-
-        public async Task<ChatResponse> MarkMessageAsReadAsync(int messageId, int userId)
-        {
-            try
-            {
-                var message = await _context.Messagesses
-                    .FirstOrDefaultAsync(m => m.MessageId == messageId);
-
-                if (message == null)
-                {
-                    return new ChatResponse
-                    {
-                        Error = -1,
-                        Message = "Message not found",
-                        Data = null
-                    };
-                }
-
-                // Only recipient can mark message as read
-                if (message.RecipientId != userId)
-                {
-                    return new ChatResponse
-                    {
-                        Error = -1,
-                        Message = "You can only mark messages sent to you as read",
-                        Data = null
-                    };
-                }
-
-                message.ReadStatus = true;
-                await _unitOfWork.SaveChangesAsync();
-
-                var messageData = await MapMessageToResponseAsync(message);
-                
-                return new ChatResponse
-                {
-                    Error = 0,
-                    Message = "Message marked as read successfully",
-                    Data = messageData
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ChatResponse
-                {
-                    Error = -1,
-                    Message = $"Failed to mark message as read: {ex.Message}",
-                    Data = null
-                };
-            }
-        }
-
-        public async Task<UnreadCountResponse> GetUnreadMessageCountAsync(int userId)
-        {
-            try
-            {
-                var unreadMessages = await _context.Messagesses
-                    .Where(m => m.RecipientId == userId && (m.ReadStatus != true))
-                    .GroupBy(m => m.SenderId)
-                    .Select(g => new { SenderId = g.Key, Count = g.Count() })
-                    .ToListAsync();
-
-                var totalUnreadCount = unreadMessages.Sum(u => u.Count);
-                var unreadCountByUser = unreadMessages.ToDictionary(u => u.SenderId.Value, u => u.Count);
-
-                return new UnreadCountResponse
-                {
-                    Error = 0,
-                    Message = "Unread message count retrieved successfully",
-                    Data = new UnreadCountData
-                    {
-                        TotalUnreadCount = totalUnreadCount,
-                        UnreadCountByUser = unreadCountByUser
-                    }
-                };
-            }
-            catch (Exception ex)
-            {
-                return new UnreadCountResponse
-                {
-                    Error = -1,
-                    Message = $"Failed to get unread message count: {ex.Message}",
-                    Data = null
-                };
-            }
-        }
-
-        public async Task<bool> MarkAllMessagesAsReadAsync(int userId, int otherUserId)
-        {
-            try
-            {
-                var unreadMessages = await _context.Messagesses
-                    .Where(m => m.RecipientId == userId && 
-                               m.SenderId == otherUserId && 
-                               (m.ReadStatus != true))
-                    .ToListAsync();
-
-                foreach (var message in unreadMessages)
-                {
-                    message.ReadStatus = true;
-                }
-
-                await _unitOfWork.SaveChangesAsync();
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public async Task<ChatResponse> GetMessageByIdAsync(int messageId)
-        {
-            try
-            {
-                var message = await _context.Messagesses
-                    .Include(m => m.Sender)
-                    .Include(m => m.Recipient)
-                    .FirstOrDefaultAsync(m => m.MessageId == messageId);
-
-                if (message == null)
-                {
-                    return new ChatResponse
-                    {
-                        Error = -1,
-                        Message = "Message not found",
-                        Data = null
-                    };
-                }
-
-                var messageData = await MapMessageToResponseAsync(message);
-                
-                return new ChatResponse
-                {
-                    Error = 0,
-                    Message = "Message retrieved successfully",
-                    Data = messageData
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ChatResponse
-                {
-                    Error = -1,
-                    Message = $"Failed to get message: {ex.Message}",
-                    Data = null
-                };
-            }
-        }
-
-        private async Task<MessageData> MapMessageToResponseAsync(Messagess message)
-        {
-            var sender = await _context.Users.FirstOrDefaultAsync(u => u.UserId == message.SenderId);
-            var recipient = await _context.Users.FirstOrDefaultAsync(u => u.UserId == message.RecipientId);
-
-            return new MessageData
+            return new MessageResponse
             {
                 MessageId = message.MessageId,
-                SenderId = message.SenderId ?? 0,
-                SenderName = sender?.FullName ?? sender?.UserName ?? "",
-                SenderEmail = sender?.Email ?? "",
-                SenderProfileImage = sender?.ProfileImage,
-                RecipientId = message.RecipientId ?? 0,
-                RecipientName = recipient?.FullName ?? recipient?.UserName ?? "",
-                RecipientEmail = recipient?.Email ?? "",
-                RecipientProfileImage = recipient?.ProfileImage,
-                Content = message.Content ?? "",
-                AttachmentUrl = message.AttachmentUrl,
-                ReadStatus = message.ReadStatus ?? false,
-                CreatedAt = message.CreatedAt ?? DateTime.UtcNow
+                SenderId = message.SenderId.Value,
+                RecipientId = message.RecipientId,
+                ConversationId = message.ConversationId,
+                Content = message.Content,
+                CreatedAt = message.CreatedAt.Value,
+                MessageType = message.MessageType,
+                Status = message.Status,
+                ReadAt = message.ReadAt,
+                SenderName = message.Sender?.UserName,
+                SenderProfileImage = message.Sender?.ProfileImage
             };
         }
+
+        public async Task<GetMessagesResponse> GetConversationMessagesAsync(GetConversationMessagesRequest request)
+        {
+            var query = _context.Messagesses
+                .Include(m => m.Sender)
+                .Where(m => m.ConversationId == request.ConversationId)
+                .OrderByDescending(m => m.CreatedAt);
+
+            var totalCount = await query.CountAsync();
+            var skip = (request.Page - 1) * request.PageSize;
+
+            var messages = await query
+                .Skip(skip)
+                .Take(request.PageSize)
+                .ToListAsync();
+
+            var messageResponses = messages.Select(m => new MessageResponse
+            {
+                MessageId = m.MessageId,
+                SenderId = m.SenderId.Value,
+                RecipientId = m.RecipientId,
+                ConversationId = m.ConversationId,
+                Content = m.Content,
+                CreatedAt = m.CreatedAt.Value,
+                MessageType = m.MessageType,
+                Status = m.Status,
+                ReadAt = m.ReadAt,
+                SenderName = m.Sender?.UserName,
+                SenderProfileImage = m.Sender?.ProfileImage
+            }).ToList();
+
+            return new GetMessagesResponse
+            {
+                Messages = messageResponses,
+                TotalCount = totalCount,
+                Page = request.Page,
+                PageSize = request.PageSize,
+                HasMore = skip + request.PageSize < totalCount
+            };
+        }
+
+        public async Task<bool> MarkMessageAsReadAsync(MarkMessageAsReadRequest request, int userId)
+        {
+            var message = await _context.Messagesses
+                .FirstOrDefaultAsync(m => m.MessageId == request.MessageId);
+
+            if (message == null) return false;
+
+            // Check if user is the recipient
+            if (message.RecipientId != userId) return false;
+
+            message.Status = "read";
+            message.ReadAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteMessageAsync(int messageId, int userId)
+        {
+            var message = await _context.Messagesses
+                .FirstOrDefaultAsync(m => m.MessageId == messageId);
+
+            if (message == null) return false;
+
+            // Check if user is the sender
+            if (message.SenderId != userId) return false;
+
+            _context.Messagesses.Remove(message);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        #endregion
+
+        #region Conversation Operations
+
+        public async Task<CreateConversationResponse> CreateConversationAsync(CreateConversationRequest request)
+        {
+            try
+            {
+                var conversation = new Conversation
+                {
+                    Title = request.Title,
+                    Type = request.Type,
+                    Status = request.Status ?? "Active",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                _context.Conversations.Add(conversation);
+                await _context.SaveChangesAsync();
+
+                // Add participants
+                var participants = request.ParticipantIds.Select(userId => new ConversationParticipant
+                {
+                    ConversationId = conversation.ConversationId,
+                    UserId = userId,
+                    JoinedAt = DateTime.UtcNow,
+                    Role = "Member",
+                    IsActive = true
+                }).ToList();
+
+                _context.ConversationParticipants.AddRange(participants);
+                await _context.SaveChangesAsync();
+
+                var conversationResponse = await GetConversationByIdAsync(conversation.ConversationId);
+
+                return new CreateConversationResponse
+                {
+                    Success = true,
+                    Message = "Conversation created successfully",
+                    Conversation = conversationResponse
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CreateConversationResponse
+                {
+                    Success = false,
+                    Message = $"Error creating conversation: {ex.Message}"
+                };
+            }
+        }
+
+        public async Task<ConversationResponse?> GetConversationByIdAsync(int conversationId)
+        {
+            var conversation = await _context.Conversations
+                .Include(c => c.Participants)
+                    .ThenInclude(p => p.User)
+                .Include(c => c.Messages.OrderByDescending(m => m.CreatedAt).Take(1))
+                .FirstOrDefaultAsync(c => c.ConversationId == conversationId);
+
+            if (conversation == null) return null;
+
+            var participants = conversation.Participants.Select(p => new ConversationParticipantResponse
+            {
+                ConversationParticipantId = p.ConversationParticipantId,
+                ConversationId = p.ConversationId,
+                UserId = p.UserId,
+                JoinedAt = p.JoinedAt.Value,
+                LeftAt = p.LeftAt,
+                Role = p.Role,
+                IsActive = p.IsActive,
+                UserName = p.User?.UserName,
+                UserProfileImage = p.User?.ProfileImage,
+                UserFullName = p.User?.FullName
+            }).ToList();
+
+            var lastMessage = conversation.Messages.FirstOrDefault();
+            var lastMessageResponse = lastMessage != null ? new MessageResponse
+            {
+                MessageId = lastMessage.MessageId,
+                SenderId = lastMessage.SenderId.Value,
+                RecipientId = lastMessage.RecipientId,
+                ConversationId = lastMessage.ConversationId,
+                Content = lastMessage.Content,
+                CreatedAt = lastMessage.CreatedAt.Value,
+                MessageType = lastMessage.MessageType,
+                Status = lastMessage.Status,
+                ReadAt = lastMessage.ReadAt
+            } : null;
+
+            return new ConversationResponse
+            {
+                ConversationId = conversation.ConversationId,
+                Title = conversation.Title,
+                CreatedAt = conversation.CreatedAt.Value,
+                UpdatedAt = conversation.UpdatedAt,
+                Status = conversation.Status,
+                Type = conversation.Type,
+                Participants = participants,
+                LastMessage = lastMessageResponse,
+                UnreadCount = 0 // Will be calculated separately if needed
+            };
+        }
+
+        public async Task<GetConversationsResponse> GetUserConversationsAsync(int userId, int page = 1, int pageSize = 20)
+        {
+            var query = _context.ConversationParticipants
+                .Include(cp => cp.Conversation)
+                    .ThenInclude(c => c.Messages.OrderByDescending(m => m.CreatedAt).Take(1))
+                .Include(cp => cp.Conversation)
+                    .ThenInclude(c => c.Participants)
+                        .ThenInclude(p => p.User)
+                .Where(cp => cp.UserId == userId && cp.IsActive)
+                .OrderByDescending(cp => cp.Conversation.UpdatedAt);
+
+            var totalCount = await query.CountAsync();
+            var skip = (page - 1) * pageSize;
+
+            var userConversations = await query
+                .Skip(skip)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var conversations = new List<ConversationResponse>();
+
+            foreach (var userConversation in userConversations)
+            {
+                var conversation = userConversation.Conversation;
+                var participants = conversation.Participants.Select(p => new ConversationParticipantResponse
+                {
+                    ConversationParticipantId = p.ConversationParticipantId,
+                    ConversationId = p.ConversationId,
+                    UserId = p.UserId,
+                    JoinedAt = p.JoinedAt.Value,
+                    LeftAt = p.LeftAt,
+                    Role = p.Role,
+                    IsActive = p.IsActive,
+                    UserName = p.User?.UserName,
+                    UserProfileImage = p.User?.ProfileImage,
+                    UserFullName = p.User?.FullName
+                }).ToList();
+
+                var lastMessage = conversation.Messages.FirstOrDefault();
+                var lastMessageResponse = lastMessage != null ? new MessageResponse
+                {
+                    MessageId = lastMessage.MessageId,
+                    SenderId = lastMessage.SenderId.Value,
+                    RecipientId = lastMessage.RecipientId,
+                    ConversationId = lastMessage.ConversationId,
+                    Content = lastMessage.Content,
+                    CreatedAt = lastMessage.CreatedAt.Value,
+                    MessageType = lastMessage.MessageType,
+                    Status = lastMessage.Status,
+                    ReadAt = lastMessage.ReadAt
+                } : null;
+
+                var unreadCount = await GetUnreadMessageCountAsync(userId, conversation.ConversationId);
+
+                conversations.Add(new ConversationResponse
+                {
+                    ConversationId = conversation.ConversationId,
+                    Title = conversation.Title,
+                    CreatedAt = conversation.CreatedAt.Value,
+                    UpdatedAt = conversation.UpdatedAt,
+                    Status = conversation.Status,
+                    Type = conversation.Type,
+                    Participants = participants,
+                    LastMessage = lastMessageResponse,
+                    UnreadCount = unreadCount
+                });
+            }
+
+            return new GetConversationsResponse
+            {
+                Conversations = conversations,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
+        public async Task<bool> UpdateConversationAsync(int conversationId, string title, string status)
+        {
+            var conversation = await _context.Conversations.FindAsync(conversationId);
+            if (conversation == null) return false;
+
+            conversation.Title = title;
+            conversation.Status = status;
+            conversation.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteConversationAsync(int conversationId, int userId)
+        {
+            var conversation = await _context.Conversations
+                .Include(c => c.Participants)
+                .FirstOrDefaultAsync(c => c.ConversationId == conversationId);
+
+            if (conversation == null) return false;
+
+            // Check if user is participant
+            var participant = conversation.Participants.FirstOrDefault(p => p.UserId == userId);
+            if (participant == null) return false;
+
+            // For direct conversations, mark as deleted for both participants
+            if (conversation.Type == "Direct")
+            {
+                foreach (var p in conversation.Participants)
+                {
+                    p.IsActive = false;
+                    p.LeftAt = DateTime.UtcNow;
+                }
+                conversation.Status = "Deleted";
+            }
+            else
+            {
+                // For group conversations, only remove the specific user
+                participant.IsActive = false;
+                participant.LeftAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        #endregion
+
+        #region Participant Operations
+
+        public async Task<bool> AddParticipantAsync(AddParticipantRequest request)
+        {
+            var conversation = await _context.Conversations
+                .Include(c => c.Participants)
+                .FirstOrDefaultAsync(c => c.ConversationId == request.ConversationId);
+
+            if (conversation == null) return false;
+
+            // Check if user is already a participant
+            if (conversation.Participants.Any(p => p.UserId == request.UserId && p.IsActive))
+                return false;
+
+            var participant = new ConversationParticipant
+            {
+                ConversationId = request.ConversationId,
+                UserId = request.UserId,
+                JoinedAt = DateTime.UtcNow,
+                Role = request.Role ?? "Member",
+                IsActive = true
+            };
+
+            _context.ConversationParticipants.Add(participant);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RemoveParticipantAsync(RemoveParticipantRequest request)
+        {
+            var participant = await _context.ConversationParticipants
+                .FirstOrDefaultAsync(p => p.ConversationId == request.ConversationId && p.UserId == request.UserId);
+
+            if (participant == null) return false;
+
+            participant.IsActive = false;
+            participant.LeftAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<List<ConversationParticipantResponse>> GetConversationParticipantsAsync(int conversationId)
+        {
+            var participants = await _context.ConversationParticipants
+                .Include(p => p.User)
+                .Where(p => p.ConversationId == conversationId && p.IsActive)
+                .ToListAsync();
+
+            return participants.Select(p => new ConversationParticipantResponse
+            {
+                ConversationParticipantId = p.ConversationParticipantId,
+                ConversationId = p.ConversationId,
+                UserId = p.UserId,
+                JoinedAt = p.JoinedAt.Value,
+                LeftAt = p.LeftAt,
+                Role = p.Role,
+                IsActive = p.IsActive,
+                UserName = p.User?.UserName,
+                UserProfileImage = p.User?.ProfileImage,
+                UserFullName = p.User?.FullName
+            }).ToList();
+        }
+
+        public async Task<bool> LeaveConversationAsync(int conversationId, int userId)
+        {
+            return await RemoveParticipantAsync(new RemoveParticipantRequest
+            {
+                ConversationId = conversationId,
+                UserId = userId
+            });
+        }
+
+        #endregion
+
+        #region Utility Operations
+
+        public async Task<int> GetUnreadMessageCountAsync(int userId, int conversationId)
+        {
+            return await _context.Messagesses
+                .CountAsync(m => m.ConversationId == conversationId && 
+                                m.RecipientId == userId && 
+                                m.Status == "sent");
+        }
+
+        public async Task<bool> IsUserInConversationAsync(int userId, int conversationId)
+        {
+            return await _context.ConversationParticipants
+                .AnyAsync(p => p.ConversationId == conversationId && 
+                              p.UserId == userId && 
+                              p.IsActive);
+        }
+
+        public async Task<ConversationResponse?> GetOrCreateDirectConversationAsync(int user1Id, int user2Id)
+        {
+            // Look for existing direct conversation between these two users
+            var existingConversation = await _context.ConversationParticipants
+                .Include(cp => cp.Conversation)
+                    .ThenInclude(c => c.Participants)
+                .Where(cp => cp.UserId == user1Id && cp.IsActive)
+                .Select(cp => cp.Conversation)
+                .Where(c => c.Type == "Direct" && c.Status == "Active")
+                .FirstOrDefaultAsync(c => c.Participants.Any(p => p.UserId == user2Id && p.IsActive));
+
+            if (existingConversation != null)
+            {
+                return await GetConversationByIdAsync(existingConversation.ConversationId);
+            }
+
+            // Create new direct conversation
+            var request = new CreateConversationRequest
+            {
+                Title = $"Direct Chat",
+                Type = "Direct",
+                ParticipantIds = new List<int> { user1Id, user2Id },
+                Status = "Active"
+            };
+
+            var result = await CreateConversationAsync(request);
+            return result.Success ? result.Conversation : null;
+        }
+
+        #endregion
     }
 } 

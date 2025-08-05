@@ -11,15 +11,22 @@ public partial class Messagess
 
     public int? RecipientId { get; set; }
 
+    public int? ConversationId { get; set; }
+
     public string? Content { get; set; }
-
-    public string? AttachmentUrl { get; set; }
-
-    public bool? ReadStatus { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
+    public string? MessageType { get; set; } // Text, Image, File, etc.
+
+    public string? Status { get; set; } // "sent", "read"
+
+    public DateTime? ReadAt { get; set; }
+
+    // Navigation properties
     public virtual User? Recipient { get; set; }
 
     public virtual User? Sender { get; set; }
+
+    public virtual Conversation? Conversation { get; set; }
 }

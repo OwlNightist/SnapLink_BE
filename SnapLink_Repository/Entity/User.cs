@@ -43,6 +43,8 @@ public partial class User
 
     public virtual ICollection<Messagess> MessagessSenders { get; set; } = new List<Messagess>();
 
+    public virtual ICollection<ConversationParticipant> ConversationParticipants { get; set; } = new List<ConversationParticipant>();
+
     public virtual ICollection<Moderator> Moderators { get; set; } = new List<Moderator>();
 
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();

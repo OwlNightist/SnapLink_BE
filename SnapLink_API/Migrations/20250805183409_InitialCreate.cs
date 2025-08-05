@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace SnapLink_Repository.Migrations
+namespace SnapLink_API.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -11,6 +11,23 @@ namespace SnapLink_Repository.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Conversation",
+                columns: table => new
+                {
+                    conversationId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    createdAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
+                    updatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__Conversation__ConversationId", x => x.conversationId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "PremiumPackage",
                 columns: table => new
@@ -72,7 +89,9 @@ namespace SnapLink_Repository.Migrations
                     bio = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
                     createAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
                     updateAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true)
+                    status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true),
+                    VerificationCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsVerified = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -97,6 +116,36 @@ namespace SnapLink_Repository.Migrations
                         column: x => x.userId,
                         principalTable: "Users",
                         principalColumn: "userId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ConversationParticipant",
+                columns: table => new
+                {
+                    conversationParticipantId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    conversationId = table.Column<int>(type: "int", nullable: false),
+                    userId = table.Column<int>(type: "int", nullable: false),
+                    joinedAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
+                    leftAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    role = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    isActive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__ConversationParticipant__ConversationParticipantId", x => x.conversationParticipantId);
+                    table.ForeignKey(
+                        name: "FK_ConversationParticipant_Conversation",
+                        column: x => x.conversationId,
+                        principalTable: "Conversation",
+                        principalColumn: "conversationId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ConversationParticipant_User",
+                        column: x => x.userId,
+                        principalTable: "Users",
+                        principalColumn: "userId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -129,14 +178,21 @@ namespace SnapLink_Repository.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     senderId = table.Column<int>(type: "int", nullable: true),
                     recipientId = table.Column<int>(type: "int", nullable: true),
+                    conversationId = table.Column<int>(type: "int", nullable: true),
                     content = table.Column<string>(type: "nvarchar(400)", maxLength: 400, nullable: true),
-                    attachmentUrl = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    readStatus = table.Column<bool>(type: "bit", nullable: true, defaultValue: false),
-                    createdAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    createdAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
+                    messageType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    readAt = table.Column<DateTime>(type: "datetime", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK__Messages__4808B993F0C0786B", x => x.messageId);
+                    table.ForeignKey(
+                        name: "FK_Messagess_Conversation",
+                        column: x => x.conversationId,
+                        principalTable: "Conversation",
+                        principalColumn: "conversationId");
                     table.ForeignKey(
                         name: "FK_Messagess_Recipient",
                         column: x => x.recipientId,
@@ -314,7 +370,9 @@ namespace SnapLink_Repository.Migrations
                     LocationType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ExternalPlaceId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     createdAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    updatedAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    updatedAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
+                    Latitude = table.Column<double>(type: "float", nullable: true),
+                    Longitude = table.Column<double>(type: "float", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -324,6 +382,65 @@ namespace SnapLink_Repository.Migrations
                         column: x => x.locationOwnerId,
                         principalTable: "LocationOwner",
                         principalColumn: "locationOwnerId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Availability",
+                columns: table => new
+                {
+                    availabilityId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    photographerId = table.Column<int>(type: "int", nullable: false),
+                    dayOfWeek = table.Column<int>(type: "int", nullable: false),
+                    startTime = table.Column<TimeSpan>(type: "time", nullable: false),
+                    endTime = table.Column<TimeSpan>(type: "time", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    createdAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
+                    updatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__Availability__AvailabilityId", x => x.availabilityId);
+                    table.ForeignKey(
+                        name: "FK_Availability_Photographer",
+                        column: x => x.photographerId,
+                        principalTable: "Photographer",
+                        principalColumn: "photographerId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DeviceInfo",
+                columns: table => new
+                {
+                    deviceInfoId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    photographerId = table.Column<int>(type: "int", nullable: false),
+                    deviceType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    brand = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    model = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    operatingSystem = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    osVersion = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    screenResolution = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    cameraResolution = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    storageCapacity = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    batteryCapacity = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    features = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    lastUsedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    createdAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
+                    updatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__DeviceInfo__DeviceInfoId", x => x.deviceInfoId);
+                    table.ForeignKey(
+                        name: "FK_DeviceInfo_Photographer",
+                        column: x => x.photographerId,
+                        principalTable: "Photographer",
+                        principalColumn: "photographerId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -466,6 +583,7 @@ namespace SnapLink_Repository.Migrations
                     is_primary = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     caption = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
+                    user_id = table.Column<int>(type: "int", nullable: true),
                     PhotographerId = table.Column<int>(type: "int", nullable: true),
                     LocationId = table.Column<int>(type: "int", nullable: true),
                     PhotographerEventId = table.Column<int>(type: "int", nullable: true)
@@ -490,6 +608,12 @@ namespace SnapLink_Repository.Migrations
                         column: x => x.PhotographerId,
                         principalTable: "Photographer",
                         principalColumn: "photographerId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Image_Users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "Users",
+                        principalColumn: "userId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -589,6 +713,36 @@ namespace SnapLink_Repository.Migrations
                         column: x => x.customerId,
                         principalTable: "Users",
                         principalColumn: "userId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PhotoDelivery",
+                columns: table => new
+                {
+                    photoDeliveryId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    bookingId = table.Column<int>(type: "int", nullable: false),
+                    deliveryMethod = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    driveLink = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    driveFolderName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    photoCount = table.Column<int>(type: "int", nullable: true),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    uploadedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    deliveredAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    expiresAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    createdAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
+                    updatedAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__PhotoDelivery__PhotoDeliveryId", x => x.photoDeliveryId);
+                    table.ForeignKey(
+                        name: "FK_PhotoDelivery_Booking",
+                        column: x => x.bookingId,
+                        principalTable: "Booking",
+                        principalColumn: "bookingId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -733,6 +887,31 @@ namespace SnapLink_Repository.Migrations
                 column: "paymentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Availability_Day_Status_Time",
+                table: "Availability",
+                columns: new[] { "dayOfWeek", "status", "startTime", "endTime" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Availability_DayOfWeek",
+                table: "Availability",
+                column: "dayOfWeek");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Availability_Photographer_Day_Status",
+                table: "Availability",
+                columns: new[] { "photographerId", "dayOfWeek", "status" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Availability_PhotographerId",
+                table: "Availability",
+                column: "photographerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Availability_Status",
+                table: "Availability",
+                column: "status");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Booking_eventId",
                 table: "Booking",
                 column: "eventId");
@@ -773,6 +952,66 @@ namespace SnapLink_Repository.Migrations
                 column: "reporterId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Conversation_CreatedAt",
+                table: "Conversation",
+                column: "createdAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Conversation_Status",
+                table: "Conversation",
+                column: "status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Conversation_Type",
+                table: "Conversation",
+                column: "type");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ConversationParticipant_ConversationId",
+                table: "ConversationParticipant",
+                column: "conversationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ConversationParticipant_IsActive",
+                table: "ConversationParticipant",
+                column: "isActive");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ConversationParticipant_Role",
+                table: "ConversationParticipant",
+                column: "role");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ConversationParticipant_UserId",
+                table: "ConversationParticipant",
+                column: "userId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DeviceInfo_Brand",
+                table: "DeviceInfo",
+                column: "brand");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DeviceInfo_DeviceType",
+                table: "DeviceInfo",
+                column: "deviceType");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DeviceInfo_LastUsedAt",
+                table: "DeviceInfo",
+                column: "lastUsedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DeviceInfo_PhotographerId",
+                table: "DeviceInfo",
+                column: "photographerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DeviceInfo_Status",
+                table: "DeviceInfo",
+                column: "status");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Image_LocationId",
                 table: "Image",
                 column: "LocationId");
@@ -788,6 +1027,11 @@ namespace SnapLink_Repository.Migrations
                 column: "PhotographerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Image_user_id",
+                table: "Image",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Location_locationOwnerId",
                 table: "Location",
                 column: "locationOwnerId");
@@ -798,14 +1042,29 @@ namespace SnapLink_Repository.Migrations
                 column: "userId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Messagess_recipientId",
+                name: "IX_Messagess_ConversationId",
+                table: "Messagess",
+                column: "conversationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messagess_CreatedAt",
+                table: "Messagess",
+                column: "createdAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messagess_RecipientId",
                 table: "Messagess",
                 column: "recipientId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Messagess_senderId",
+                name: "IX_Messagess_SenderId",
                 table: "Messagess",
                 column: "senderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messagess_Status",
+                table: "Messagess",
+                column: "status");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Moderator_userId",
@@ -827,6 +1086,22 @@ namespace SnapLink_Repository.Migrations
                 name: "IX_Payment_customerId",
                 table: "Payment",
                 column: "customerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PhotoDelivery_BookingId",
+                table: "PhotoDelivery",
+                column: "bookingId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PhotoDelivery_DeliveryMethod",
+                table: "PhotoDelivery",
+                column: "deliveryMethod");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PhotoDelivery_Status",
+                table: "PhotoDelivery",
+                column: "status");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Photographer_userId",
@@ -939,7 +1214,16 @@ namespace SnapLink_Repository.Migrations
                 name: "Advertisement");
 
             migrationBuilder.DropTable(
+                name: "Availability");
+
+            migrationBuilder.DropTable(
                 name: "Complaint");
+
+            migrationBuilder.DropTable(
+                name: "ConversationParticipant");
+
+            migrationBuilder.DropTable(
+                name: "DeviceInfo");
 
             migrationBuilder.DropTable(
                 name: "Image");
@@ -949,6 +1233,9 @@ namespace SnapLink_Repository.Migrations
 
             migrationBuilder.DropTable(
                 name: "Notifications");
+
+            migrationBuilder.DropTable(
+                name: "PhotoDelivery");
 
             migrationBuilder.DropTable(
                 name: "PhotographerEventLocation");
@@ -976,6 +1263,9 @@ namespace SnapLink_Repository.Migrations
 
             migrationBuilder.DropTable(
                 name: "Moderator");
+
+            migrationBuilder.DropTable(
+                name: "Conversation");
 
             migrationBuilder.DropTable(
                 name: "PremiumPackage");
