@@ -52,6 +52,9 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.MaxDepth = 32;
     });
 
+// Add SignalR
+builder.Services.AddSignalR();
+
 // Add DbContext
 //builder.Services.AddDbContext<SnaplinkDbContext>(options =>
 //  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -137,6 +140,7 @@ builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
 builder.Services.AddScoped<IPhotoDeliveryRepository, PhotoDeliveryRepository>();
 builder.Services.AddScoped<IPhotoDeliveryService, PhotoDeliveryService>();
+builder.Services.AddScoped<IChatService, ChatService>();
 
 
 
@@ -151,7 +155,7 @@ builder.Services.AddCors(opts =>
         build.SetIsOriginAllowed(origin => true) // Allow all origins for development
              .AllowAnyMethod()
              .AllowAnyHeader()
-             .AllowCredentials(); // Important for SignalR
+             .AllowCredentials();
     });
 });
 
@@ -195,5 +199,8 @@ app.UseCors("corspolicy");
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Map SignalR Hub
+app.MapHub<SnapLink_API.Hubs.ChatHub>("/chatHub");
 
 app.Run();

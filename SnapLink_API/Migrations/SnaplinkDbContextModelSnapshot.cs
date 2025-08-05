@@ -314,6 +314,109 @@ namespace SnapLink_API.Migrations
                     b.ToTable("Complaint", (string)null);
                 });
 
+            modelBuilder.Entity("SnapLink_Repository.Entity.Conversation", b =>
+                {
+                    b.Property<int>("ConversationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("conversationId");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ConversationId"));
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("createdAt")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("title");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updatedAt");
+
+                    b.HasKey("ConversationId")
+                        .HasName("PK__Conversation__ConversationId");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_Conversation_CreatedAt");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Conversation_Status");
+
+                    b.HasIndex("Type")
+                        .HasDatabaseName("IX_Conversation_Type");
+
+                    b.ToTable("Conversation", (string)null);
+                });
+
+            modelBuilder.Entity("SnapLink_Repository.Entity.ConversationParticipant", b =>
+                {
+                    b.Property<int>("ConversationParticipantId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("conversationParticipantId");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ConversationParticipantId"));
+
+                    b.Property<int>("ConversationId")
+                        .HasColumnType("int")
+                        .HasColumnName("conversationId");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("isActive");
+
+                    b.Property<DateTime?>("JoinedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("joinedAt")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<DateTime?>("LeftAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("leftAt");
+
+                    b.Property<string>("Role")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("role");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("userId");
+
+                    b.HasKey("ConversationParticipantId")
+                        .HasName("PK__ConversationParticipant__ConversationParticipantId");
+
+                    b.HasIndex("ConversationId")
+                        .HasDatabaseName("IX_ConversationParticipant_ConversationId");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_ConversationParticipant_IsActive");
+
+                    b.HasIndex("Role")
+                        .HasDatabaseName("IX_ConversationParticipant_Role");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_ConversationParticipant_UserId");
+
+                    b.ToTable("ConversationParticipant", (string)null);
+                });
+
             modelBuilder.Entity("SnapLink_Repository.Entity.DeviceInfo", b =>
                 {
                     b.Property<int>("DeviceInfoId")
@@ -631,15 +734,14 @@ namespace SnapLink_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MessageId"));
 
-                    b.Property<string>("AttachmentUrl")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("attachmentUrl");
-
                     b.Property<string>("Content")
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("content");
+
+                    b.Property<int?>("ConversationId")
+                        .HasColumnType("int")
+                        .HasColumnName("conversationId");
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -647,11 +749,14 @@ namespace SnapLink_API.Migrations
                         .HasColumnName("createdAt")
                         .HasDefaultValueSql("(getdate())");
 
-                    b.Property<bool?>("ReadStatus")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false)
-                        .HasColumnName("readStatus");
+                    b.Property<string>("MessageType")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("messageType");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("readAt");
 
                     b.Property<int?>("RecipientId")
                         .HasColumnType("int")
@@ -661,12 +766,28 @@ namespace SnapLink_API.Migrations
                         .HasColumnType("int")
                         .HasColumnName("senderId");
 
+                    b.Property<string>("Status")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
                     b.HasKey("MessageId")
                         .HasName("PK__Messages__4808B993F0C0786B");
 
-                    b.HasIndex("RecipientId");
+                    b.HasIndex("ConversationId")
+                        .HasDatabaseName("IX_Messagess_ConversationId");
 
-                    b.HasIndex("SenderId");
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_Messagess_CreatedAt");
+
+                    b.HasIndex("RecipientId")
+                        .HasDatabaseName("IX_Messagess_RecipientId");
+
+                    b.HasIndex("SenderId")
+                        .HasDatabaseName("IX_Messagess_SenderId");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Messagess_Status");
 
                     b.ToTable("Messagess", (string)null);
                 });
@@ -1715,6 +1836,27 @@ namespace SnapLink_API.Migrations
                     b.Navigation("Reporter");
                 });
 
+            modelBuilder.Entity("SnapLink_Repository.Entity.ConversationParticipant", b =>
+                {
+                    b.HasOne("SnapLink_Repository.Entity.Conversation", "Conversation")
+                        .WithMany("Participants")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_ConversationParticipant_Conversation");
+
+                    b.HasOne("SnapLink_Repository.Entity.User", "User")
+                        .WithMany("ConversationParticipants")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_ConversationParticipant_User");
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SnapLink_Repository.Entity.DeviceInfo", b =>
                 {
                     b.HasOne("SnapLink_Repository.Entity.Photographer", "Photographer")
@@ -1782,6 +1924,11 @@ namespace SnapLink_API.Migrations
 
             modelBuilder.Entity("SnapLink_Repository.Entity.Messagess", b =>
                 {
+                    b.HasOne("SnapLink_Repository.Entity.Conversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .HasConstraintName("FK_Messagess_Conversation");
+
                     b.HasOne("SnapLink_Repository.Entity.User", "Recipient")
                         .WithMany("MessagessRecipients")
                         .HasForeignKey("RecipientId")
@@ -1791,6 +1938,8 @@ namespace SnapLink_API.Migrations
                         .WithMany("MessagessSenders")
                         .HasForeignKey("SenderId")
                         .HasConstraintName("FK_Messagess_Sender");
+
+                    b.Navigation("Conversation");
 
                     b.Navigation("Recipient");
 
@@ -2044,6 +2193,13 @@ namespace SnapLink_API.Migrations
                     b.Navigation("Reviews");
                 });
 
+            modelBuilder.Entity("SnapLink_Repository.Entity.Conversation", b =>
+                {
+                    b.Navigation("Messages");
+
+                    b.Navigation("Participants");
+                });
+
             modelBuilder.Entity("SnapLink_Repository.Entity.Location", b =>
                 {
                     b.Navigation("Advertisements");
@@ -2126,6 +2282,8 @@ namespace SnapLink_API.Migrations
                     b.Navigation("ComplaintReportedUsers");
 
                     b.Navigation("ComplaintReporters");
+
+                    b.Navigation("ConversationParticipants");
 
                     b.Navigation("FromTransactions");
 

@@ -30,10 +30,11 @@ jobs:
     - name: Publish SnapLink_API
       run: dotnet publish SnapLink_API/SnapLink_API.csproj --configuration Release --output ./publish
 
-    - name: Configure Azure Storage Connection String
+    - name: Configure Connection Strings
       run: |
         $content = Get-Content ./publish/appsettings.json -Raw | ConvertFrom-Json
         $content.AzureStorage.ConnectionString = "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}"
+        $content.SignalR.ConnectionString = "${{ secrets.SIGNALR_CONNECTION_STRING }}"
         $content | ConvertTo-Json -Depth 10 | Set-Content ./publish/appsettings.json
 
     - name: Deploy to Azure Web App

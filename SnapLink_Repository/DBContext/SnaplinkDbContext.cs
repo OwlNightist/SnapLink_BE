@@ -33,6 +33,10 @@ public partial class SnaplinkDbContext : DbContext
 
     public virtual DbSet<Messagess> Messagesses { get; set; }
 
+    public virtual DbSet<Conversation> Conversations { get; set; }
+
+    public virtual DbSet<ConversationParticipant> ConversationParticipants { get; set; }
+
     public virtual DbSet<Moderator> Moderators { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
@@ -359,9 +363,9 @@ public partial class SnaplinkDbContext : DbContext
             entity.ToTable("Messagess");
 
             entity.Property(e => e.MessageId).HasColumnName("messageId");
-            entity.Property(e => e.AttachmentUrl)
-                .HasMaxLength(100)
-                .HasColumnName("attachmentUrl");
+            entity.Property(e => e.SenderId).HasColumnName("senderId");
+            entity.Property(e => e.RecipientId).HasColumnName("recipientId");
+            entity.Property(e => e.ConversationId).HasColumnName("conversationId");
             entity.Property(e => e.Content)
                 .HasMaxLength(400)
                 .HasColumnName("content");
@@ -369,11 +373,15 @@ public partial class SnaplinkDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("createdAt");
-            entity.Property(e => e.ReadStatus)
-                .HasDefaultValue(false)
-                .HasColumnName("readStatus");
-            entity.Property(e => e.RecipientId).HasColumnName("recipientId");
-            entity.Property(e => e.SenderId).HasColumnName("senderId");
+            entity.Property(e => e.MessageType)
+                .HasMaxLength(20)
+                .HasColumnName("messageType");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasColumnName("status");
+            entity.Property(e => e.ReadAt)
+                .HasColumnType("datetime")
+                .HasColumnName("readAt");
 
             entity.HasOne(d => d.Recipient).WithMany(p => p.MessagessRecipients)
                 .HasForeignKey(d => d.RecipientId)
@@ -382,6 +390,17 @@ public partial class SnaplinkDbContext : DbContext
             entity.HasOne(d => d.Sender).WithMany(p => p.MessagessSenders)
                 .HasForeignKey(d => d.SenderId)
                 .HasConstraintName("FK_Messagess_Sender");
+
+            entity.HasOne(d => d.Conversation).WithMany(p => p.Messages)
+                .HasForeignKey(d => d.ConversationId)
+                .HasConstraintName("FK_Messagess_Conversation");
+
+            // Add indexes for better performance
+            entity.HasIndex(e => e.SenderId).HasDatabaseName("IX_Messagess_SenderId");
+            entity.HasIndex(e => e.RecipientId).HasDatabaseName("IX_Messagess_RecipientId");
+            entity.HasIndex(e => e.ConversationId).HasDatabaseName("IX_Messagess_ConversationId");
+            entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_Messagess_CreatedAt");
+            entity.HasIndex(e => e.Status).HasDatabaseName("IX_Messagess_Status");
         });
 
         modelBuilder.Entity<Moderator>(entity =>
@@ -1065,6 +1084,75 @@ public partial class SnaplinkDbContext : DbContext
             entity.HasIndex(e => e.Brand).HasDatabaseName("IX_DeviceInfo_Brand");
             entity.HasIndex(e => e.Status).HasDatabaseName("IX_DeviceInfo_Status");
             entity.HasIndex(e => e.LastUsedAt).HasDatabaseName("IX_DeviceInfo_LastUsedAt");
+        });
+
+        modelBuilder.Entity<Conversation>(entity =>
+        {
+            entity.HasKey(e => e.ConversationId).HasName("PK__Conversation__ConversationId");
+
+            entity.ToTable("Conversation");
+
+            entity.Property(e => e.ConversationId).HasColumnName("conversationId");
+            entity.Property(e => e.Title)
+                .HasMaxLength(200)
+                .HasColumnName("title");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updatedAt");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasColumnName("status");
+            entity.Property(e => e.Type)
+                .HasMaxLength(20)
+                .HasColumnName("type");
+
+            // Add indexes for better performance
+            entity.HasIndex(e => e.Status).HasDatabaseName("IX_Conversation_Status");
+            entity.HasIndex(e => e.Type).HasDatabaseName("IX_Conversation_Type");
+            entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_Conversation_CreatedAt");
+        });
+
+        modelBuilder.Entity<ConversationParticipant>(entity =>
+        {
+            entity.HasKey(e => e.ConversationParticipantId).HasName("PK__ConversationParticipant__ConversationParticipantId");
+
+            entity.ToTable("ConversationParticipant");
+
+            entity.Property(e => e.ConversationParticipantId).HasColumnName("conversationParticipantId");
+            entity.Property(e => e.ConversationId).HasColumnName("conversationId");
+            entity.Property(e => e.UserId).HasColumnName("userId");
+            entity.Property(e => e.JoinedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("joinedAt");
+            entity.Property(e => e.LeftAt)
+                .HasColumnType("datetime")
+                .HasColumnName("leftAt");
+            entity.Property(e => e.Role)
+                .HasMaxLength(20)
+                .HasColumnName("role");
+            entity.Property(e => e.IsActive)
+                .HasColumnName("isActive");
+
+            entity.HasOne(d => d.Conversation).WithMany(p => p.Participants)
+                .HasForeignKey(d => d.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_ConversationParticipant_Conversation");
+
+            entity.HasOne(d => d.User).WithMany(p => p.ConversationParticipants)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_ConversationParticipant_User");
+
+            // Add indexes for better performance
+            entity.HasIndex(e => e.ConversationId).HasDatabaseName("IX_ConversationParticipant_ConversationId");
+            entity.HasIndex(e => e.UserId).HasDatabaseName("IX_ConversationParticipant_UserId");
+            entity.HasIndex(e => e.IsActive).HasDatabaseName("IX_ConversationParticipant_IsActive");
+            entity.HasIndex(e => e.Role).HasDatabaseName("IX_ConversationParticipant_Role");
         });
 
         OnModelCreatingPartial(modelBuilder);

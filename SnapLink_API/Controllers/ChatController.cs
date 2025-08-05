@@ -1,11 +1,14 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SnapLink_Model.DTO.Request;
+using SnapLink_Model.DTO.Response;
 using SnapLink_Service.IService;
 
 namespace SnapLink_API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ChatController : ControllerBase
     {
         private readonly IChatService _chatService;
@@ -15,132 +18,385 @@ namespace SnapLink_API.Controllers
             _chatService = chatService;
         }
 
-        /// <summary>
-        /// Send a message to another user
-        /// </summary>
-        [HttpPost("send")]
-        public async Task<IActionResult> SendMessage([FromBody] SendMessageRequest request, [FromQuery] int userId)
-        {
-            var response = await _chatService.SendMessageAsync(request, userId);
-            
-            if (response.Error == 0)
-            {
-                return Ok(response);
-            }
-            
-            return BadRequest(response);
-        }
+        #region Message Endpoints
 
         /// <summary>
-        /// Get conversation messages between two users
+        /// Send a message to a user or conversation
         /// </summary>
-        [HttpGet("conversation/{otherUserId}")]
-        public async Task<IActionResult> GetConversationMessages(int otherUserId, [FromQuery] int userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        [HttpPost("send-message")]
+        public async Task<ActionResult<SendMessageResponse>> SendMessage([FromBody] SendMessageRequest request)
         {
-            var response = await _chatService.GetConversationMessagesAsync(userId, otherUserId, page, pageSize);
-            
-            if (response.Error == 0)
+            if (!ModelState.IsValid)
             {
-                return Ok(response);
+                return BadRequest(ModelState);
             }
-            
-            return BadRequest(response);
-        }
 
-        /// <summary>
-        /// Get all conversations for the current user
-        /// </summary>
-        [HttpGet("conversations")]
-        public async Task<IActionResult> GetUserConversations([FromQuery] int userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-        {
-            var response = await _chatService.GetUserConversationsAsync(userId, page, pageSize);
-            
-            if (response.Error == 0)
+            // Extract user ID from JWT token
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int senderId))
             {
-                return Ok(response);
+                return Unauthorized("Invalid user token");
             }
-            
-            return BadRequest(response);
-        }
 
-        /// <summary>
-        /// Mark a specific message as read
-        /// </summary>
-        [HttpPut("messages/{messageId}/read")]
-        public async Task<IActionResult> MarkMessageAsRead(int messageId, [FromQuery] int userId)
-        {
-            var response = await _chatService.MarkMessageAsReadAsync(messageId, userId);
-            
-            if (response.Error == 0)
+            // Create request with sender ID from token
+            var sendMessageRequest = new SendMessageRequest
             {
-                return Ok(response);
-            }
-            
-            return BadRequest(response);
-        }
+                RecipientId = request.RecipientId,
+                Content = request.Content,
+                MessageType = request.MessageType,
+                ConversationId = request.ConversationId
+            };
 
-        /// <summary>
-        /// Mark all messages from a specific user as read
-        /// </summary>
-        [HttpPut("conversation/{otherUserId}/read-all")]
-        public async Task<IActionResult> MarkAllMessagesAsRead(int otherUserId, [FromQuery] int userId)
-        {
-            var success = await _chatService.MarkAllMessagesAsReadAsync(userId, otherUserId);
+            var result = await _chatService.SendMessageAsync(sendMessageRequest, senderId);
             
-            if (success)
+            if (!result.Success)
             {
-                return Ok(new { Error = 0, Message = "All messages marked as read successfully" });
+                return BadRequest(result);
             }
-            
-            return BadRequest(new { Error = -1, Message = "Failed to mark messages as read" });
-        }
 
-        /// <summary>
-        /// Get unread message count for the current user
-        /// </summary>
-        [HttpGet("unread-count")]
-        public async Task<IActionResult> GetUnreadMessageCount([FromQuery] int userId)
-        {
-            var response = await _chatService.GetUnreadMessageCountAsync(userId);
-            
-            if (response.Error == 0)
-            {
-                return Ok(response);
-            }
-            
-            return BadRequest(response);
+            return Ok(result);
         }
 
         /// <summary>
         /// Get a specific message by ID
         /// </summary>
         [HttpGet("messages/{messageId}")]
-        public async Task<IActionResult> GetMessageById(int messageId)
+        public async Task<ActionResult<MessageResponse>> GetMessage(int messageId)
         {
-            var response = await _chatService.GetMessageByIdAsync(messageId);
+            var message = await _chatService.GetMessageByIdAsync(messageId);
             
-            if (response.Error == 0)
+            if (message == null)
             {
-                return Ok(response);
+                return NotFound("Message not found");
             }
-            
-            return NotFound(response);
+
+            return Ok(message);
         }
 
         /// <summary>
-        /// Get unread message count for a specific user
+        /// Get messages from a conversation with pagination
         /// </summary>
-        [HttpGet("unread-count/{targetUserId}")]
-        public async Task<IActionResult> GetUnreadMessageCountForUser(int targetUserId, [FromQuery] int userId)
+        [HttpGet("conversations/{conversationId}/messages")]
+        public async Task<ActionResult<GetMessagesResponse>> GetConversationMessages(
+            int conversationId, 
+            [FromQuery] int page = 1, 
+            [FromQuery] int pageSize = 20)
         {
-            var response = await _chatService.GetUnreadMessageCountAsync(targetUserId);
-            
-            if (response.Error == 0)
+            var request = new GetConversationMessagesRequest
             {
-                return Ok(response);
-            }
-            
-            return BadRequest(response);
+                ConversationId = conversationId,
+                Page = page,
+                PageSize = pageSize
+            };
+
+            var result = await _chatService.GetConversationMessagesAsync(request);
+            return Ok(result);
         }
+
+        /// <summary>
+        /// Mark a message as read
+        /// </summary>
+        [HttpPost("messages/{messageId}/mark-read")]
+        public async Task<ActionResult> MarkMessageAsRead(int messageId, [FromBody] MarkMessageAsReadRequest request)
+        {
+            if (request.MessageId != messageId)
+            {
+                return BadRequest("Message ID mismatch");
+            }
+
+            // Extract user ID from JWT token
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized("Invalid user token");
+            }
+
+            var success = await _chatService.MarkMessageAsReadAsync(request, userId);
+            
+            if (!success)
+            {
+                return BadRequest("Failed to mark message as read");
+            }
+
+            return Ok(new { Success = true, Message = "Message marked as read" });
+        }
+
+        /// <summary>
+        /// Delete a message (only by sender)
+        /// </summary>
+        [HttpDelete("messages/{messageId}")]
+        public async Task<ActionResult> DeleteMessage(int messageId)
+        {
+            // Extract user ID from JWT token
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized("Invalid user token");
+            }
+
+            var success = await _chatService.DeleteMessageAsync(messageId, userId);
+            
+            if (!success)
+            {
+                return BadRequest("Failed to delete message");
+            }
+
+            return Ok(new { Success = true, Message = "Message deleted successfully" });
+        }
+
+        #endregion
+
+        #region Conversation Endpoints
+
+        /// <summary>
+        /// Create a new conversation
+        /// </summary>
+        [HttpPost("conversations")]
+        public async Task<ActionResult<CreateConversationResponse>> CreateConversation([FromBody] CreateConversationRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _chatService.CreateConversationAsync(request);
+            
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get a specific conversation by ID
+        /// </summary>
+        [HttpGet("conversations/{conversationId}")]
+        public async Task<ActionResult<ConversationResponse>> GetConversation(int conversationId)
+        {
+            var conversation = await _chatService.GetConversationByIdAsync(conversationId);
+            
+            if (conversation == null)
+            {
+                return NotFound("Conversation not found");
+            }
+
+            return Ok(conversation);
+        }
+
+        /// <summary>
+        /// Get all conversations for the authenticated user
+        /// </summary>
+        [HttpGet("conversations")]
+        public async Task<ActionResult<GetConversationsResponse>> GetUserConversations(
+            [FromQuery] int page = 1, 
+            [FromQuery] int pageSize = 20)
+        {
+            // Extract user ID from JWT token
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized("Invalid user token");
+            }
+
+            var result = await _chatService.GetUserConversationsAsync(userId, page, pageSize);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Update conversation details
+        /// </summary>
+        [HttpPut("conversations/{conversationId}")]
+        public async Task<ActionResult> UpdateConversation(
+            int conversationId, 
+            [FromQuery] string title, 
+            [FromQuery] string status)
+        {
+            var success = await _chatService.UpdateConversationAsync(conversationId, title, status);
+            
+            if (!success)
+            {
+                return BadRequest("Failed to update conversation");
+            }
+
+            return Ok(new { Success = true, Message = "Conversation updated successfully" });
+        }
+
+        /// <summary>
+        /// Delete/Leave a conversation
+        /// </summary>
+        [HttpDelete("conversations/{conversationId}")]
+        public async Task<ActionResult> DeleteConversation(int conversationId)
+        {
+            // Extract user ID from JWT token
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized("Invalid user token");
+            }
+
+            var success = await _chatService.DeleteConversationAsync(conversationId, userId);
+            
+            if (!success)
+            {
+                return BadRequest("Failed to delete conversation");
+            }
+
+            return Ok(new { Success = true, Message = "Conversation deleted successfully" });
+        }
+
+        #endregion
+
+        #region Participant Endpoints
+
+        /// <summary>
+        /// Add a participant to a conversation
+        /// </summary>
+        [HttpPost("conversations/{conversationId}/participants")]
+        public async Task<ActionResult> AddParticipant(int conversationId, [FromBody] AddParticipantRequest request)
+        {
+            if (request.ConversationId != conversationId)
+            {
+                return BadRequest("Conversation ID mismatch");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var success = await _chatService.AddParticipantAsync(request);
+            
+            if (!success)
+            {
+                return BadRequest("Failed to add participant");
+            }
+
+            return Ok(new { Success = true, Message = "Participant added successfully" });
+        }
+
+        /// <summary>
+        /// Remove a participant from a conversation
+        /// </summary>
+        [HttpDelete("conversations/{conversationId}/participants")]
+        public async Task<ActionResult> RemoveParticipant(int conversationId, [FromBody] RemoveParticipantRequest request)
+        {
+            if (request.ConversationId != conversationId)
+            {
+                return BadRequest("Conversation ID mismatch");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var success = await _chatService.RemoveParticipantAsync(request);
+            
+            if (!success)
+            {
+                return BadRequest("Failed to remove participant");
+            }
+
+            return Ok(new { Success = true, Message = "Participant removed successfully" });
+        }
+
+        /// <summary>
+        /// Get all participants in a conversation
+        /// </summary>
+        [HttpGet("conversations/{conversationId}/participants")]
+        public async Task<ActionResult<List<ConversationParticipantResponse>>> GetConversationParticipants(int conversationId)
+        {
+            var participants = await _chatService.GetConversationParticipantsAsync(conversationId);
+            return Ok(participants);
+        }
+
+        /// <summary>
+        /// Leave a conversation
+        /// </summary>
+        [HttpPost("conversations/{conversationId}/leave")]
+        public async Task<ActionResult> LeaveConversation(int conversationId)
+        {
+            // Extract user ID from JWT token
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized("Invalid user token");
+            }
+
+            var success = await _chatService.LeaveConversationAsync(conversationId, userId);
+            
+            if (!success)
+            {
+                return BadRequest("Failed to leave conversation");
+            }
+
+            return Ok(new { Success = true, Message = "Left conversation successfully" });
+        }
+
+        #endregion
+
+        #region Utility Endpoints
+
+        /// <summary>
+        /// Get unread message count for a conversation
+        /// </summary>
+        [HttpGet("conversations/{conversationId}/unread-count")]
+        public async Task<ActionResult<int>> GetUnreadMessageCount(int conversationId)
+        {
+            // Extract user ID from JWT token
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized("Invalid user token");
+            }
+
+            var count = await _chatService.GetUnreadMessageCountAsync(userId, conversationId);
+            return Ok(count);
+        }
+
+        /// <summary>
+        /// Check if user is in a conversation
+        /// </summary>
+        [HttpGet("conversations/{conversationId}/is-participant")]
+        public async Task<ActionResult<bool>> IsUserInConversation(int conversationId)
+        {
+            // Extract user ID from JWT token
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized("Invalid user token");
+            }
+
+            var isParticipant = await _chatService.IsUserInConversationAsync(userId, conversationId);
+            return Ok(isParticipant);
+        }
+
+        /// <summary>
+        /// Get or create direct conversation between authenticated user and another user
+        /// </summary>
+        [HttpGet("direct-conversation")]
+        public async Task<ActionResult<ConversationResponse>> GetOrCreateDirectConversation(
+            [FromQuery] int otherUserId)
+        {
+            // Extract user ID from JWT token
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+            {
+                return Unauthorized("Invalid user token");
+            }
+
+            var conversation = await _chatService.GetOrCreateDirectConversationAsync(currentUserId, otherUserId);
+            
+            if (conversation == null)
+            {
+                return BadRequest("Failed to get or create direct conversation");
+            }
+
+            return Ok(conversation);
+        }
+
+        #endregion
     }
 } 
