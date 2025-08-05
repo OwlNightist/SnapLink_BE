@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SnapLink_Service.IService;
+using System.Security.Claims;
 
 namespace SnapLink_API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class WalletController : ControllerBase
 {
     private readonly IWalletService _walletService;
@@ -16,10 +18,22 @@ public class WalletController : ControllerBase
     }
 
     [HttpGet("balance")]
-    public async Task<IActionResult> GetWalletBalance([FromQuery] int userId)
+    public async Task<IActionResult> GetWalletBalance()
     {
         try
         {
+            // Extract user ID from JWT token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new
+                {
+                    Error = -1,
+                    Message = "Invalid token or user not found",
+                    Data = (object?)null
+                });
+            }
+
             var balance = await _walletService.GetWalletBalanceAsync(userId);
             
             return Ok(new
@@ -42,6 +56,7 @@ public class WalletController : ControllerBase
     }
 
     [HttpGet("balance/{userId}")]
+    [Authorize(Roles = "Admin,Moderator")]
     public async Task<IActionResult> GetWalletBalanceByUserId(int userId)
     {
         try
@@ -72,6 +87,24 @@ public class WalletController : ControllerBase
     {
         try
         {
+            // Extract user ID from JWT token for security
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int currentUserId))
+            {
+                return Unauthorized(new
+                {
+                    Error = -1,
+                    Message = "Invalid token or user not found",
+                    Data = (object?)null
+                });
+            }
+
+            // Ensure the user can only transfer from their own wallet
+            if (request.FromUserId != currentUserId)
+            {
+                return Forbid();
+            }
+
             var success = await _walletService.TransferFundsAsync(request.FromUserId, request.ToUserId, request.Amount);
             
             if (success)

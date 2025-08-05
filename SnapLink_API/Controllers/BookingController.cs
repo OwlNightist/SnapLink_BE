@@ -1,11 +1,14 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SnapLink_Model.DTO.Request;
 using SnapLink_Service.IService;
+using System.Security.Claims;
 
 namespace SnapLink_API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class BookingController : ControllerBase
 {
     private readonly IBookingService _bookingService;
@@ -16,10 +19,22 @@ public class BookingController : ControllerBase
     }
 
     [HttpPost("create")]
-    public async Task<IActionResult> CreateBooking([FromBody] CreateBookingRequest request, [FromQuery] int userId)
+    public async Task<IActionResult> CreateBooking([FromBody] CreateBookingRequest request)
     {
         try
         {
+            // Extract user ID from JWT token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new
+                {
+                    Error = -1,
+                    Message = "Invalid token or user not found",
+                    Data = (object?)null
+                });
+            }
+
             var result = await _bookingService.CreateBookingAsync(request, userId);
             
             if (result.Error == 0)
