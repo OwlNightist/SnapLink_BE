@@ -877,7 +877,7 @@ namespace SnapLink_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
 
-                    b.Property<int>("BookingId")
+                    b.Property<int?>("BookingId")
                         .HasColumnType("int")
                         .HasColumnName("bookingId");
 
@@ -935,7 +935,8 @@ namespace SnapLink_API.Migrations
                         .HasName("PK__Payment__A0D9EFC6D01669A5");
 
                     b.HasIndex("BookingId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[bookingId] IS NOT NULL");
 
                     b.HasIndex("CustomerId");
 
@@ -1973,7 +1974,6 @@ namespace SnapLink_API.Migrations
                     b.HasOne("SnapLink_Repository.Entity.Booking", "Booking")
                         .WithOne("Payment")
                         .HasForeignKey("SnapLink_Repository.Entity.Payment", "BookingId")
-                        .IsRequired()
                         .HasConstraintName("FK_Payment_Booking");
 
                     b.HasOne("SnapLink_Repository.Entity.User", "Customer")

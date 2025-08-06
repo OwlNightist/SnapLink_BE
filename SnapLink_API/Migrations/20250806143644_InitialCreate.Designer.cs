@@ -12,7 +12,7 @@ using SnapLink_Repository.DBContext;
 namespace SnapLink_API.Migrations
 {
     [DbContext(typeof(SnaplinkDbContext))]
-    [Migration("20250805183409_InitialCreate")]
+    [Migration("20250806143644_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -880,7 +880,7 @@ namespace SnapLink_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
 
-                    b.Property<int>("BookingId")
+                    b.Property<int?>("BookingId")
                         .HasColumnType("int")
                         .HasColumnName("bookingId");
 
@@ -938,7 +938,8 @@ namespace SnapLink_API.Migrations
                         .HasName("PK__Payment__A0D9EFC6D01669A5");
 
                     b.HasIndex("BookingId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[bookingId] IS NOT NULL");
 
                     b.HasIndex("CustomerId");
 
@@ -1976,7 +1977,6 @@ namespace SnapLink_API.Migrations
                     b.HasOne("SnapLink_Repository.Entity.Booking", "Booking")
                         .WithOne("Payment")
                         .HasForeignKey("SnapLink_Repository.Entity.Payment", "BookingId")
-                        .IsRequired()
                         .HasConstraintName("FK_Payment_Booking");
 
                     b.HasOne("SnapLink_Repository.Entity.User", "Customer")

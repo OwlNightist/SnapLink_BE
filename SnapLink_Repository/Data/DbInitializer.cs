@@ -499,7 +499,7 @@ namespace SnapLink_Repository.Data
                         TotalAmount = 300, 
                         Status = PaymentStatus.Success, 
                         Method = "PayOS",
-                        ExternalTransactionId = "PAY_001",
+                        ExternalTransactionId = "1111",
                         Note = "Payment for Central Park Studio booking",
                         CreatedAt = DateTime.Now 
                     },
@@ -510,6 +510,7 @@ namespace SnapLink_Repository.Data
                         TotalAmount = 450, 
                         Status = PaymentStatus.Pending, 
                         Method = "PayOS",
+                        ExternalTransactionId = "2222",
                         Note = "Payment for Riverside Venue booking",
                         CreatedAt = DateTime.Now 
                     },
@@ -520,7 +521,7 @@ namespace SnapLink_Repository.Data
                         TotalAmount = 180, 
                         Status = PaymentStatus.Success, 
                         Method = "PayOS",
-                        ExternalTransactionId = "PAY_003",
+                        ExternalTransactionId = "3333",
                         Note = "Payment for Urban Loft booking",
                         CreatedAt = DateTime.Now 
                     },
@@ -531,7 +532,7 @@ namespace SnapLink_Repository.Data
                         TotalAmount = 140, 
                         Status = PaymentStatus.Success, 
                         Method = "PayOS",
-                        ExternalTransactionId = "PAY_004",
+                        ExternalTransactionId = "4444",
                         Note = "Payment for external location booking",
                         CreatedAt = DateTime.Now 
                     },
@@ -542,7 +543,7 @@ namespace SnapLink_Repository.Data
                         TotalAmount = 180, 
                         Status = PaymentStatus.Success, 
                         Method = "PayOS",
-                        ExternalTransactionId = "PAY_005",
+                        ExternalTransactionId = "5555",
                         Note = "Payment for external location booking",
                         CreatedAt = DateTime.Now 
                     }

@@ -690,7 +690,7 @@ namespace SnapLink_API.Migrations
                     paymentId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     customerId = table.Column<int>(type: "int", nullable: false),
-                    bookingId = table.Column<int>(type: "int", nullable: false),
+                    bookingId = table.Column<int>(type: "int", nullable: true),
                     totalAmount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     currency = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false, defaultValue: "VND"),
                     status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
@@ -1080,7 +1080,8 @@ namespace SnapLink_API.Migrations
                 name: "IX_Payment_bookingId",
                 table: "Payment",
                 column: "bookingId",
-                unique: true);
+                unique: true,
+                filter: "[bookingId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payment_customerId",

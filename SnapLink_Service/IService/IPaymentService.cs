@@ -7,6 +7,7 @@ namespace SnapLink_Service.IService
     public interface IPaymentService
     {
         Task<PaymentResponse> CreatePaymentLinkAsync(CreatePaymentLinkRequest request, int userId);
+        Task<PaymentResponse> CreateWalletTopUpLinkAsync(CreateWalletTopUpRequest request, int userId);
         Task<PaymentResponse> GetPaymentStatusAsync(long paymentId);
         Task<PaymentResponse> CancelPaymentAsync(int bookingId);
         Task HandlePayOSWebhookAsync(WebhookType payload);

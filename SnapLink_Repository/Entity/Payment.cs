@@ -10,8 +10,8 @@ public partial class Payment
     public int CustomerId { get; set; }
     public virtual User Customer { get; set; } = null!;
 
-    public int BookingId { get; set; }
-    public virtual Booking Booking { get; set; } = null!;
+    public int? BookingId { get; set; }
+    public virtual Booking? Booking { get; set; }
 
     public decimal TotalAmount { get; set; }
 

@@ -112,7 +112,7 @@ public class PaymentService : IPaymentService
 
                 // Check if payment already exists for this booking
                 var existingPayment = await _context.Payments
-                    .FirstOrDefaultAsync(p => p.BookingId == request.BookingId);
+                    .FirstOrDefaultAsync(p => p.BookingId == request.BookingId && p.BookingId.HasValue);
                 
                 if (existingPayment != null)
                 {
@@ -212,16 +212,207 @@ public class PaymentService : IPaymentService
             }
         }
 
-        public async Task<PaymentResponse> GetPaymentStatusAsync(long paymentId)
-    {
-        try
+        public async Task<PaymentResponse> CreateWalletTopUpLinkAsync(CreateWalletTopUpRequest request, int userId)
         {
-            // Get payment information from PayOS
-                PaymentLinkInformation paymentLinkInformation = await _payOS.getPaymentLinkInformation(paymentId);
-            
-            if (paymentLinkInformation.status.Equals("PAID"))
+            try
             {
-                // Find the payment record
+                // Validate amount
+                if (request.Amount <= 0)
+                {
+                    return new PaymentResponse
+                    {
+                        Error = -1,
+                        Message = "Invalid amount",
+                        Data = null
+                    };
+                }
+
+                // Validate URLs
+                if (string.IsNullOrEmpty(request.SuccessUrl) || string.IsNullOrEmpty(request.CancelUrl))
+                {
+                    return new PaymentResponse
+                    {
+                        Error = -1,
+                        Message = "Missing SuccessUrl or CancelUrl in request.",
+                        Data = null
+                    };
+                }
+
+                // Generate unique payment code
+                long paymentCode = await GenerateUniquePaymentCodeAsync();
+                
+                // Create PayOS item data
+                var item = new ItemData(request.ProductName, 1, (int)request.Amount);
+                var items = new List<ItemData> { item };
+                
+                // Create payment data
+                var paymentData = new PaymentData(
+                    paymentCode, 
+                    (int)request.Amount, 
+                    request.Description, 
+                    items, 
+                    request.CancelUrl, 
+                    request.SuccessUrl
+                );
+
+                // Create payment link with PayOS
+                var createPayment = await _payOS.createPaymentLink(paymentData);
+
+                // Create payment record for wallet top-up (no booking)
+                var payment = new Payment
+                {
+                    CustomerId = userId,
+                    BookingId = null, // No booking for wallet top-up
+                    TotalAmount = request.Amount,
+                    Status = PaymentStatus.Pending,
+                    ExternalTransactionId = paymentCode.ToString(),
+                    Method = "PayOS",
+                    Note = $"Wallet top-up: {request.Description}",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                await _unitOfWork.PaymentRepository.AddAsync(payment);
+                await _unitOfWork.SaveChangesAsync();
+
+                return new PaymentResponse
+                {
+                    Error = 0,
+                    Message = "Wallet top-up payment link created successfully",
+                    Data = createPayment
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating wallet top-up payment link: {ex.Message}");
+                return new PaymentResponse
+                {
+                    Error = -1,
+                    Message = $"Failed to create wallet top-up payment link: {ex.Message}",
+                    Data = null
+                };
+            }
+        }
+
+        /*
+        public async Task<PaymentResponse> GetPaymentStatusAsync(long paymentId)
+        {
+            try
+            {
+                // Get payment information from PayOS
+                PaymentLinkInformation paymentLinkInformation = await _payOS.getPaymentLinkInformation(paymentId);
+                
+                if (paymentLinkInformation.status.Equals("PAID"))
+                {
+                    // Find the payment record
+                    var payment = await _context.Payments
+                        .Include(p => p.Booking)
+                        .ThenInclude(b => b.Photographer)
+                            .ThenInclude(p => p.User)
+                        .Include(p => p.Booking)
+                            .ThenInclude(b => b.Location)
+                            .ThenInclude(l => l.LocationOwner)
+                            .ThenInclude(lo => lo.User)
+                        .FirstOrDefaultAsync(p => p.ExternalTransactionId == paymentId.ToString());
+                    
+                    if (payment != null && payment.Status != PaymentStatus.Success)
+                    {
+                        // Update payment status
+                        payment.Status = PaymentStatus.Success;
+                        payment.UpdatedAt = DateTime.UtcNow;
+                        
+                        // Create main payment transaction when payment is completed
+                        var paymentTransaction = new SnapLink_Repository.Entity.Transaction
+                        {
+                            ReferencePaymentId = payment.PaymentId,
+                            FromUserId = payment.CustomerId,
+                            ToUserId = null, // System receives the payment
+                            Amount = payment.TotalAmount,
+                            Type = TransactionType.Deposit,
+                            Status = TransactionStatus.Success,
+                            Note = payment.BookingId.HasValue ? $"Payment completed for booking {payment.BookingId}" : "Wallet top-up payment completed",
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow
+                        };
+
+                        await _unitOfWork.TransactionRepository.AddAsync(paymentTransaction);
+                        Console.WriteLine($"Created payment transaction: {paymentTransaction.TransactionId}");
+
+                        // Handle booking payments vs wallet top-ups
+                        if (payment.BookingId.HasValue && payment.Booking != null)
+                        {
+                            // This is a booking payment - distribute funds to photographer and location owner
+                            var calculationResult = await _paymentCalculationService.CalculatePaymentDistributionAsync(payment.TotalAmount, payment.Booking.LocationId);
+
+                            // Create fee distribution transactions
+                            await _transactionService.CreatePaymentDistributionTransactionsAsync(payment.PaymentId, calculationResult.PlatformFee, calculationResult.PhotographerPayout, calculationResult.LocationFee);
+
+                            // Update booking status
+                            payment.Booking.Status = "Confirmed";
+                            payment.Booking.UpdatedAt = DateTime.UtcNow;
+
+                            // Update photographer wallet
+                            if (payment.Booking.PhotographerId != null && calculationResult.PhotographerPayout > 0)
+                            {
+                                var photographer = await _context.Photographers
+                                    .FirstOrDefaultAsync(p => p.PhotographerId == payment.Booking.PhotographerId);
+                                
+                                if (photographer != null)
+                                {
+                                    await _walletService.AddFundsToWalletAsync(photographer.UserId, calculationResult.PhotographerPayout);
+                                }
+                            }
+
+                            // Update location owner wallet (only for registered locations)
+                            if (payment.Booking.LocationId != null && calculationResult.LocationFee > 0)
+                            {
+                                var locationWithOwner = await _context.Locations
+                                    .Include(l => l.LocationOwner)
+                                    .FirstOrDefaultAsync(l => l.LocationId == payment.Booking.LocationId);
+                                
+                                // Only pay location owner if it's a registered location
+                                if (locationWithOwner?.LocationOwner != null && 
+                                    (locationWithOwner.LocationType == "Registered" || locationWithOwner.LocationType == null))
+                                {
+                                    await _walletService.AddFundsToWalletAsync(locationWithOwner.LocationOwner.UserId, calculationResult.LocationFee);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // This is a wallet top-up - just add funds to user wallet
+                            await _walletService.AddFundsToWalletAsync(payment.CustomerId, payment.TotalAmount);
+                        }
+
+                        await _unitOfWork.SaveChangesAsync();
+                    }
+                }
+
+                return new PaymentResponse
+                {
+                    Error = 0,
+                    Message = "Payment status retrieved successfully",
+                    Data = paymentLinkInformation
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting payment status: {ex.Message}");
+                return new PaymentResponse
+                {
+                    Error = -1,
+                    Message = "Failed to get payment status",
+                    Data = null
+                };
+            }
+        }
+        */
+
+        public async Task<PaymentResponse> GetPaymentStatusAsync(long paymentId)
+        {
+            try
+            {
+                // Find the payment record in our database only
                 var payment = await _context.Payments
                     .Include(p => p.Booking)
                     .ThenInclude(b => b.Photographer)
@@ -230,93 +421,59 @@ public class PaymentService : IPaymentService
                         .ThenInclude(b => b.Location)
                         .ThenInclude(l => l.LocationOwner)
                         .ThenInclude(lo => lo.User)
-                    .FirstOrDefaultAsync(p => p.ExternalTransactionId == paymentId.ToString());
-                
-                if (payment != null && payment.Status != PaymentStatus.Success)
+                    .Include(p => p.Customer)
+                    .FirstOrDefaultAsync(p => p.PaymentId == paymentId);
+
+                if (payment == null)
                 {
-                    // Update payment status
-                    payment.Status = PaymentStatus.Success;
-                    payment.UpdatedAt = DateTime.UtcNow;
-                    
-                    // Create main payment transaction when payment is completed
-                    var paymentTransaction = new SnapLink_Repository.Entity.Transaction
+                    return new PaymentResponse
                     {
-                        ReferencePaymentId = payment.PaymentId,
-                        FromUserId = payment.CustomerId,
-                        ToUserId = null, // System receives the payment
-                        Amount = payment.TotalAmount,
-                        Type = TransactionType.Deposit,
-                        Status = TransactionStatus.Success,
-                        Note = $"Payment completed for booking {payment.BookingId}",
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
+                        Error = -1,
+                        Message = "Payment not found",
+                        Data = null
                     };
-
-                    await _unitOfWork.TransactionRepository.AddAsync(paymentTransaction);
-                    Console.WriteLine($"Created payment transaction: {paymentTransaction.TransactionId}");
-
-                    // Calculate fee distribution using the dedicated service
-                    var calculationResult = await _paymentCalculationService.CalculatePaymentDistributionAsync(payment.TotalAmount, payment.Booking.LocationId);
-
-                    // Create fee distribution transactions
-                    await _transactionService.CreatePaymentDistributionTransactionsAsync(payment.PaymentId, calculationResult.PlatformFee, calculationResult.PhotographerPayout, calculationResult.LocationFee);
-
-                    // Update booking status
-                    if (payment.Booking != null)
-                    {
-                        payment.Booking.Status = "Confirmed";
-                        payment.Booking.UpdatedAt = DateTime.UtcNow;
-                    }
-
-                    // Update photographer wallet
-                    if (payment.Booking?.PhotographerId != null && calculationResult.PhotographerPayout > 0)
-                    {
-                        var photographer = await _context.Photographers
-                            .FirstOrDefaultAsync(p => p.PhotographerId == payment.Booking.PhotographerId);
-                        
-                        if (photographer != null)
-                        {
-                            await _walletService.AddFundsToWalletAsync(photographer.UserId, calculationResult.PhotographerPayout);
-                        }
-                    }
-
-                    // Update location owner wallet (only for registered locations)
-                    if (payment.Booking?.LocationId != null && calculationResult.LocationFee > 0)
-                    {
-                        var locationWithOwner = await _context.Locations
-                            .Include(l => l.LocationOwner)
-                            .FirstOrDefaultAsync(l => l.LocationId == payment.Booking.LocationId);
-                        
-                        // Only pay location owner if it's a registered location
-                        if (locationWithOwner?.LocationOwner != null && 
-                            (locationWithOwner.LocationType == "Registered" || locationWithOwner.LocationType == null))
-                        {
-                            await _walletService.AddFundsToWalletAsync(locationWithOwner.LocationOwner.UserId, calculationResult.LocationFee);
-                        }
-                    }
-
-                    await _unitOfWork.SaveChangesAsync();
                 }
-            }
 
-            return new PaymentResponse
-            {
-                Error = 0,
+                // Create a comprehensive payment status response from database only
+                var paymentStatusData = new
+                {
+                    DatabaseStatus = payment.Status.ToString(),
+                    PaymentId = payment.PaymentId,
+                    ExternalTransactionId = payment.ExternalTransactionId,
+                    CustomerId = payment.CustomerId,
+                    CustomerName = payment.Customer?.FullName,
+                    CustomerEmail = payment.Customer?.Email,
+                    TotalAmount = payment.TotalAmount,
+                    Currency = payment.Currency,
+                    Method = payment.Method,
+                    Note = payment.Note,
+                    CreatedAt = payment.CreatedAt,
+                    UpdatedAt = payment.UpdatedAt,
+                    BookingId = payment.BookingId,
+                    BookingStatus = payment.Booking?.Status,
+                    PhotographerName = payment.Booking?.Photographer?.User?.FullName,
+                    LocationName = payment.Booking?.Location?.Name,
+                    IsWalletTopUp = !payment.BookingId.HasValue
+                };
+
+                return new PaymentResponse
+                {
+                    Error = 0,
                     Message = "Payment status retrieved successfully",
-                Data = paymentLinkInformation
-            };
-        }
-        catch (Exception ex)
-        {
-                Console.WriteLine($"Error getting payment status: {ex.Message}");
-            return new PaymentResponse
+                    Data = paymentStatusData
+                };
+            }
+            catch (Exception ex)
             {
-                Error = -1,
+                Console.WriteLine($"Error getting payment status: {ex.Message}");
+                return new PaymentResponse
+                {
+                    Error = -1,
                     Message = "Failed to get payment status",
-                Data = null
-            };
+                    Data = null
+                };
+            }
         }
-    }
 
 
         public async Task<PaymentResponse> CancelPaymentAsync(int bookingId)
@@ -325,7 +482,7 @@ public class PaymentService : IPaymentService
         {
             // Find payment by booking ID
             var payment = await _context.Payments
-                    .FirstOrDefaultAsync(p => p.BookingId == bookingId);
+                    .FirstOrDefaultAsync(p => p.BookingId == bookingId && p.BookingId.HasValue);
             
             if (payment == null)
             {

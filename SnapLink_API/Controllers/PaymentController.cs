@@ -6,6 +6,7 @@ using SnapLink_Service.IService;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Net.payOS.Types;
+using System.Security.Claims;
 
 namespace SnapLink_API.Controllers;
 
@@ -21,12 +22,24 @@ public class PaymentController : ControllerBase
         _paymentService = paymentService;
         _logger = logger;
     }
-// need userid for now , add to jwt token later
     [HttpPost("create")]
-    public async Task<IActionResult> CreatePaymentLink([FromBody] CreatePaymentLinkRequest request, [FromQuery] int userId)
+    [Authorize]
+    public async Task<IActionResult> CreatePaymentLink([FromBody] CreatePaymentLinkRequest request)
     {
         try
         {
+            // Extract user ID from JWT token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new PaymentResponse
+                {
+                    Error = -1,
+                    Message = "Invalid token or user not found",
+                    Data = null
+                });
+            }
+
             var result = await _paymentService.CreatePaymentLinkAsync(request, userId);
             
             if (result.Error == 0)
@@ -41,6 +54,47 @@ public class PaymentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in CreatePaymentLink");
+            return StatusCode(500, new PaymentResponse
+            {
+                Error = -1,
+                Message = "Internal server error",
+                Data = null
+            });
+        }
+    }
+
+    [HttpPost("wallet-topup")]
+    [Authorize]
+    public async Task<IActionResult> CreateWalletTopUpLink([FromBody] CreateWalletTopUpRequest request)
+    {
+        try
+        {
+            // Extract user ID from JWT token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new PaymentResponse
+                {
+                    Error = -1,
+                    Message = "Invalid token or user not found",
+                    Data = null
+                });
+            }
+
+            var result = await _paymentService.CreateWalletTopUpLinkAsync(request, userId);
+            
+            if (result.Error == 0)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in CreateWalletTopUpLink");
             return StatusCode(500, new PaymentResponse
             {
                 Error = -1,
