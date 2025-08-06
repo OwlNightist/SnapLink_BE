@@ -71,17 +71,11 @@ public class PaymentService : IPaymentService
         }
 
         public async Task<PaymentResponse> CreatePaymentLinkAsync(CreatePaymentLinkRequest request, int userId)
-         {
-        try
         {
+            try
+            {
                 // Validate booking exists and belongs to the user
                 var booking = await _context.Bookings
-                    .Include(b => b.Photographer)
-                        .ThenInclude(p => p.User)
-                    .Include(b => b.Location)
-                        .ThenInclude(l => l.LocationOwner)
-                        .ThenInclude(lo => lo.User)
-                    .Include(b => b.User)
                     .FirstOrDefaultAsync(b => b.BookingId == request.BookingId);
                 
                 if (booking == null)
@@ -122,19 +116,14 @@ public class PaymentService : IPaymentService
                 
                 if (existingPayment != null)
                 {
-                    // Allow creating new payment if existing payment is still pending
                     if (existingPayment.Status == PaymentStatus.Pending)
                     {
-                        // Cancel the existing pending payment
                         existingPayment.Status = PaymentStatus.Cancelled;
                         existingPayment.UpdatedAt = DateTime.UtcNow;
                         await _unitOfWork.SaveChangesAsync();
-                        
-                        Console.WriteLine($"Cancelled existing pending payment {existingPayment.PaymentId} for booking {request.BookingId}");
                     }
                     else
                     {
-                        // Don't allow new payment if existing payment is not pending
                         return new PaymentResponse
                         {
                             Error = -1,
@@ -144,9 +133,9 @@ public class PaymentService : IPaymentService
                     }
                 }
 
-                // Use booking's true price for payment calculations
-                decimal truePrice = booking.TotalPrice ?? 0;
-                if (truePrice <= 0)
+                // Validate booking price
+                decimal paymentAmount = booking.TotalPrice ?? 0;
+                if (paymentAmount <= 0)
                 {
                     return new PaymentResponse
                     {
@@ -156,20 +145,7 @@ public class PaymentService : IPaymentService
                     };
                 }
 
-                // For testing: hard-code payment amount at 5000
-                decimal paymentAmount = 5000m;
-
-                // Calculate payment distribution using the dedicated service
-                var calculationResult = await _paymentCalculationService.CalculatePaymentDistributionAsync(paymentAmount, booking.Location);
-
-                // Generate unique payment code
-                long paymentCode = await GenerateUniquePaymentCodeAsync();
-                
-                // Create PayOS item data using payment amount (capped for testing)
-                ItemData item = new ItemData(request.ProductName, 1, (int)paymentAmount);
-            List<ItemData> items = new List<ItemData> { item };
-            
-                // Chỉ lấy successUrl và cancelUrl từ request, nếu không có thì báo lỗi
+                // Validate URLs
                 if (string.IsNullOrEmpty(request.SuccessUrl) || string.IsNullOrEmpty(request.CancelUrl))
                 {
                     return new PaymentResponse
@@ -179,57 +155,62 @@ public class PaymentService : IPaymentService
                         Data = null
                     };
                 }
-                string successUrl = request.SuccessUrl;
-                string cancelUrl = request.CancelUrl;
+
+                // Generate unique payment code
+                long paymentCode = await GenerateUniquePaymentCodeAsync();
+                
+                // Create PayOS item data
+                var item = new ItemData(request.ProductName, 1, (int)paymentAmount);
+                var items = new List<ItemData> { item };
                 
                 // Create payment data
-            PaymentData paymentData = new PaymentData(
+                var paymentData = new PaymentData(
                     paymentCode, 
                     (int)paymentAmount, 
-                request.Description, 
-                items, 
-                cancelUrl, 
-                successUrl
-            );
+                    request.Description, 
+                    items, 
+                    request.CancelUrl, 
+                    request.SuccessUrl
+                );
 
-            // Create payment link with PayOS
-            CreatePaymentResult createPayment = await _payOS.createPaymentLink(paymentData);
+                // Create payment link with PayOS
+                var createPayment = await _payOS.createPaymentLink(paymentData);
 
-            // Create payment record with capped amount for testing
-            var payment = new Payment
+                // Create payment record
+                var payment = new Payment
+                {
+                    CustomerId = userId,
+                    BookingId = booking.BookingId,
+                    TotalAmount = paymentAmount,
+                    Status = PaymentStatus.Pending,
+                    ExternalTransactionId = paymentCode.ToString(),
+                    Method = "PayOS",
+                    Note = request.Description,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                await _unitOfWork.PaymentRepository.AddAsync(payment);
+                await _unitOfWork.SaveChangesAsync();
+
+                return new PaymentResponse
+                {
+                    Error = 0,
+                    Message = "Payment link created successfully",
+                    Data = createPayment
+                };
+            }
+            catch (Exception ex)
             {
-                CustomerId = userId,
-                BookingId = booking.BookingId,
-                TotalAmount = paymentAmount, // Store capped amount for testing
-                Status = PaymentStatus.Pending,
-                ExternalTransactionId = paymentCode.ToString(),
-                Method = "PayOS",
-                Note = $"{request.Description} (True price: {truePrice}, Capped for testing: {paymentAmount}) - {calculationResult.CalculationNote}",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-
-            await _unitOfWork.PaymentRepository.AddAsync(payment);
-            await _unitOfWork.SaveChangesAsync();
-
-            return new PaymentResponse
-            {
-                Error = 0,
-                Message = "Payment link created successfully",
-                Data = createPayment
-            };
+                Console.WriteLine($"Error creating payment link: {ex.Message}");
+                return new PaymentResponse
+                {
+                    Error = -1,
+                    Message = $"Failed to create payment link: {ex.Message}",
+                    Data = null
+                };
+            }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error creating payment link: {ex.Message}");
-            return new PaymentResponse
-            {
-                Error = -1,
-                Message = $"Failed to create payment link: {ex.Message}",
-                Data = null
-            };
-        }
-    }
 
         public async Task<PaymentResponse> GetPaymentStatusAsync(long paymentId)
     {

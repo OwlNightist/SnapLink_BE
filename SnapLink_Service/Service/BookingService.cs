@@ -680,26 +680,18 @@ namespace SnapLink_Service.Service
             var duration = (endTime - startTime).TotalHours;
             var photographerHourlyRate = photographer.HourlyRate ?? 0;
             
-            // If no location ID provided, it's an external location (no fee)
             if (!locationId.HasValue)
-            {
                 return photographerHourlyRate * (decimal)duration;
-            }
 
-            // Check if location exists and determine fee
             var location = await _context.Locations
                 .FirstOrDefaultAsync(l => l.LocationId == locationId.Value);
 
             if (location == null)
-                return photographerHourlyRate * (decimal)duration; // Default to photographer only
+                return photographerHourlyRate * (decimal)duration;
 
-            // Only add location fee if it's a registered location
-            var locationHourlyRate = 0m;
-            if (location.LocationType == "Registered" || location.LocationType == null) // Default to registered for backward compatibility
-            {
-                locationHourlyRate = location.HourlyRate ?? 0;
-            }
-            // External locations (Google Places) have no fee
+            var locationHourlyRate = (location.LocationType == "Registered" || location.LocationType == null) 
+                ? (location.HourlyRate ?? 0) 
+                : 0;
 
             return (photographerHourlyRate + locationHourlyRate) * (decimal)duration;
         }

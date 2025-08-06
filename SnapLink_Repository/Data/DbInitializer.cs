@@ -99,21 +99,21 @@ namespace SnapLink_Repository.Data
                 var users = context.Users.Take(15).ToList();
                 var photographers = new[]
                 {
-                    new Photographer { UserId = users[0].UserId, YearsExperience = 5, Equipment = "Canon EOS R5", HourlyRate = 150000, AvailabilityStatus = "Available", Rating = 4.8M },
-                    new Photographer { UserId = users[1].UserId, YearsExperience = 3, Equipment = "Nikon D850", HourlyRate = 200000, AvailabilityStatus = "Available", Rating = 4.5M },
-                    new Photographer { UserId = users[2].UserId, YearsExperience = 7, Equipment = "Sony A7 III", HourlyRate = 120000, AvailabilityStatus = "Busy", Rating = 4.9M },
-                    new Photographer { UserId = users[3].UserId, YearsExperience = 2, Equipment = "Fujifilm X-T4", HourlyRate = 70000, AvailabilityStatus = "Available", Rating = 4.3M },
-                    new Photographer { UserId = users[4].UserId, YearsExperience = 4, Equipment = "Olympus OM-D E-M1", HourlyRate = 90000, AvailabilityStatus = "Available", Rating = 4.7M },
-                    new Photographer { UserId = users[5].UserId, YearsExperience = 6, Equipment = "Canon EOS R6", HourlyRate = 110000, AvailabilityStatus = "Available", Rating = 4.6M },
-                    new Photographer { UserId = users[6].UserId, YearsExperience = 4, Equipment = "Nikon Z6", HourlyRate = 85000, AvailabilityStatus = "Available", Rating = 4.4M },
-                    new Photographer { UserId = users[7].UserId, YearsExperience = 8, Equipment = "Sony A7R IV", HourlyRate = 130000, AvailabilityStatus = "Busy", Rating = 4.9M },
-                    new Photographer { UserId = users[8].UserId, YearsExperience = 3, Equipment = "Fujifilm X-T3", HourlyRate = 75000, AvailabilityStatus = "Available", Rating = 4.2M },
-                    new Photographer { UserId = users[9].UserId, YearsExperience = 5, Equipment = "Canon EOS 5D", HourlyRate = 95000, AvailabilityStatus = "Available", Rating = 4.5M },
-                    new Photographer { UserId = users[10].UserId, YearsExperience = 7, Equipment = "Nikon D750", HourlyRate = 105000, AvailabilityStatus = "Available", Rating = 4.7M },
-                    new Photographer { UserId = users[11].UserId, YearsExperience = 2, Equipment = "Sony A6400", HourlyRate = 65000, AvailabilityStatus = "Available", Rating = 4.1M },
-                    new Photographer { UserId = users[12].UserId, YearsExperience = 6, Equipment = "Canon EOS 90D", HourlyRate = 115000, AvailabilityStatus = "Busy", Rating = 4.8M },
-                    new Photographer { UserId = users[13].UserId, YearsExperience = 4, Equipment = "Nikon Z50", HourlyRate = 80000, AvailabilityStatus = "Available", Rating = 4.3M },
-                    new Photographer { UserId = users[14].UserId, YearsExperience = 9, Equipment = "Sony A9", HourlyRate = 140000, AvailabilityStatus = "Available", Rating = 4.9M }
+                    new Photographer { UserId = users[0].UserId, YearsExperience = 5, Equipment = "Iphone 20 Pro Max", HourlyRate = 5000, AvailabilityStatus = "Available", Rating = 4.8M },
+                    new Photographer { UserId = users[1].UserId, YearsExperience = 3, Equipment = "Iphone 19 Pro Max", HourlyRate = 200000, AvailabilityStatus = "Available", Rating = 4.5M },
+                    new Photographer { UserId = users[2].UserId, YearsExperience = 7, Equipment = "Iphone 18 Pro Max", HourlyRate = 120000, AvailabilityStatus = "Busy", Rating = 4.9M },
+                    new Photographer { UserId = users[3].UserId, YearsExperience = 2, Equipment = "Iphone 17 Pro Max", HourlyRate = 70000, AvailabilityStatus = "Available", Rating = 4.3M },
+                    new Photographer { UserId = users[4].UserId, YearsExperience = 4, Equipment = "Iphone 6 Pro Max", HourlyRate = 90000, AvailabilityStatus = "Available", Rating = 4.7M },
+                    new Photographer { UserId = users[5].UserId, YearsExperience = 6, Equipment = "Iphone 15 Pro Max", HourlyRate = 110000, AvailabilityStatus = "Available", Rating = 4.6M },
+                    new Photographer { UserId = users[6].UserId, YearsExperience = 4, Equipment = "Iphone 15 Pro Max", HourlyRate = 85000, AvailabilityStatus = "Available", Rating = 4.4M },
+                    new Photographer { UserId = users[7].UserId, YearsExperience = 8, Equipment = "Iphone 15 Pro Max", HourlyRate = 130000, AvailabilityStatus = "Busy", Rating = 4.9M },
+                    new Photographer { UserId = users[8].UserId, YearsExperience = 3, Equipment = "Iphone 15 Pro Max", HourlyRate = 75000, AvailabilityStatus = "Available", Rating = 4.2M },
+                    new Photographer { UserId = users[9].UserId, YearsExperience = 5, Equipment = "Iphone 15 Pro Max", HourlyRate = 95000, AvailabilityStatus = "Available", Rating = 4.5M },
+                    new Photographer { UserId = users[10].UserId, YearsExperience = 7, Equipment = "Iphone 15 Pro Max", HourlyRate = 105000, AvailabilityStatus = "Available", Rating = 4.7M },
+                    new Photographer { UserId = users[11].UserId, YearsExperience = 2, Equipment = "Iphone 15 Pro Max", HourlyRate = 65000, AvailabilityStatus = "Available", Rating = 4.1M },
+                    new Photographer { UserId = users[12].UserId, YearsExperience = 6, Equipment = "Iphone 15 Pro Max", HourlyRate = 115000, AvailabilityStatus = "Busy", Rating = 4.8M },
+                    new Photographer { UserId = users[13].UserId, YearsExperience = 4, Equipment = "Iphone 15 Pro Max", HourlyRate = 80000, AvailabilityStatus = "Available", Rating = 4.3M },
+                    new Photographer { UserId = users[14].UserId, YearsExperience = 9, Equipment = "Iphone 15 Pro Max", HourlyRate = 140000, AvailabilityStatus = "Available", Rating = 4.9M }
                 };
                 context.Photographers.AddRange(photographers);
                 context.SaveChanges();
@@ -248,7 +248,7 @@ namespace SnapLink_Repository.Data
                         Name = "Urban Loft", 
                         Address = "789 City Ave, New York, NY", 
                         Description = "Modern loft in city center", 
-                        HourlyRate = 60, 
+                        HourlyRate = 0, 
                         Capacity = 30, 
                         Indoor = true, 
                         Outdoor = false, 
