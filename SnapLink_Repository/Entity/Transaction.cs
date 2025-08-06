@@ -38,12 +38,17 @@ public enum TransactionType
     PlatformFee,       // Phí phân bổ cho nền tảng
     Refund,            // Hoàn tiền (nếu người dùng hủy đơn hàng hoặc giao dịch thất bại)
     Deposit,           // Nạp tiền vào ví (nếu người dùng nạp tiền vào ví của mình)
-    Withdrawal         // Rút tiền từ ví (nếu người dùng hoặc thợ chụp rút tiền ra ngoài)
+    Withdrawal,        // Rút tiền từ ví (nếu người dùng hoặc thợ chụp rút tiền ra ngoài)
+    EscrowHold,        // Tiền được giữ trong escrow (khi booking được confirm)
+    EscrowRelease,     // Tiền được giải phóng từ escrow (khi booking completed)
+    EscrowRefund       // Hoàn tiền từ escrow (khi booking cancelled)
 }
 
 public enum TransactionStatus
 {
     Pending,
     Success,
-    Failed
+    Failed,
+    Held,              // Tiền đang được giữ trong escrow
+    Released           // Tiền đã được giải phóng từ escrow
 }

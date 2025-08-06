@@ -32,6 +32,10 @@ public class BookingData
     public string PaymentStatus { get; set; } = string.Empty;
     public decimal? PaymentAmount { get; set; }
     
+    // Escrow information
+    public decimal EscrowBalance { get; set; }
+    public bool HasEscrowFunds { get; set; }
+    
     // Calculated fields
     public int DurationHours { get; set; }
     public decimal PricePerHour { get; set; }

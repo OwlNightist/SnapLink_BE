@@ -15,14 +15,16 @@ namespace SnapLink_Service.Service
         private readonly IAvailabilityService _availabilityService;
         private readonly IWalletService _walletService;
         private readonly IPaymentCalculationService _paymentCalculationService;
+        private readonly IEscrowService _escrowService;
 
-        public BookingService(SnaplinkDbContext context, IUnitOfWork unitOfWork, IAvailabilityService availabilityService, IWalletService walletService, IPaymentCalculationService paymentCalculationService)
+        public BookingService(SnaplinkDbContext context, IUnitOfWork unitOfWork, IAvailabilityService availabilityService, IWalletService walletService, IPaymentCalculationService paymentCalculationService, IEscrowService escrowService)
         {
             _context = context;
             _unitOfWork = unitOfWork;
             _availabilityService = availabilityService;
             _walletService = walletService;
             _paymentCalculationService = paymentCalculationService;
+            _escrowService = escrowService;
         }
 
         public async Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request, int userId)
@@ -415,6 +417,21 @@ namespace SnapLink_Service.Service
                     };
                 }
 
+                // If booking is confirmed, refund funds from escrow
+                if (booking.Status == "Confirmed")
+                {
+                    var fundsRefunded = await _escrowService.RefundFundsFromEscrowAsync(bookingId, booking.UserId);
+                    if (!fundsRefunded)
+                    {
+                        return new BookingResponse
+                        {
+                            Error = -1,
+                            Message = "Failed to refund funds from escrow",
+                            Data = null
+                        };
+                    }
+                }
+
                 booking.Status = "Cancelled";
                 booking.UpdatedAt = DateTime.UtcNow;
 
@@ -425,7 +442,7 @@ namespace SnapLink_Service.Service
                 return new BookingResponse
                 {
                     Error = 0,
-                    Message = "Booking cancelled successfully",
+                    Message = booking.Status == "Confirmed" ? "Booking cancelled successfully and funds refunded" : "Booking cancelled successfully",
                     Data = bookingData
                 };
             }
@@ -468,6 +485,18 @@ namespace SnapLink_Service.Service
                     };
                 }
 
+                // Release funds from escrow to photographer and location owner
+                var fundsReleased = await _escrowService.ReleaseFundsFromEscrowAsync(bookingId);
+                if (!fundsReleased)
+                {
+                    return new BookingResponse
+                    {
+                        Error = -1,
+                        Message = "Failed to release funds from escrow",
+                        Data = null
+                    };
+                }
+
                 booking.Status = "Completed";
                 booking.UpdatedAt = DateTime.UtcNow;
 
@@ -478,7 +507,7 @@ namespace SnapLink_Service.Service
                 return new BookingResponse
                 {
                     Error = 0,
-                    Message = "Booking completed successfully",
+                    Message = "Booking completed successfully and funds released to photographer and location owner",
                     Data = bookingData
                 };
             }
@@ -540,7 +569,7 @@ namespace SnapLink_Service.Service
                         Data = null
                     };
                 }
-                // Deduct funds
+                // Deduct funds from user's wallet
                 var deducted = await _walletService.DeductFundsFromWalletAsync(userId, booking.TotalPrice.Value);
                 if (!deducted)
                 {
@@ -551,17 +580,18 @@ namespace SnapLink_Service.Service
                         Data = null
                     };
                 }
-                // Distribute funds
-                var calculationResult = await _paymentCalculationService.CalculatePaymentDistributionAsync(booking.TotalPrice.Value, booking.Location);
-                // Photographer payout
-                if (calculationResult.PhotographerPayout > 0 && booking.Photographer != null)
+                // Hold funds in escrow instead of immediate distribution
+                var escrowHeld = await _escrowService.HoldFundsInEscrowAsync(bookingId, userId, booking.TotalPrice.Value);
+                if (!escrowHeld)
                 {
-                    await _walletService.AddFundsToWalletAsync(booking.Photographer.UserId, calculationResult.PhotographerPayout);
-                }
-                // Location owner payout (only for registered locations)
-                if (calculationResult.LocationFee > 0 && booking.Location?.LocationOwner != null && (booking.Location.LocationType == "Registered" || booking.Location.LocationType == null))
-                {
-                    await _walletService.AddFundsToWalletAsync(booking.Location.LocationOwner.UserId, calculationResult.LocationFee);
+                    // If escrow fails, refund the user
+                    await _walletService.AddFundsToWalletAsync(userId, booking.TotalPrice.Value);
+                    return new BookingResponse
+                    {
+                        Error = -1,
+                        Message = "Failed to hold funds in escrow",
+                        Data = null
+                    };
                 }
                 // Update booking status
                 booking.Status = "Confirmed";
@@ -571,7 +601,7 @@ namespace SnapLink_Service.Service
                 return new BookingResponse
                 {
                     Error = 0,
-                    Message = "Booking confirmed and funds distributed successfully",
+                    Message = "Booking confirmed and funds held in escrow",
                     Data = bookingData
                 };
             }
@@ -781,6 +811,15 @@ namespace SnapLink_Service.Service
             var priceToDisplay = displayPrice ?? GetDisplayPrice(truePrice);
             var pricePerHour = duration > 0 ? priceToDisplay / (decimal)duration : 0;
 
+            // Get escrow balance for confirmed bookings
+            decimal escrowBalance = 0;
+            bool hasEscrowFunds = false;
+            if (booking.Status == "Confirmed")
+            {
+                escrowBalance = await _escrowService.GetEscrowBalanceAsync(booking.BookingId);
+                hasEscrowFunds = escrowBalance > 0;
+            }
+
             return new BookingData
             {
                 BookingId = booking.BookingId,
@@ -803,6 +842,8 @@ namespace SnapLink_Service.Service
                 HasPayment = booking.Payment != null,
                 PaymentStatus = booking.Payment?.Status.ToString() ?? "",
                 PaymentAmount = booking.Payment?.TotalAmount,
+                EscrowBalance = escrowBalance,
+                HasEscrowFunds = hasEscrowFunds,
                 DurationHours = (int)duration,
                 PricePerHour = pricePerHour
             };
