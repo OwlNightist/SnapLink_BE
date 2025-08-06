@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SnapLink_Model.DTO.Request;
 using SnapLink_Model.DTO.Response;
 using SnapLink_Service.IService;
+using System.Security.Claims;
 
 namespace SnapLink_API.Controllers
 {
@@ -32,10 +33,10 @@ namespace SnapLink_API.Controllers
             }
 
             // Extract user ID from JWT token
-            var userIdClaim = User.FindFirst("UserId")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int senderId))
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int senderId))
             {
-                return Unauthorized("Invalid user token");
+                return Unauthorized("Invalid token or user not found");
             }
 
             // Create request with sender ID from token
@@ -105,10 +106,10 @@ namespace SnapLink_API.Controllers
             }
 
             // Extract user ID from JWT token
-            var userIdClaim = User.FindFirst("UserId")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
             {
-                return Unauthorized("Invalid user token");
+                return Unauthorized("Invalid token or user not found");
             }
 
             var success = await _chatService.MarkMessageAsReadAsync(request, userId);
@@ -128,10 +129,10 @@ namespace SnapLink_API.Controllers
         public async Task<ActionResult> DeleteMessage(int messageId)
         {
             // Extract user ID from JWT token
-            var userIdClaim = User.FindFirst("UserId")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
             {
-                return Unauthorized("Invalid user token");
+                return Unauthorized("Invalid token or user not found");
             }
 
             var success = await _chatService.DeleteMessageAsync(messageId, userId);
@@ -194,10 +195,10 @@ namespace SnapLink_API.Controllers
             [FromQuery] int pageSize = 20)
         {
             // Extract user ID from JWT token
-            var userIdClaim = User.FindFirst("UserId")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
             {
-                return Unauthorized("Invalid user token");
+                return Unauthorized("Invalid token or user not found");
             }
 
             var result = await _chatService.GetUserConversationsAsync(userId, page, pageSize);
@@ -230,10 +231,10 @@ namespace SnapLink_API.Controllers
         public async Task<ActionResult> DeleteConversation(int conversationId)
         {
             // Extract user ID from JWT token
-            var userIdClaim = User.FindFirst("UserId")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
             {
-                return Unauthorized("Invalid user token");
+                return Unauthorized("Invalid token or user not found");
             }
 
             var success = await _chatService.DeleteConversationAsync(conversationId, userId);
@@ -319,10 +320,10 @@ namespace SnapLink_API.Controllers
         public async Task<ActionResult> LeaveConversation(int conversationId)
         {
             // Extract user ID from JWT token
-            var userIdClaim = User.FindFirst("UserId")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
             {
-                return Unauthorized("Invalid user token");
+                return Unauthorized("Invalid token or user not found");
             }
 
             var success = await _chatService.LeaveConversationAsync(conversationId, userId);
@@ -346,10 +347,10 @@ namespace SnapLink_API.Controllers
         public async Task<ActionResult<int>> GetUnreadMessageCount(int conversationId)
         {
             // Extract user ID from JWT token
-            var userIdClaim = User.FindFirst("UserId")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
             {
-                return Unauthorized("Invalid user token");
+                return Unauthorized("Invalid token or user not found");
             }
 
             var count = await _chatService.GetUnreadMessageCountAsync(userId, conversationId);
@@ -363,10 +364,10 @@ namespace SnapLink_API.Controllers
         public async Task<ActionResult<bool>> IsUserInConversation(int conversationId)
         {
             // Extract user ID from JWT token
-            var userIdClaim = User.FindFirst("UserId")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
             {
-                return Unauthorized("Invalid user token");
+                return Unauthorized("Invalid token or user not found");
             }
 
             var isParticipant = await _chatService.IsUserInConversationAsync(userId, conversationId);
@@ -381,10 +382,10 @@ namespace SnapLink_API.Controllers
             [FromQuery] int otherUserId)
         {
             // Extract user ID from JWT token
-            var userIdClaim = User.FindFirst("UserId")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int currentUserId))
             {
-                return Unauthorized("Invalid user token");
+                return Unauthorized("Invalid token or user not found");
             }
 
             var conversation = await _chatService.GetOrCreateDirectConversationAsync(currentUserId, otherUserId);
