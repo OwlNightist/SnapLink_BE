@@ -400,48 +400,6 @@ namespace SnapLink_API.Controllers
 
         #endregion
 
-        #region Real-time Features
-
-        /// <summary>
-        /// Send typing indicator
-        /// </summary>
-        [HttpPost("typing-indicator")]
-        public async Task<ActionResult> SendTypingIndicator(
-            [FromQuery] int conversationId, 
-            [FromQuery] bool isTyping)
-        {
-            // Extract user ID from JWT token
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
-            {
-                return Unauthorized("Invalid token or user not found");
-            }
-
-            // Check if user is in conversation
-            var isParticipant = await _chatService.IsUserInConversationAsync(userId, conversationId);
-            if (!isParticipant)
-            {
-                return BadRequest("You are not a participant in this conversation");
-            }
-
-            // This would typically be handled by SignalR hub directly
-            // For now, return success - the frontend should call the hub method
-            return Ok(new { Success = true, Message = "Typing indicator sent" });
-        }
-
-        /// <summary>
-        /// Get online status of users
-        /// </summary>
-        [HttpGet("users/{userId}/online-status")]
-        public async Task<ActionResult<bool>> GetUserOnlineStatus(int userId)
-        {
-            // This would check against the SignalR hub's connected users
-            // For now, return a placeholder
-            return Ok(false);
-        }
-
-        #endregion
-
         #region Test Endpoints
 
         /// <summary>

@@ -95,32 +95,6 @@ namespace SnapLink_API.Hubs
         }
 
         /// <summary>
-        /// Send typing indicator to conversation participants
-        /// </summary>
-        public async Task SendTypingIndicator(int conversationId, int userId, bool isTyping)
-        {
-            await Clients.Group($"conversation_{conversationId}").SendAsync("TypingIndicator", userId, isTyping);
-        }
-
-        /// <summary>
-        /// Send typing indicator to specific user
-        /// </summary>
-        public async Task SendTypingIndicatorToUser(int recipientUserId, int senderUserId, bool isTyping)
-        {
-            await Clients.Group($"user_{recipientUserId}").SendAsync("TypingIndicator", senderUserId, isTyping);
-        }
-
-        /// <summary>
-        /// Notify users about online status changes
-        /// </summary>
-        public async Task NotifyOnlineStatus(int userId, bool isOnline)
-        {
-            // Get all conversations where this user is a participant
-            // This would typically be called from the service layer
-            await Clients.All.SendAsync("UserOnlineStatusChanged", userId, isOnline);
-        }
-
-        /// <summary>
         /// Get current user ID for this connection
         /// </summary>
         public int? GetCurrentUserId()
