@@ -19,4 +19,5 @@ public interface IBookingService
     Task<decimal> CalculateBookingPriceAsync(int photographerId, int? locationId, DateTime startTime, DateTime endTime);
     Task<int> CancelExpiredPendingBookingsAsync();
     Task<int> CancelAllPendingBookingsAsync();
+    Task<BookingResponse> ConfirmBookingAsync(int bookingId, int userId);
 } 

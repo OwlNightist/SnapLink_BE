@@ -425,57 +425,11 @@ public class PaymentService : IPaymentService
             {
                 payment.Status = PaymentStatus.Success;
                 payment.UpdatedAt = DateTime.UtcNow;
-                
-                // Cập nhật booking nếu cần
-                var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == payment.BookingId);
-                if (booking != null && booking.Status == "Pending")
-                {
-                    booking.Status = "Confirmed";
-                    booking.UpdatedAt = DateTime.UtcNow;
-                }
-                
+
+                // Only add funds to user wallet (do not update booking or distribute funds)
+                await _walletService.AddFundsToWalletAsync(payment.CustomerId, payment.TotalAmount);
+
                 await _unitOfWork.SaveChangesAsync();
-
-                // Calculate fee distribution using the dedicated service
-                var calculationResult = await _paymentCalculationService.CalculatePaymentDistributionAsync(payment.TotalAmount, booking.LocationId);
-
-                // Create distribution transactions
-                await _transactionService.CreatePaymentDistributionTransactionsAsync(payment.PaymentId, calculationResult.PlatformFee, calculationResult.PhotographerPayout, calculationResult.LocationFee);
-
-                // Update photographer wallet using WalletService
-                if (booking?.PhotographerId != null && calculationResult.PhotographerPayout > 0)
-                {
-                    var photographer = await _context.Photographers
-                        .FirstOrDefaultAsync(p => p.PhotographerId == booking.PhotographerId);
-                    
-                    if (photographer != null)
-                    {
-                        bool success = await _walletService.AddFundsToWalletAsync(photographer.UserId, calculationResult.PhotographerPayout);
-                        if (!success)
-                        {
-                            Console.WriteLine($"Failed to add funds to photographer wallet: UserId={photographer.UserId}, Amount={calculationResult.PhotographerPayout}");
-                        }
-                    }
-                }
-
-                // Update location owner wallet using WalletService (only for registered locations)
-                if (booking?.LocationId != null && calculationResult.LocationFee > 0)
-                {
-                    var locationWithOwner = await _context.Locations
-                        .Include(l => l.LocationOwner)
-                        .FirstOrDefaultAsync(l => l.LocationId == booking.LocationId);
-                    
-                    // Only pay location owner if it's a registered location
-                    if (locationWithOwner?.LocationOwner != null && 
-                        (locationWithOwner.LocationType == "Registered" || locationWithOwner.LocationType == null))
-                    {
-                        bool success = await _walletService.AddFundsToWalletAsync(locationWithOwner.LocationOwner.UserId, calculationResult.LocationFee);
-                        if (!success)
-                        {
-                            Console.WriteLine($"Failed to add funds to location owner wallet: UserId={locationWithOwner.LocationOwner.UserId}, Amount={calculationResult.LocationFee}");
-                        }
-                    }
-                }
             }
             else
             {

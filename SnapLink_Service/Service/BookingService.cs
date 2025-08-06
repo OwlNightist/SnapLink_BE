@@ -13,12 +13,16 @@ namespace SnapLink_Service.Service
         private readonly SnaplinkDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAvailabilityService _availabilityService;
+        private readonly IWalletService _walletService;
+        private readonly IPaymentCalculationService _paymentCalculationService;
 
-        public BookingService(SnaplinkDbContext context, IUnitOfWork unitOfWork, IAvailabilityService availabilityService)
+        public BookingService(SnaplinkDbContext context, IUnitOfWork unitOfWork, IAvailabilityService availabilityService, IWalletService walletService, IPaymentCalculationService paymentCalculationService)
         {
             _context = context;
             _unitOfWork = unitOfWork;
             _availabilityService = availabilityService;
+            _walletService = walletService;
+            _paymentCalculationService = paymentCalculationService;
         }
 
         public async Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request, int userId)
@@ -484,6 +488,99 @@ namespace SnapLink_Service.Service
                 {
                     Error = -1,
                     Message = $"Failed to complete booking: {ex.Message}",
+                    Data = null
+                };
+            }
+        }
+
+        public async Task<BookingResponse> ConfirmBookingAsync(int bookingId, int userId)
+        {
+            try
+            {
+                var booking = await _context.Bookings
+                    .Include(b => b.Photographer)
+                    .Include(b => b.Location)
+                        .ThenInclude(l => l.LocationOwner)
+                    .FirstOrDefaultAsync(b => b.BookingId == bookingId && b.UserId == userId);
+                if (booking == null)
+                {
+                    return new BookingResponse
+                    {
+                        Error = -1,
+                        Message = "Booking not found or does not belong to user",
+                        Data = null
+                    };
+                }
+                if (booking.Status != "Pending")
+                {
+                    return new BookingResponse
+                    {
+                        Error = -1,
+                        Message = "Booking is not in pending status",
+                        Data = null
+                    };
+                }
+                if (booking.TotalPrice == null || booking.TotalPrice <= 0)
+                {
+                    return new BookingResponse
+                    {
+                        Error = -1,
+                        Message = "Invalid booking price",
+                        Data = null
+                    };
+                }
+                // Check wallet balance
+                var balance = await _walletService.GetWalletBalanceAsync(userId);
+                if (balance < booking.TotalPrice.Value)
+                {
+                    return new BookingResponse
+                    {
+                        Error = -1,
+                        Message = "Insufficient wallet balance",
+                        Data = null
+                    };
+                }
+                // Deduct funds
+                var deducted = await _walletService.DeductFundsFromWalletAsync(userId, booking.TotalPrice.Value);
+                if (!deducted)
+                {
+                    return new BookingResponse
+                    {
+                        Error = -1,
+                        Message = "Failed to deduct funds from wallet",
+                        Data = null
+                    };
+                }
+                // Distribute funds
+                var calculationResult = await _paymentCalculationService.CalculatePaymentDistributionAsync(booking.TotalPrice.Value, booking.Location);
+                // Photographer payout
+                if (calculationResult.PhotographerPayout > 0 && booking.Photographer != null)
+                {
+                    await _walletService.AddFundsToWalletAsync(booking.Photographer.UserId, calculationResult.PhotographerPayout);
+                }
+                // Location owner payout (only for registered locations)
+                if (calculationResult.LocationFee > 0 && booking.Location?.LocationOwner != null && (booking.Location.LocationType == "Registered" || booking.Location.LocationType == null))
+                {
+                    await _walletService.AddFundsToWalletAsync(booking.Location.LocationOwner.UserId, calculationResult.LocationFee);
+                }
+                // Update booking status
+                booking.Status = "Confirmed";
+                booking.UpdatedAt = DateTime.UtcNow;
+                await _unitOfWork.SaveChangesAsync();
+                var bookingData = await MapBookingToResponseAsync(booking);
+                return new BookingResponse
+                {
+                    Error = 0,
+                    Message = "Booking confirmed and funds distributed successfully",
+                    Data = bookingData
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BookingResponse
+                {
+                    Error = -1,
+                    Message = $"Failed to confirm booking: {ex.Message}",
                     Data = null
                 };
             }

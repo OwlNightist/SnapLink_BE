@@ -228,6 +228,45 @@ public class BookingController : ControllerBase
         }
     }
 
+    [HttpPut("{bookingId}/confirm")]
+    public async Task<IActionResult> ConfirmBooking(int bookingId)
+    {
+        try
+        {
+            // Extract user ID from JWT token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new
+                {
+                    Error = -1,
+                    Message = "Invalid token or user not found",
+                    Data = (object?)null
+                });
+            }
+
+            var result = await _bookingService.ConfirmBookingAsync(bookingId, userId);
+            if (result.Error == 0)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in ConfirmBooking: {ex.Message}");
+            return StatusCode(500, new
+            {
+                Error = -1,
+                Message = "Internal server error",
+                Data = (object?)null
+            });
+        }
+    }
+
     [HttpGet("availability/photographer/{photographerId}")]
     public async Task<IActionResult> CheckPhotographerAvailability(int photographerId, [FromQuery] DateTime startTime, [FromQuery] DateTime endTime)
     {
