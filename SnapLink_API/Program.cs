@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Net.payOS;
 using SnapLink_Model.DTO;
+using Microsoft.Azure.SignalR;
 
 using SnapLink_Repository.Data;
 using SnapLink_Repository.DBContext;
@@ -53,7 +54,12 @@ builder.Services.AddControllers()
     });
 
 // Add SignalR
-builder.Services.AddSignalR();
+builder.Services.AddSignalR()
+    .AddAzureSignalR(options =>
+    {
+        options.ConnectionString = builder.Configuration["SignalR:ConnectionString"];
+        options.ServerStickyMode = Microsoft.Azure.SignalR.ServerStickyMode.Required;
+    });
 
 // Add DbContext
 //builder.Services.AddDbContext<SnaplinkDbContext>(options =>

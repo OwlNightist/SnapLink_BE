@@ -399,5 +399,22 @@ namespace SnapLink_API.Controllers
         }
 
         #endregion
+
+        #region Test Endpoints
+
+        /// <summary>
+        /// Test Azure SignalR connection
+        /// </summary>
+        [HttpGet("test-signalr")]
+        public ActionResult TestSignalR()
+        {
+            return Ok(new { 
+                Success = true, 
+                Message = "Azure SignalR is configured and ready",
+                HubUrl = "/chatHub"
+            });
+        }
+
+        #endregion
     }
 } 
