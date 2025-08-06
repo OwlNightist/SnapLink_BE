@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
+using SnapLink_API.Hubs;
 using SnapLink_Model.DTO.Request;
 using SnapLink_Model.DTO.Response;
 using SnapLink_Repository.DBContext;
@@ -12,11 +14,13 @@ namespace SnapLink_Service.Service
     {
         private readonly SnaplinkDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHubContext<ChatHub> _chatHub;
 
-        public ChatService(SnaplinkDbContext context, IUnitOfWork unitOfWork)
+        public ChatService(SnaplinkDbContext context, IUnitOfWork unitOfWork, IHubContext<ChatHub> chatHub)
         {
             _context = context;
             _unitOfWork = unitOfWork;
+            _chatHub = chatHub;
         }
 
         #region Message Operations
@@ -163,6 +167,12 @@ namespace SnapLink_Service.Service
                     SenderProfileImage = sender.ProfileImage
                 };
 
+                // Broadcast message via SignalR
+                await _chatHub.Clients.Group($"conversation_{conversationId}").SendAsync("ReceiveMessage", messageResponse);
+                
+                // Also send to specific recipient if they're not in the conversation group
+                await _chatHub.Clients.Group($"user_{request.RecipientId}").SendAsync("ReceiveMessage", messageResponse);
+
                 return new SendMessageResponse
                 {
                     Success = true,
@@ -259,6 +269,10 @@ namespace SnapLink_Service.Service
             message.ReadAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+
+            // Broadcast read status via SignalR
+            await _chatHub.Clients.Group($"conversation_{message.ConversationId}").SendAsync("MessageStatusChanged", message.MessageId, "read");
+
             return true;
         }
 
@@ -468,6 +482,11 @@ namespace SnapLink_Service.Service
             conversation.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+
+            // Broadcast conversation update via SignalR
+            var update = new { ConversationId = conversationId, Title = title, Status = status, UpdatedAt = conversation.UpdatedAt };
+            await _chatHub.Clients.Group($"conversation_{conversationId}").SendAsync("ConversationUpdated", update);
+
             return true;
         }
 
