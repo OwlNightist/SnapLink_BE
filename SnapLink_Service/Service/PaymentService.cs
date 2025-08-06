@@ -21,18 +21,20 @@ public class PaymentService : IPaymentService
     private readonly PayOS _payOS;
     private readonly IUnitOfWork _unitOfWork;
     private readonly SnaplinkDbContext _context;
-        private readonly IWalletService _walletService;
-        private readonly IConfiguration _configuration;
-        private readonly ITransactionService _transactionService;
+    private readonly IWalletService _walletService;
+    private readonly IConfiguration _configuration;
+    private readonly ITransactionService _transactionService;
+    private readonly IPaymentCalculationService _paymentCalculationService;
 
-        public PaymentService(PayOS payOS, IUnitOfWork unitOfWork, SnaplinkDbContext context, IWalletService walletService, IConfiguration configuration, ITransactionService transactionService)
+    public PaymentService(PayOS payOS, IUnitOfWork unitOfWork, SnaplinkDbContext context, IWalletService walletService, IConfiguration configuration, ITransactionService transactionService, IPaymentCalculationService paymentCalculationService)
     {
         _payOS = payOS;
         _unitOfWork = unitOfWork;
         _context = context;
-            _walletService = walletService;
-            _configuration = configuration;
-            _transactionService = transactionService;
+        _walletService = walletService;
+        _configuration = configuration;
+        _transactionService = transactionService;
+        _paymentCalculationService = paymentCalculationService;
     }
         // need userid for now , add to jwt token later
         private async Task<long> GenerateUniquePaymentCodeAsync()
@@ -157,30 +159,8 @@ public class PaymentService : IPaymentService
                 // For testing: hard-code payment amount at 5000
                 decimal paymentAmount = 5000m;
 
-                // Calculate payment distribution based on location type and fees
-                decimal platformFeePercentage = _configuration.GetValue<decimal>("PaymentSettings:PlatformFeePercentage", 10);
-                decimal platformFee = paymentAmount * (platformFeePercentage / 100m);
-                decimal locationFee = 0m;
-                decimal photographerPayout;
-
-                // Determine location fee based on location type
-                if (booking.Location?.LocationType == "Registered" || booking.Location?.LocationType == null) // Default to registered for backward compatibility
-                {
-                    locationFee = booking.Location?.HourlyRate ?? 0; // Fixed location fee for registered locations
-                }
-                // External locations (Google Places) have no fee
-
-                // Calculate photographer payout
-                if (locationFee > 0)
-                {
-                    // Registered location with fee - photographer gets remaining after platform fee and location fee
-                    photographerPayout = paymentAmount - platformFee - locationFee;
-                }
-                else
-                {
-                    // External location or no location fee - photographer gets remaining after platform fee
-                    photographerPayout = paymentAmount - platformFee;
-                }
+                // Calculate payment distribution using the dedicated service
+                var calculationResult = await _paymentCalculationService.CalculatePaymentDistributionAsync(paymentAmount, booking.Location);
 
                 // Generate unique payment code
                 long paymentCode = await GenerateUniquePaymentCodeAsync();
@@ -224,7 +204,7 @@ public class PaymentService : IPaymentService
                 Status = PaymentStatus.Pending,
                 ExternalTransactionId = paymentCode.ToString(),
                 Method = "PayOS",
-                Note = $"{request.Description} (True price: {truePrice}, Capped for testing: {paymentAmount})",
+                Note = $"{request.Description} (True price: {truePrice}, Capped for testing: {paymentAmount}) - {calculationResult.CalculationNote}",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -294,32 +274,11 @@ public class PaymentService : IPaymentService
                     await _unitOfWork.TransactionRepository.AddAsync(paymentTransaction);
                     Console.WriteLine($"Created payment transaction: {paymentTransaction.TransactionId}");
 
-                    // Calculate fee distribution for transactions
-                    decimal platformFee = payment.TotalAmount * (_configuration.GetValue<decimal>("PaymentSettings:PlatformFeePercentage", 10) / 100m);
-                    decimal locationFee = 0m;
-                    decimal photographerPayout;
-
-                    // Get location info for fee calculation
-                    var location = await _context.Locations
-                        .FirstOrDefaultAsync(l => l.LocationId == payment.Booking.LocationId);
-
-                    if (location != null && (location.LocationType == "Registered" || location.LocationType == null))
-                    {
-                        locationFee = location.HourlyRate ?? 0;
-                    }
-
-                    // Calculate photographer payout
-                    if (locationFee > 0)
-                    {
-                        photographerPayout = payment.TotalAmount - platformFee - locationFee;
-                    }
-                    else
-                    {
-                        photographerPayout = payment.TotalAmount - platformFee;
-                    }
+                    // Calculate fee distribution using the dedicated service
+                    var calculationResult = await _paymentCalculationService.CalculatePaymentDistributionAsync(payment.TotalAmount, payment.Booking.LocationId);
 
                     // Create fee distribution transactions
-                    await _transactionService.CreatePaymentDistributionTransactionsAsync(payment.PaymentId, platformFee, photographerPayout, locationFee);
+                    await _transactionService.CreatePaymentDistributionTransactionsAsync(payment.PaymentId, calculationResult.PlatformFee, calculationResult.PhotographerPayout, calculationResult.LocationFee);
 
                     // Update booking status
                     if (payment.Booking != null)
@@ -329,19 +288,19 @@ public class PaymentService : IPaymentService
                     }
 
                     // Update photographer wallet
-                    if (payment.Booking?.PhotographerId != null && photographerPayout > 0)
+                    if (payment.Booking?.PhotographerId != null && calculationResult.PhotographerPayout > 0)
                     {
                         var photographer = await _context.Photographers
                             .FirstOrDefaultAsync(p => p.PhotographerId == payment.Booking.PhotographerId);
                         
                         if (photographer != null)
                         {
-                            await _walletService.AddFundsToWalletAsync(photographer.UserId, photographerPayout);
+                            await _walletService.AddFundsToWalletAsync(photographer.UserId, calculationResult.PhotographerPayout);
                         }
                     }
 
                     // Update location owner wallet (only for registered locations)
-                    if (payment.Booking?.LocationId != null && locationFee > 0)
+                    if (payment.Booking?.LocationId != null && calculationResult.LocationFee > 0)
                     {
                         var locationWithOwner = await _context.Locations
                             .Include(l => l.LocationOwner)
@@ -351,7 +310,7 @@ public class PaymentService : IPaymentService
                         if (locationWithOwner?.LocationOwner != null && 
                             (locationWithOwner.LocationType == "Registered" || locationWithOwner.LocationType == null))
                         {
-                            await _walletService.AddFundsToWalletAsync(locationWithOwner.LocationOwner.UserId, locationFee);
+                            await _walletService.AddFundsToWalletAsync(locationWithOwner.LocationOwner.UserId, calculationResult.LocationFee);
                         }
                     }
 
@@ -477,52 +436,30 @@ public class PaymentService : IPaymentService
                 
                 await _unitOfWork.SaveChangesAsync();
 
-                // Calculate fee distribution
-                decimal platformFeePercentage = _configuration.GetValue<decimal>("PaymentSettings:PlatformFeePercentage", 10);
-                decimal platformFee = payment.TotalAmount * (platformFeePercentage / 100m);
-                decimal locationFee = 0m;
-                decimal photographerPayout;
-
-                // Get location info for fee calculation
-                var location = await _context.Locations
-                    .FirstOrDefaultAsync(l => l.LocationId == booking.LocationId);
-
-                if (location != null && (location.LocationType == "Registered" || location.LocationType == null))
-                {
-                    locationFee = location.HourlyRate ?? 0;
-                }
-
-                // Calculate photographer payout
-                if (locationFee > 0)
-                {
-                    photographerPayout = payment.TotalAmount - platformFee - locationFee;
-                }
-                else
-                {
-                    photographerPayout = payment.TotalAmount - platformFee;
-                }
+                // Calculate fee distribution using the dedicated service
+                var calculationResult = await _paymentCalculationService.CalculatePaymentDistributionAsync(payment.TotalAmount, booking.LocationId);
 
                 // Create distribution transactions
-                await _transactionService.CreatePaymentDistributionTransactionsAsync(payment.PaymentId, platformFee, photographerPayout, locationFee);
+                await _transactionService.CreatePaymentDistributionTransactionsAsync(payment.PaymentId, calculationResult.PlatformFee, calculationResult.PhotographerPayout, calculationResult.LocationFee);
 
                 // Update photographer wallet using WalletService
-                if (booking?.PhotographerId != null && photographerPayout > 0)
+                if (booking?.PhotographerId != null && calculationResult.PhotographerPayout > 0)
                 {
                     var photographer = await _context.Photographers
                         .FirstOrDefaultAsync(p => p.PhotographerId == booking.PhotographerId);
                     
                     if (photographer != null)
                     {
-                        bool success = await _walletService.AddFundsToWalletAsync(photographer.UserId, photographerPayout);
+                        bool success = await _walletService.AddFundsToWalletAsync(photographer.UserId, calculationResult.PhotographerPayout);
                         if (!success)
                         {
-                            Console.WriteLine($"Failed to add funds to photographer wallet: UserId={photographer.UserId}, Amount={photographerPayout}");
+                            Console.WriteLine($"Failed to add funds to photographer wallet: UserId={photographer.UserId}, Amount={calculationResult.PhotographerPayout}");
                         }
                     }
                 }
 
                 // Update location owner wallet using WalletService (only for registered locations)
-                if (booking?.LocationId != null && locationFee > 0)
+                if (booking?.LocationId != null && calculationResult.LocationFee > 0)
                 {
                     var locationWithOwner = await _context.Locations
                         .Include(l => l.LocationOwner)
@@ -532,10 +469,10 @@ public class PaymentService : IPaymentService
                     if (locationWithOwner?.LocationOwner != null && 
                         (locationWithOwner.LocationType == "Registered" || locationWithOwner.LocationType == null))
                     {
-                        bool success = await _walletService.AddFundsToWalletAsync(locationWithOwner.LocationOwner.UserId, locationFee);
+                        bool success = await _walletService.AddFundsToWalletAsync(locationWithOwner.LocationOwner.UserId, calculationResult.LocationFee);
                         if (!success)
                         {
-                            Console.WriteLine($"Failed to add funds to location owner wallet: UserId={locationWithOwner.LocationOwner.UserId}, Amount={locationFee}");
+                            Console.WriteLine($"Failed to add funds to location owner wallet: UserId={locationWithOwner.LocationOwner.UserId}, Amount={calculationResult.LocationFee}");
                         }
                     }
                 }

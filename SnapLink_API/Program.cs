@@ -139,6 +139,7 @@ builder.Services.AddScoped<IStyleService, StyleService>();
 builder.Services.AddScoped<IUserStyleService, UserStyleService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
+builder.Services.AddScoped<IPaymentCalculationService, PaymentCalculationService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IPhotographerEventService, PhotographerEventService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
