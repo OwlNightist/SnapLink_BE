@@ -148,7 +148,7 @@ builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
 builder.Services.AddScoped<IPhotoDeliveryRepository, PhotoDeliveryRepository>();
 builder.Services.AddScoped<IPhotoDeliveryService, PhotoDeliveryService>();
 builder.Services.AddScoped<IChatService, ChatService>();
-
+builder.Services.AddScoped<IEscrowService, EscrowService>();
 
 
 // Add Background Services
