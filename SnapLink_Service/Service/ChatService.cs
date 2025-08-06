@@ -40,9 +40,23 @@ namespace SnapLink_Service.Service
 
                 // Get or create conversation
                 int conversationId;
-                if (request.ConversationId.HasValue)
+                // First, try to find existing 1-to-1 conversation with the recipient
+                var existingDirectConversation = await _context.ConversationParticipants
+                    .Include(cp => cp.Conversation)
+                        .ThenInclude(c => c.Participants)
+                    .Where(cp => cp.UserId == senderId && cp.IsActive)
+                    .Select(cp => cp.Conversation)
+                    .Where(c => c.Type == "Direct" && c.Status == "Active")
+                    .FirstOrDefaultAsync(c => c.Participants.Any(p => p.UserId == request.RecipientId && p.IsActive));
+
+                if (existingDirectConversation != null)
                 {
-                    // Use existing conversation
+                    // Use existing 1-to-1 conversation
+                    conversationId = existingDirectConversation.ConversationId;
+                }
+                else if (request.ConversationId.HasValue)
+                {
+                    // Use specified conversation ID (for group conversations or specific cases)
                     var existingConversation = await _context.Conversations
                         .Include(c => c.Participants)
                         .FirstOrDefaultAsync(c => c.ConversationId == request.ConversationId.Value);
