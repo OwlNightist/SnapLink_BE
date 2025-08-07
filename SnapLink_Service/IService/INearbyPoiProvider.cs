@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace SnapLink_Service.IService
 {
-    public interface IGeoProvider
+    public interface INearbyPoiProvider
     {
-        Task<(double lat, double lon)?> GeocodeAsync(string address);
-        
+        Task<List<NearbyCombinedItem>> GetNearbyAsync(double lat, double lon, int radiusMeters, string? tags, int limit);
     }
+
 }

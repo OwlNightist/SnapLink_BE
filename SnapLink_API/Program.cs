@@ -150,6 +150,8 @@ builder.Services.AddScoped<IPhotoDeliveryService, PhotoDeliveryService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IEscrowService, EscrowService>();
 builder.Services.AddScoped<IGeoProvider, LocationIqGeoProvider>();
+builder.Services.AddScoped<INearbyPoiProvider, LocationIqNearbyProvider>();
+
 
 
 // Add Background Services

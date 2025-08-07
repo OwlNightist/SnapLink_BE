@@ -2,6 +2,7 @@
 using SnapLink_Service.IService;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -31,13 +32,13 @@ namespace SnapLink_Service.Service
 
             var json = await res.Content.ReadAsStringAsync();
             using var doc = JsonDocument.Parse(json);
-            var arr = doc.RootElement;
-            if (arr.ValueKind != JsonValueKind.Array || arr.GetArrayLength() == 0) return null;
+            if (doc.RootElement.ValueKind != JsonValueKind.Array || doc.RootElement.GetArrayLength() == 0) return null;
 
-            var first = arr[0];
-            double lat = double.Parse(first.GetProperty("lat").GetString()!);
-            double lon = double.Parse(first.GetProperty("lon").GetString()!);
+            var first = doc.RootElement[0];
+            var lat = double.Parse(first.GetProperty("lat").GetString()!, CultureInfo.InvariantCulture);
+            var lon = double.Parse(first.GetProperty("lon").GetString()!, CultureInfo.InvariantCulture);
             return (lat, lon);
         }
+
     }
 }

@@ -7,6 +7,7 @@ using SnapLink_Repository.Repository;
 using SnapLink_Service.IService;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -22,14 +23,16 @@ namespace SnapLink_Service.Service
         private readonly IMapper _mapper;
         private readonly IGeoProvider _geo;
         private readonly HttpClient _httpClient;
+        private readonly INearbyPoiProvider _poi;
 
-        public LocationService(HttpClient httpClient,ILocationRepository repo, IMapper mapper, IGeoProvider geo)
+
+        public LocationService(HttpClient httpClient,ILocationRepository repo, IMapper mapper, IGeoProvider geo, INearbyPoiProvider poi)
         {
             _repo = repo;
             _mapper = mapper;
             _httpClient = httpClient;
             _geo = geo;
-
+            _poi = poi;
         }
 
         public async Task<IEnumerable<Location>> GetAllAsync() => await _repo.GetAllAsync();
@@ -156,7 +159,7 @@ namespace SnapLink_Service.Service
         private double DegreesToRadians(double deg) => deg * (Math.PI / 180);
 
 
-        public async Task<List<LocationNearbyResponse>> GetLocationsNearbyAsync(string address, double radiusInKm)
+        public async Task<List<LocationNearbyResponse>> GetLocationsNearbyAsync(string address, double radiusInKm, bool debug = false)
         {
             var coords = await _geo.GeocodeAsync(address);
             if (coords == null) return new List<LocationNearbyResponse>();
@@ -172,18 +175,22 @@ namespace SnapLink_Service.Service
                     return new LocationNearbyResponse
                     {
                         LocationId = l.LocationId,
-                        Name = l.Name ?? "",
-                        Address = l.Address ?? "",
+                        Name = l.Name,
+                        Address = l.Address,
                         Latitude = l.Latitude,
                         Longitude = l.Longitude,
                         DistanceInKm = Math.Round(d, 2)
                     };
-                })
-                .Where(x => x.DistanceInKm <= radiusInKm)
+                });
+                /*.Where(x => x.DistanceInKm <= radiusInKm)
                 .OrderBy(x => x.DistanceInKm)
                 .ToList();
 
-            return list;
+            return list;*/
+                if (!debug)
+                list = list.Where(x => x.DistanceInKm <= radiusInKm);
+
+            return list.OrderBy(x => x.DistanceInKm).ToList();
         }
 
         public async Task UpdateCoordinatesByAddressAsync(int locationId)
@@ -218,5 +225,58 @@ namespace SnapLink_Service.Service
             return 2 * R * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
         }
 
+
+        public async Task<List<NearbyCombinedItem>> GetNearbyCombinedAsync(string address, double radiusInKm, string? tags, int limit)
+        {
+            var coords = await _geo.GeocodeAsync(address);
+            if (coords == null) return new List<NearbyCombinedItem>();
+            var (lat, lon) = coords.Value;
+
+            var radiusMeters = (int)Math.Round(radiusInKm * 1000);
+
+            // INTERNAL (DB)
+            var db = await _repo.GetAllAsyncc();
+            var internals = db
+                .Where(l => l.Latitude.HasValue && l.Longitude.HasValue)
+                .Select(l => new NearbyCombinedItem
+                {
+                    Source = "internal",
+                    LocationId = l.LocationId,
+                    Name = l.Name,
+                    Address = l.Address,
+                    Latitude = l.Latitude!.Value,
+                    Longitude = l.Longitude!.Value,
+                    DistanceInKm = Math.Round(HaversineKm(lat, lon, l.Latitude!.Value, l.Longitude!.Value), 2)
+                })
+                .Where(x => x.DistanceInKm <= radiusInKm)
+                .ToList();
+
+            // EXTERNAL (LocationIQ Nearby)
+            var externals = await _poi.GetNearbyAsync(lat, lon, radiusMeters, tags, limit);
+            foreach (var e in externals)
+                e.DistanceInKm = Math.Round(HaversineKm(lat, lon, e.Latitude, e.Longitude), 2);
+
+            // Gộp + sort
+            var combined = internals.Concat(externals)
+                                    .OrderBy(x => x.DistanceInKm)
+                                    .ToList();
+
+            // Tuỳ chọn: bỏ trùng (theo khoảng cách rất gần)
+            // combined = DeduplicateByProximity(combined);
+
+            return combined;
+        }
+
+        private static double HaversineKm(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double R = 6371;
+            double dLat = (lat2 - lat1) * Math.PI / 180d;
+            double dLon = (lon2 - lon1) * Math.PI / 180d;
+            lat1 *= Math.PI / 180d; lat2 *= Math.PI / 180d;
+            double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                       Math.Cos(lat1) * Math.Cos(lat2) *
+                       Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+            return 2 * R * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        }
     }
 }

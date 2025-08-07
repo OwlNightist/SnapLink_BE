@@ -46,13 +46,14 @@ namespace SnapLink_API.Controllers
             await _service.DeleteAsync(id);
             return Ok("Deleted");
         }
-        [HttpPost("nearby")]
-        public async Task<IActionResult> GetNearby([FromBody] LocationNearbyRequest req)
+      
+        [HttpPost("nearby/combined")]
+        public async Task<IActionResult> GetNearbyCombined([FromBody] LocationNearbyRequest req)
         {
             if (string.IsNullOrWhiteSpace(req.Address) || req.RadiusInKm <= 0)
                 return BadRequest("Address và RadiusInKm là bắt buộc.");
 
-            var data = await _service.GetLocationsNearbyAsync(req.Address, req.RadiusInKm);
+            var data = await _service.GetNearbyCombinedAsync(req.Address, req.RadiusInKm, req.Tags, req.Limit ?? 20);
             return Ok(data);
         }
         [HttpPut("update-coordinates/{id:int}")]
@@ -61,5 +62,6 @@ namespace SnapLink_API.Controllers
             await _service.UpdateCoordinatesByAddressAsync(id);
             return Ok("Coordinates updated.");
         }
+
     }
 }
