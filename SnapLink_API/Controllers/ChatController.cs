@@ -58,19 +58,6 @@ namespace SnapLink_API.Controllers
             {
                 return BadRequest(result);
             }
-
-            // Send real-time notification via SignalR
-            if (result.MessageData != null && result.ConversationId.HasValue)
-            {
-                // Send to conversation group
-                await _hubContext.Clients.Group($"conversation_{result.ConversationId.Value}")
-                    .SendAsync("ReceiveMessage", result.MessageData);
-                
-                // Also send to recipient's user group for notifications
-                await _hubContext.Clients.Group($"user_{request.RecipientId}")
-                    .SendAsync("ReceiveMessage", result.MessageData);
-            }
-
             return Ok(result);
         }
 

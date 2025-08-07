@@ -1,11 +1,19 @@
 using Microsoft.AspNetCore.SignalR;
 using SnapLink_Model.DTO.Response;
+using SnapLink_Model.DTO.Request;
+using SnapLink_Service.IService;
 
 namespace SnapLink_API.Hubs
 {
     public class ChatHub : Hub
     {
         private static readonly Dictionary<string, int> _userConnections = new Dictionary<string, int>();
+        private readonly IChatService _chatService;
+
+        public ChatHub(IChatService chatService)
+        {
+            _chatService = chatService;
+        }
 
         public override async Task OnConnectedAsync()
         {
@@ -83,11 +91,34 @@ namespace SnapLink_API.Hubs
                     return;
                 }
 
-                // Broadcast message to conversation group EXCEPT the sender
-                await Clients.GroupExcept($"conversation_{conversationId}", Context.ConnectionId).SendAsync("ReceiveMessage", message);
+                // Persist message to database
+                var sendMessageRequest = new SendMessageRequest
+                {
+                    RecipientId = message.RecipientId ?? 0,
+                    Content = message.Content,
+                    MessageType = message.MessageType ?? "Text",
+                    ConversationId = conversationId
+                };
+
+                var result = await _chatService.SendMessageAsync(sendMessageRequest, currentUserId.Value);
                 
-                // Send confirmation to the sender
-                await Clients.Caller.SendAsync("MessageSent", message);
+                if (!result.Success)
+                {
+                    await Clients.Caller.SendAsync("Error", $"Failed to persist message: {result.Message}");
+                    return;
+                }
+
+                // Use the persisted message data for broadcasting
+                var persistedMessage = result.MessageData;
+                if (persistedMessage != null)
+                {
+                    // Broadcast message to conversation group EXCEPT the sender
+                    await Clients.GroupExcept($"conversation_{conversationId}", Context.ConnectionId)
+                        .SendAsync("ReceiveMessage", persistedMessage);
+                    
+                    // Send confirmation to the sender with persisted data
+                    await Clients.Caller.SendAsync("MessageSent", persistedMessage);
+                }
             }
             catch (Exception ex)
             {
