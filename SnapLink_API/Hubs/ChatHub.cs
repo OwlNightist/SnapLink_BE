@@ -59,7 +59,40 @@ namespace SnapLink_API.Hubs
         /// </summary>
         public async Task SendMessageToConversation(int conversationId, MessageResponse message)
         {
-            await Clients.Group($"conversation_{conversationId}").SendAsync("ReceiveMessage", message);
+            try
+            {
+                // Validate message
+                if (message == null || string.IsNullOrWhiteSpace(message.Content))
+                {
+                    await Clients.Caller.SendAsync("Error", "Invalid message");
+                    return;
+                }
+
+                // Validate conversation ID
+                if (conversationId <= 0)
+                {
+                    await Clients.Caller.SendAsync("Error", "Invalid conversation ID");
+                    return;
+                }
+
+                // Get current user ID
+                var currentUserId = GetCurrentUserId();
+                if (!currentUserId.HasValue || currentUserId.Value != message.SenderId)
+                {
+                    await Clients.Caller.SendAsync("Error", "Unauthorized to send message");
+                    return;
+                }
+
+                // Broadcast message to conversation group EXCEPT the sender
+                await Clients.GroupExcept($"conversation_{conversationId}", Context.ConnectionId).SendAsync("ReceiveMessage", message);
+                
+                // Send confirmation to the sender
+                await Clients.Caller.SendAsync("MessageSent", message);
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", $"Failed to send message: {ex.Message}");
+            }
         }
 
         /// <summary>
