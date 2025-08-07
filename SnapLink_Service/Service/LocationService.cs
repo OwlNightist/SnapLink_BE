@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using SnapLink_Model.DTO;
+using SnapLink_Model.DTO.Response;
 using SnapLink_Repository.Entity;
 using SnapLink_Repository.IRepository;
 using SnapLink_Repository.Repository;
@@ -19,13 +20,16 @@ namespace SnapLink_Service.Service
     {
         private readonly ILocationRepository _repo;
         private readonly IMapper _mapper;
+        private readonly IGeoProvider _geo;
         private readonly HttpClient _httpClient;
 
-        public LocationService(HttpClient httpClient,ILocationRepository repo, IMapper mapper)
+        public LocationService(HttpClient httpClient,ILocationRepository repo, IMapper mapper, IGeoProvider geo)
         {
             _repo = repo;
             _mapper = mapper;
             _httpClient = httpClient;
+            _geo = geo;
+
         }
 
         public async Task<IEnumerable<Location>> GetAllAsync() => await _repo.GetAllAsync();
@@ -147,7 +151,72 @@ namespace SnapLink_Service.Service
             return R * c;
         }
 
+
+
         private double DegreesToRadians(double deg) => deg * (Math.PI / 180);
+
+
+        public async Task<List<LocationNearbyResponse>> GetLocationsNearbyAsync(string address, double radiusInKm)
+        {
+            var coords = await _geo.GeocodeAsync(address);
+            if (coords == null) return new List<LocationNearbyResponse>();
+
+            var (lat, lon) = coords.Value;
+            var all = await _repo.GetAllAsyncc();
+
+            var list = all
+                .Where(l => l.Latitude.HasValue && l.Longitude.HasValue)
+                .Select(l =>
+                {
+                    var d = Haversine(lat, lon, l.Latitude!.Value, l.Longitude!.Value);
+                    return new LocationNearbyResponse
+                    {
+                        LocationId = l.LocationId,
+                        Name = l.Name ?? "",
+                        Address = l.Address ?? "",
+                        Latitude = l.Latitude,
+                        Longitude = l.Longitude,
+                        DistanceInKm = Math.Round(d, 2)
+                    };
+                })
+                .Where(x => x.DistanceInKm <= radiusInKm)
+                .OrderBy(x => x.DistanceInKm)
+                .ToList();
+
+            return list;
+        }
+
+        public async Task UpdateCoordinatesByAddressAsync(int locationId)
+        {
+            var loc = await _repo.GetByIdAsyncc(locationId)
+                      ?? throw new Exception("Location not found");
+
+            if (string.IsNullOrWhiteSpace(loc.Address))
+                throw new Exception("Location has no address to geocode");
+
+            var coords = await _geo.GeocodeAsync(loc.Address);
+            if (coords == null) throw new Exception("Cannot geocode this address");
+
+            loc.Latitude = coords.Value.lat;
+            loc.Longitude = coords.Value.lon;
+            loc.UpdatedAt = DateTime.UtcNow;
+
+            await _repo.UpdateAsyncc(loc);
+            await _repo.SaveChangesAsync();
+        }
+
+        // Haversine (km)
+        private static double Haversine(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double R = 6371;
+            double dLat = (lat2 - lat1) * Math.PI / 180;
+            double dLon = (lon2 - lon1) * Math.PI / 180;
+            lat1 *= Math.PI / 180; lat2 *= Math.PI / 180;
+            double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                       Math.Cos(lat1) * Math.Cos(lat2) *
+                       Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+            return 2 * R * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        }
 
     }
 }
