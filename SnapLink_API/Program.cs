@@ -149,6 +149,9 @@ builder.Services.AddScoped<IPhotoDeliveryRepository, PhotoDeliveryRepository>();
 builder.Services.AddScoped<IPhotoDeliveryService, PhotoDeliveryService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IEscrowService, EscrowService>();
+builder.Services.AddScoped<IGeoProvider, LocationIqGeoProvider>();
+builder.Services.AddScoped<INearbyPoiProvider, LocationIqNearbyProvider>();
+
 
 
 // Add Background Services
@@ -208,6 +211,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Map SignalR Hub
-app.MapHub<SnapLink_API.Hubs.ChatHub>("/chatHub");
+/*app.MapHub<SnapLink_API.Hubs.ChatHub>("/chatHub");*/
 
 app.Run();

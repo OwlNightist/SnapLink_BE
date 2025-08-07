@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SnapLink_Model.DTO;
+using SnapLink_Model.DTO.Request;
 using SnapLink_Service.IService;
 using SnapLink_Service.Service;
 
@@ -45,27 +46,22 @@ namespace SnapLink_API.Controllers
             await _service.DeleteAsync(id);
             return Ok("Deleted");
         }
-        [HttpPost("nearby")]
-        public async Task<IActionResult> GetNearbyLocations([FromBody] AddressRequest request)
+      
+        [HttpPost("nearby/combined")]
+        public async Task<IActionResult> GetNearbyCombined([FromBody] LocationNearbyRequest req)
         {
-            if (string.IsNullOrWhiteSpace(request.Address))
-                return BadRequest("Address is required.");
+            if (string.IsNullOrWhiteSpace(req.Address) || req.RadiusInKm <= 0)
+                return BadRequest("Address và RadiusInKm là bắt buộc.");
 
-            var locations = await _service.GetNearbyLocationsAsync(request.Address);
-            return Ok(locations);
+            var data = await _service.GetNearbyCombinedAsync(req.Address, req.RadiusInKm, req.Tags, req.Limit ?? 20);
+            return Ok(data);
         }
-        [HttpPut("update-location-coordinates")]
-        public async Task<IActionResult> UpdateCoordinates([FromBody] UpdateLocationCoordinatesRequest request)
+        [HttpPut("update-coordinates/{id:int}")]
+        public async Task<IActionResult> UpdateCoordinates(int id)
         {
-            try
-            {
-                await _service.UpdateCoordinatesAsync(request.LocationId);
-                return Ok("Coordinates updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _service.UpdateCoordinatesByAddressAsync(id);
+            return Ok("Coordinates updated.");
         }
+
     }
 }
