@@ -451,13 +451,14 @@ public class PaymentService : IPaymentService
                 // Create a comprehensive payment status response from database only
                 var paymentStatusData = new
                 {
-                    DatabaseStatus = payment.Status.ToString(),
+                    
                     PaymentId = payment.PaymentId,
                     ExternalTransactionId = payment.ExternalTransactionId,
                     CustomerId = payment.CustomerId,
                     CustomerName = payment.Customer?.FullName,
                     CustomerEmail = payment.Customer?.Email,
                     TotalAmount = payment.TotalAmount,
+                    status = payment.Status.ToString(),
                     Currency = payment.Currency,
                     Method = payment.Method,
                     Note = payment.Note,
