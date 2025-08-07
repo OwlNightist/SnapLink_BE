@@ -193,11 +193,18 @@ public class PaymentService : IPaymentService
                 await _unitOfWork.PaymentRepository.AddAsync(payment);
                 await _unitOfWork.SaveChangesAsync();
 
+                // Create response data that includes both PayOS data and our payment ID
+                var responseData = new
+                {
+                    PaymentId = payment.PaymentId,
+                    PayOSData = createPayment
+                };
+
                 return new PaymentResponse
                 {
                     Error = 0,
                     Message = "Payment link created successfully",
-                    Data = createPayment
+                    Data = responseData
                 };
             }
             catch (Exception ex)
@@ -275,11 +282,18 @@ public class PaymentService : IPaymentService
                 await _unitOfWork.PaymentRepository.AddAsync(payment);
                 await _unitOfWork.SaveChangesAsync();
 
+                // Create response data that includes both PayOS data and our payment ID
+                var responseData = new
+                {
+                    PaymentId = payment.PaymentId,
+                    PayOSData = createPayment
+                };
+
                 return new PaymentResponse
                 {
                     Error = 0,
                     Message = "Wallet top-up payment link created successfully",
-                    Data = createPayment
+                    Data = responseData
                 };
             }
             catch (Exception ex)
