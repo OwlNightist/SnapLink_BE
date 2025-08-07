@@ -65,4 +65,10 @@ namespace SnapLink_Model.DTO.Request
 
         public int PageSize { get; set; } = 20;
     }
+
+    public class TypingIndicatorRequest
+    {
+        [Required]
+        public bool IsTyping { get; set; }
+    }
 } 

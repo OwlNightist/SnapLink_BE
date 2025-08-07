@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using SnapLink_API.Hubs;
 using SnapLink_Model.DTO.Request;
 using SnapLink_Model.DTO.Response;
 using SnapLink_Service.IService;
@@ -13,10 +15,12 @@ namespace SnapLink_API.Controllers
     public class ChatController : ControllerBase
     {
         private readonly IChatService _chatService;
+        private readonly IHubContext<ChatHub> _hubContext;
 
-        public ChatController(IChatService chatService)
+        public ChatController(IChatService chatService, IHubContext<ChatHub> hubContext)
         {
             _chatService = chatService;
+            _hubContext = hubContext;
         }
 
         #region Message Endpoints
@@ -53,6 +57,18 @@ namespace SnapLink_API.Controllers
             if (!result.Success)
             {
                 return BadRequest(result);
+            }
+
+            // Send real-time notification via SignalR
+            if (result.MessageData != null && result.ConversationId.HasValue)
+            {
+                // Send to conversation group
+                await _hubContext.Clients.Group($"conversation_{result.ConversationId.Value}")
+                    .SendAsync("ReceiveMessage", result.MessageData);
+                
+                // Also send to recipient's user group for notifications
+                await _hubContext.Clients.Group($"user_{request.RecipientId}")
+                    .SendAsync("ReceiveMessage", result.MessageData);
             }
 
             return Ok(result);
@@ -119,6 +135,15 @@ namespace SnapLink_API.Controllers
                 return BadRequest("Failed to mark message as read");
             }
 
+            // Get message details for SignalR notification
+            var message = await _chatService.GetMessageByIdAsync(messageId);
+            if (message != null && message.ConversationId.HasValue)
+            {
+                // Notify conversation participants about message status change
+                await _hubContext.Clients.Group($"conversation_{message.ConversationId.Value}")
+                    .SendAsync("MessageStatusChanged", messageId, "read");
+            }
+
             return Ok(new { Success = true, Message = "Message marked as read" });
         }
 
@@ -165,6 +190,16 @@ namespace SnapLink_API.Controllers
             if (!result.Success)
             {
                 return BadRequest(result);
+            }
+
+            // Notify all participants about the new conversation
+            if (result.Conversation != null)
+            {
+                foreach (var participant in result.Conversation.Participants)
+                {
+                    await _hubContext.Clients.Group($"user_{participant.UserId}")
+                        .SendAsync("NewConversation", result.Conversation);
+                }
             }
 
             return Ok(result);
@@ -220,6 +255,11 @@ namespace SnapLink_API.Controllers
             {
                 return BadRequest("Failed to update conversation");
             }
+
+            // Notify conversation participants about the update
+            var update = new { conversationId, title, status };
+            await _hubContext.Clients.Group($"conversation_{conversationId}")
+                .SendAsync("ConversationUpdated", update);
 
             return Ok(new { Success = true, Message = "Conversation updated successfully" });
         }
@@ -395,7 +435,48 @@ namespace SnapLink_API.Controllers
                 return BadRequest("Failed to get or create direct conversation");
             }
 
+            // If this is a newly created conversation, notify both users
+            if (conversation.CreatedAt > DateTime.UtcNow.AddMinutes(-1)) // Check if recently created
+            {
+                foreach (var participant in conversation.Participants)
+                {
+                    await _hubContext.Clients.Group($"user_{participant.UserId}")
+                        .SendAsync("NewConversation", conversation);
+                }
+            }
+
             return Ok(conversation);
+        }
+
+        #endregion
+
+        #region Real-time Features
+
+        /// <summary>
+        /// Send typing indicator to conversation participants
+        /// </summary>
+        [HttpPost("conversations/{conversationId}/typing")]
+        public async Task<ActionResult> SendTypingIndicator(int conversationId, [FromBody] TypingIndicatorRequest request)
+        {
+            // Extract user ID from JWT token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized("Invalid token or user not found");
+            }
+
+            // Check if user is in conversation
+            var isParticipant = await _chatService.IsUserInConversationAsync(userId, conversationId);
+            if (!isParticipant)
+            {
+                return BadRequest("You are not a participant in this conversation");
+            }
+
+            // Send typing indicator to conversation group
+            await _hubContext.Clients.Group($"conversation_{conversationId}")
+                .SendAsync("UserTyping", userId, request.IsTyping);
+
+            return Ok(new { Success = true, Message = "Typing indicator sent" });
         }
 
         #endregion

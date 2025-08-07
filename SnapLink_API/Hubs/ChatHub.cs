@@ -117,5 +117,13 @@ namespace SnapLink_API.Hubs
         {
             return _userConnections.Values.Contains(userId);
         }
+
+        /// <summary>
+        /// Send typing indicator to conversation participants
+        /// </summary>
+        public async Task SendTypingIndicator(int conversationId, int userId, bool isTyping)
+        {
+            await Clients.Group($"conversation_{conversationId}").SendAsync("UserTyping", userId, isTyping);
+        }
     }
 } 
