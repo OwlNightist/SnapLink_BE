@@ -19,7 +19,6 @@ namespace SnapLink_Repository.Entity
         public int? LocationId { get; set; }
         public Location? Location { get; set; }
 
-        public int? PhotographerEventId { get; set; }
-        public PhotographerEvent? PhotographerEvent { get; set; }
+
     }
 } 

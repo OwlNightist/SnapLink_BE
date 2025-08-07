@@ -69,9 +69,7 @@ public partial class SnaplinkDbContext : DbContext
 
     public virtual DbSet<WithdrawalRequest> WithdrawalRequests { get; set; }
 
-    public virtual DbSet<PhotographerEvent> PhotographerEvents { get; set; }
 
-    public virtual DbSet<PhotographerEventLocation> PhotographerEventLocations { get; set; }
 
     public virtual DbSet<Availability> Availabilities { get; set; }
 
@@ -198,10 +196,6 @@ public partial class SnaplinkDbContext : DbContext
                 .HasForeignKey(d => d.LocationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Booking_Location");
-
-            entity.HasOne(d => d.Event).WithMany(p => p.Bookings)
-                .HasForeignKey(d => d.EventId)
-                .HasConstraintName("FK_Booking_Event");
         });
 
         modelBuilder.Entity<Complaint>(entity =>
@@ -325,10 +319,6 @@ public partial class SnaplinkDbContext : DbContext
                 .HasForeignKey(e => e.LocationId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(e => e.PhotographerEvent)
-                .WithMany(ev => ev.Images)
-                .HasForeignKey(e => e.PhotographerEventId)
-                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<LocationOwner>(entity =>
@@ -858,74 +848,7 @@ public partial class SnaplinkDbContext : DbContext
                 .HasConstraintName("FK_WithdrawalRequest_Wallet");
         });
 
-        modelBuilder.Entity<PhotographerEvent>(entity =>
-        {
-            entity.HasKey(e => e.EventId).HasName("PK__PhotographerEvent__EventId");
-
-            entity.ToTable("PhotographerEvent");
-
-            entity.Property(e => e.EventId).HasColumnName("eventId");
-            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
-            entity.Property(e => e.Title)
-                .HasMaxLength(255)
-                .HasColumnName("title");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.OriginalPrice)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("originalPrice");
-            entity.Property(e => e.DiscountedPrice)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("discountedPrice");
-            entity.Property(e => e.DiscountPercentage)
-                .HasColumnType("decimal(5, 2)")
-                .HasColumnName("discountPercentage");
-            entity.Property(e => e.StartDate)
-                .HasColumnType("datetime")
-                .HasColumnName("startDate");
-            entity.Property(e => e.EndDate)
-                .HasColumnType("datetime")
-                .HasColumnName("endDate");
-            entity.Property(e => e.MaxBookings).HasColumnName("maxBookings");
-            entity.Property(e => e.CurrentBookings).HasColumnName("currentBookings");
-            entity.Property(e => e.Status)
-                .HasMaxLength(30)
-                .HasColumnName("status");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-
-            entity.HasOne(d => d.Photographer).WithMany(p => p.PhotographerEvents)
-                .HasForeignKey(d => d.PhotographerId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PhotographerEvent_Photographer");
-        });
-
-        modelBuilder.Entity<PhotographerEventLocation>(entity =>
-        {
-            entity.HasKey(e => e.EventLocationId).HasName("PK__PhotographerEventLocation__EventLocationId");
-
-            entity.ToTable("PhotographerEventLocation");
-
-            entity.Property(e => e.EventLocationId).HasColumnName("eventLocationId");
-            entity.Property(e => e.EventId).HasColumnName("eventId");
-            entity.Property(e => e.LocationId).HasColumnName("locationId");
-
-            entity.HasOne(d => d.Event).WithMany(p => p.PhotographerEventLocations)
-                .HasForeignKey(d => d.EventId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PhotographerEventLocation_Event");
-
-            entity.HasOne(d => d.Location).WithMany(p => p.PhotographerEventLocations)
-                .HasForeignKey(d => d.LocationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PhotographerEventLocation_Location");
-        });
-
+     
         modelBuilder.Entity<Availability>(entity =>
         {
             entity.HasKey(e => e.AvailabilityId).HasName("PK__Availability__AvailabilityId");

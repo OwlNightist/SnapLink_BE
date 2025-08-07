@@ -138,19 +138,6 @@ namespace SnapLink_Model.DTO
                       opt => opt.MapFrom(src => src.UserRoles.Select(ur => ur.Role.RoleName)));
             CreateMap<Location, LocationDto>();
 
-            // PhotographerEvent mappings
-            CreateMap<PhotographerEvent, PhotographerEventResponse>()
-                .ForMember(dest => dest.PhotographerName, opt => opt.MapFrom(src => src.Photographer.User.FullName))
-                .ForMember(dest => dest.Locations, opt => opt.MapFrom(src => src.PhotographerEventLocations.Select(pel => pel.Location)));
-
-            CreateMap<PhotographerEvent, PhotographerEventListResponse>()
-                .ForMember(dest => dest.PhotographerName, opt => opt.MapFrom(src => src.Photographer.User.FullName))
-                .ForMember(dest => dest.LocationCount, opt => opt.MapFrom(src => src.PhotographerEventLocations.Count));
-
-            CreateMap<CreatePhotographerEventRequest, PhotographerEvent>();
-            CreateMap<UpdatePhotographerEventRequest, PhotographerEvent>()
-                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
-
             // Location mappings for PhotographerEvent
             CreateMap<Location, LocationResponse>();
         }

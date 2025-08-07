@@ -35,8 +35,6 @@ namespace SnapLink_Repository.Repository
         private IGenericRepository<UserRole> _userRoleRepository;
         private IGenericRepository<UserStyle> _userStyleRepository;
         private IGenericRepository<WithdrawalRequest> _withdrawalRequestRepository;
-        private IGenericRepository<PhotographerEvent> _photographerEventRepository;
-        private IGenericRepository<PhotographerEventLocation> _photographerEventLocationRepository;
         private IGenericRepository<Image> _imageRepository;
         private IGenericRepository<Availability> _availabilityRepository;
 
@@ -114,12 +112,6 @@ namespace SnapLink_Repository.Repository
 
         public IGenericRepository<WithdrawalRequest> WithdrawalRequestRepository => 
             _withdrawalRequestRepository ??= new GenericRepository<WithdrawalRequest>(_context);
-
-        public IGenericRepository<PhotographerEvent> PhotographerEventRepository => 
-            _photographerEventRepository ??= new GenericRepository<PhotographerEvent>(_context);
-
-        public IGenericRepository<PhotographerEventLocation> PhotographerEventLocationRepository => 
-            _photographerEventLocationRepository ??= new GenericRepository<PhotographerEventLocation>(_context);
 
         public IGenericRepository<Image> ImageRepository =>
             _imageRepository ??= new GenericRepository<Image>(_context);
