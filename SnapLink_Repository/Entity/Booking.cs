@@ -13,8 +13,6 @@ public partial class Booking
 
     public int LocationId { get; set; }
 
-    public int? EventId { get; set; }
-
     public DateTime? StartDatetime { get; set; }
 
     public DateTime? EndDatetime { get; set; }
@@ -41,8 +39,9 @@ public partial class Booking
 
     public virtual Payment? Payment { get; set; }
 
-    public virtual PhotographerEvent? Event { get; set; }
-
     // Photo delivery relationship
     public virtual PhotoDelivery? PhotoDelivery { get; set; }
+    
+    // Event booking relationship
+    public virtual EventBooking? EventBooking { get; set; }
 }

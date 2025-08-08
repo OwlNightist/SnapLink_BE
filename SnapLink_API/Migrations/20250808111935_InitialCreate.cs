@@ -444,36 +444,6 @@ namespace SnapLink_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PhotographerEvent",
-                columns: table => new
-                {
-                    eventId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    photographerId = table.Column<int>(type: "int", nullable: false),
-                    title = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    originalPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: true),
-                    discountedPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: true),
-                    discountPercentage = table.Column<decimal>(type: "decimal(5,2)", nullable: true),
-                    startDate = table.Column<DateTime>(type: "datetime", nullable: true),
-                    endDate = table.Column<DateTime>(type: "datetime", nullable: true),
-                    maxBookings = table.Column<int>(type: "int", nullable: true),
-                    currentBookings = table.Column<int>(type: "int", nullable: true),
-                    status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true),
-                    createdAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    updatedAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK__PhotographerEvent__EventId", x => x.eventId);
-                    table.ForeignKey(
-                        name: "FK_PhotographerEvent_Photographer",
-                        column: x => x.photographerId,
-                        principalTable: "Photographer",
-                        principalColumn: "photographerId");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PhotographerStyle",
                 columns: table => new
                 {
@@ -512,17 +482,11 @@ namespace SnapLink_API.Migrations
                     requestedAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
                     processedAt = table.Column<DateTime>(type: "datetime", nullable: true),
                     processedByModeratorId = table.Column<int>(type: "int", nullable: true),
-                    rejectionReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhotographerId = table.Column<int>(type: "int", nullable: true)
+                    rejectionReason = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK__Withdraw__3213E83FE86C5098", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_WithdrawalRequest_Photographer_PhotographerId",
-                        column: x => x.PhotographerId,
-                        principalTable: "Photographer",
-                        principalColumn: "photographerId");
                     table.ForeignKey(
                         name: "FK_WithdrawalRequest_Wallet",
                         column: x => x.walletId,
@@ -539,7 +503,6 @@ namespace SnapLink_API.Migrations
                     userId = table.Column<int>(type: "int", nullable: false),
                     photographerId = table.Column<int>(type: "int", nullable: false),
                     locationId = table.Column<int>(type: "int", nullable: false),
-                    eventId = table.Column<int>(type: "int", nullable: true),
                     startDatetime = table.Column<DateTime>(type: "datetime", nullable: true),
                     endDatetime = table.Column<DateTime>(type: "datetime", nullable: true),
                     status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true),
@@ -551,11 +514,6 @@ namespace SnapLink_API.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK__Booking__C6D03BCDDFA35959", x => x.bookingId);
-                    table.ForeignKey(
-                        name: "FK_Booking_Event",
-                        column: x => x.eventId,
-                        principalTable: "PhotographerEvent",
-                        principalColumn: "eventId");
                     table.ForeignKey(
                         name: "FK_Booking_Location",
                         column: x => x.locationId,
@@ -585,8 +543,7 @@ namespace SnapLink_API.Migrations
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
                     user_id = table.Column<int>(type: "int", nullable: true),
                     PhotographerId = table.Column<int>(type: "int", nullable: true),
-                    LocationId = table.Column<int>(type: "int", nullable: true),
-                    PhotographerEventId = table.Column<int>(type: "int", nullable: true)
+                    LocationId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -596,12 +553,6 @@ namespace SnapLink_API.Migrations
                         column: x => x.LocationId,
                         principalTable: "Location",
                         principalColumn: "locationId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Image_PhotographerEvent_PhotographerEventId",
-                        column: x => x.PhotographerEventId,
-                        principalTable: "PhotographerEvent",
-                        principalColumn: "eventId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Image_Photographer_PhotographerId",
@@ -618,27 +569,34 @@ namespace SnapLink_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PhotographerEventLocation",
+                name: "LocationEvent",
                 columns: table => new
                 {
-                    eventLocationId = table.Column<int>(type: "int", nullable: false)
+                    eventId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    eventId = table.Column<int>(type: "int", nullable: false),
-                    locationId = table.Column<int>(type: "int", nullable: false)
+                    locationId = table.Column<int>(type: "int", nullable: false),
+                    name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    startDate = table.Column<DateTime>(type: "datetime", nullable: false),
+                    endDate = table.Column<DateTime>(type: "datetime", nullable: false),
+                    discountedPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: true),
+                    originalPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: true),
+                    maxPhotographers = table.Column<int>(type: "int", nullable: false),
+                    maxBookingsPerSlot = table.Column<int>(type: "int", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    eventImageUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    createdAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
+                    updatedAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK__PhotographerEventLocation__EventLocationId", x => x.eventLocationId);
+                    table.PrimaryKey("PK__LocationEvent__EventId", x => x.eventId);
                     table.ForeignKey(
-                        name: "FK_PhotographerEventLocation_Event",
-                        column: x => x.eventId,
-                        principalTable: "PhotographerEvent",
-                        principalColumn: "eventId");
-                    table.ForeignKey(
-                        name: "FK_PhotographerEventLocation_Location",
+                        name: "FK_LocationEvent_Location",
                         column: x => x.locationId,
                         principalTable: "Location",
-                        principalColumn: "locationId");
+                        principalColumn: "locationId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -771,6 +729,37 @@ namespace SnapLink_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "EventPhotographer",
+                columns: table => new
+                {
+                    eventPhotographerId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    eventId = table.Column<int>(type: "int", nullable: false),
+                    photographerId = table.Column<int>(type: "int", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    appliedAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
+                    approvedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    rejectionReason = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    specialRate = table.Column<decimal>(type: "decimal(10,2)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__EventPhotographer__EventPhotographerId", x => x.eventPhotographerId);
+                    table.ForeignKey(
+                        name: "FK_EventPhotographer_LocationEvent",
+                        column: x => x.eventId,
+                        principalTable: "LocationEvent",
+                        principalColumn: "eventId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_EventPhotographer_Photographer",
+                        column: x => x.photographerId,
+                        principalTable: "Photographer",
+                        principalColumn: "photographerId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Advertisement",
                 columns: table => new
                 {
@@ -871,6 +860,38 @@ namespace SnapLink_API.Migrations
                         principalColumn: "userId");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "EventBooking",
+                columns: table => new
+                {
+                    eventBookingId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    eventId = table.Column<int>(type: "int", nullable: false),
+                    bookingId = table.Column<int>(type: "int", nullable: false),
+                    eventPhotographerId = table.Column<int>(type: "int", nullable: false),
+                    eventPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    createdAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__EventBooking__EventBookingId", x => x.eventBookingId);
+                    table.ForeignKey(
+                        name: "FK_EventBooking_Booking",
+                        column: x => x.bookingId,
+                        principalTable: "Booking",
+                        principalColumn: "bookingId");
+                    table.ForeignKey(
+                        name: "FK_EventBooking_EventPhotographer",
+                        column: x => x.eventPhotographerId,
+                        principalTable: "EventPhotographer",
+                        principalColumn: "eventPhotographerId");
+                    table.ForeignKey(
+                        name: "FK_EventBooking_LocationEvent",
+                        column: x => x.eventId,
+                        principalTable: "LocationEvent",
+                        principalColumn: "eventId");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Administrator_userId",
                 table: "Administrator",
@@ -910,11 +931,6 @@ namespace SnapLink_API.Migrations
                 name: "IX_Availability_Status",
                 table: "Availability",
                 column: "status");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Booking_eventId",
-                table: "Booking",
-                column: "eventId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Booking_locationId",
@@ -1012,14 +1028,51 @@ namespace SnapLink_API.Migrations
                 column: "status");
 
             migrationBuilder.CreateIndex(
+                name: "IX_EventBooking_BookingId",
+                table: "EventBooking",
+                column: "bookingId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EventBooking_CreatedAt",
+                table: "EventBooking",
+                column: "createdAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EventBooking_EventId",
+                table: "EventBooking",
+                column: "eventId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EventBooking_EventPhotographerId",
+                table: "EventBooking",
+                column: "eventPhotographerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EventPhotographer_Event_Photographer_Unique",
+                table: "EventPhotographer",
+                columns: new[] { "eventId", "photographerId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EventPhotographer_EventId",
+                table: "EventPhotographer",
+                column: "eventId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EventPhotographer_PhotographerId",
+                table: "EventPhotographer",
+                column: "photographerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EventPhotographer_Status",
+                table: "EventPhotographer",
+                column: "status");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Image_LocationId",
                 table: "Image",
                 column: "LocationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Image_PhotographerEventId",
-                table: "Image",
-                column: "PhotographerEventId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Image_PhotographerId",
@@ -1035,6 +1088,31 @@ namespace SnapLink_API.Migrations
                 name: "IX_Location_locationOwnerId",
                 table: "Location",
                 column: "locationOwnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LocationEvent_EndDate",
+                table: "LocationEvent",
+                column: "endDate");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LocationEvent_LocationId",
+                table: "LocationEvent",
+                column: "locationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LocationEvent_StartDate",
+                table: "LocationEvent",
+                column: "startDate");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LocationEvent_Status",
+                table: "LocationEvent",
+                column: "status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LocationEvent_Status_DateRange",
+                table: "LocationEvent",
+                columns: new[] { "status", "startDate", "endDate" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_LocationOwner_userId",
@@ -1110,21 +1188,6 @@ namespace SnapLink_API.Migrations
                 column: "userId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PhotographerEvent_photographerId",
-                table: "PhotographerEvent",
-                column: "photographerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PhotographerEventLocation_eventId",
-                table: "PhotographerEventLocation",
-                column: "eventId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PhotographerEventLocation_locationId",
-                table: "PhotographerEventLocation",
-                column: "locationId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_PhotographerStyle_photographerId",
                 table: "PhotographerStyle",
                 column: "photographerId");
@@ -1195,11 +1258,6 @@ namespace SnapLink_API.Migrations
                 column: "userId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_WithdrawalRequest_PhotographerId",
-                table: "WithdrawalRequest",
-                column: "PhotographerId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_WithdrawalRequest_walletId",
                 table: "WithdrawalRequest",
                 column: "walletId");
@@ -1227,6 +1285,9 @@ namespace SnapLink_API.Migrations
                 name: "DeviceInfo");
 
             migrationBuilder.DropTable(
+                name: "EventBooking");
+
+            migrationBuilder.DropTable(
                 name: "Image");
 
             migrationBuilder.DropTable(
@@ -1237,9 +1298,6 @@ namespace SnapLink_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "PhotoDelivery");
-
-            migrationBuilder.DropTable(
-                name: "PhotographerEventLocation");
 
             migrationBuilder.DropTable(
                 name: "PhotographerStyle");
@@ -1266,6 +1324,9 @@ namespace SnapLink_API.Migrations
                 name: "Moderator");
 
             migrationBuilder.DropTable(
+                name: "EventPhotographer");
+
+            migrationBuilder.DropTable(
                 name: "Conversation");
 
             migrationBuilder.DropTable(
@@ -1284,10 +1345,10 @@ namespace SnapLink_API.Migrations
                 name: "Wallet");
 
             migrationBuilder.DropTable(
-                name: "Booking");
+                name: "LocationEvent");
 
             migrationBuilder.DropTable(
-                name: "PhotographerEvent");
+                name: "Booking");
 
             migrationBuilder.DropTable(
                 name: "Location");

@@ -748,38 +748,6 @@ namespace SnapLink_Repository.Data
             }
 
             // Seed PhotographerEvents
-            if (!context.PhotographerEvents.Any())
-            {
-                var photographers = context.Photographers.Take(5).ToList();
-                var events = new[]
-                {
-                    new PhotographerEvent { PhotographerId = photographers[0].PhotographerId, Title = "Spring Mini Sessions", Description = "Short sessions for families", OriginalPrice = 200, DiscountedPrice = 150, DiscountPercentage = 25, StartDate = DateTime.Now.AddDays(5), EndDate = DateTime.Now.AddDays(10), MaxBookings = 10, CurrentBookings = 2, Status = "Active", CreatedAt = DateTime.Now },
-                    new PhotographerEvent { PhotographerId = photographers[1].PhotographerId, Title = "Wedding Expo", Description = "Meet top wedding photographers", OriginalPrice = 500, DiscountedPrice = 400, DiscountPercentage = 20, StartDate = DateTime.Now.AddDays(15), EndDate = DateTime.Now.AddDays(20), MaxBookings = 20, CurrentBookings = 5, Status = "Active", CreatedAt = DateTime.Now },
-                    new PhotographerEvent { PhotographerId = photographers[2].PhotographerId, Title = "Landscape Workshop", Description = "Learn landscape photography", OriginalPrice = 300, DiscountedPrice = 250, DiscountPercentage = 17, StartDate = DateTime.Now.AddDays(25), EndDate = DateTime.Now.AddDays(30), MaxBookings = 15, CurrentBookings = 3, Status = "Inactive", CreatedAt = DateTime.Now },
-                    new PhotographerEvent { PhotographerId = photographers[3].PhotographerId, Title = "Fashion Shoot", Description = "Fashion photography for models", OriginalPrice = 400, DiscountedPrice = 350, DiscountPercentage = 12, StartDate = DateTime.Now.AddDays(35), EndDate = DateTime.Now.AddDays(40), MaxBookings = 8, CurrentBookings = 1, Status = "Active", CreatedAt = DateTime.Now },
-                    new PhotographerEvent { PhotographerId = photographers[4].PhotographerId, Title = "Event Coverage", Description = "Book for your event", OriginalPrice = 250, DiscountedPrice = 200, DiscountPercentage = 20, StartDate = DateTime.Now.AddDays(45), EndDate = DateTime.Now.AddDays(50), MaxBookings = 12, CurrentBookings = 4, Status = "Active", CreatedAt = DateTime.Now }
-                };
-                context.PhotographerEvents.AddRange(events);
-                context.SaveChanges();
-            }
-
-            // Seed PhotographerEventLocations
-            if (!context.PhotographerEventLocations.Any())
-            {
-                var events = context.PhotographerEvents.Take(5).ToList();
-                var locations = context.Locations.Take(5).ToList();
-                var eventLocations = new[]
-                {
-                    new PhotographerEventLocation { EventId = events[0].EventId, LocationId = locations[0].LocationId },
-                    new PhotographerEventLocation { EventId = events[1].EventId, LocationId = locations[1].LocationId },
-                    new PhotographerEventLocation { EventId = events[2].EventId, LocationId = locations[2].LocationId },
-                    new PhotographerEventLocation { EventId = events[3].EventId, LocationId = locations[3].LocationId },
-                    new PhotographerEventLocation { EventId = events[4].EventId, LocationId = locations[4].LocationId }
-                };
-                context.PhotographerEventLocations.AddRange(eventLocations);
-                context.SaveChanges();
-            }
-
             // Seed Images
             if (!context.Images.Any())
             {

@@ -64,15 +64,6 @@ namespace SnapLink_Service.Service
             return _mapper.Map<IEnumerable<ImageResponse>>(images);
         }
 
-        public async Task<IEnumerable<ImageResponse>> GetByPhotographerEventIdAsync(int photographerEventId)
-        {
-            var images = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.PhotographerEventId == photographerEventId,
-                orderBy: q => q.OrderByDescending(img => img.IsPrimary).ThenBy(img => img.CreatedAt)
-            );
-            return _mapper.Map<IEnumerable<ImageResponse>>(images);
-        }
-
         public async Task<ImageResponse?> GetPrimaryByUserIdAsync(int userId)
         {
             var primaryImage = await _unitOfWork.ImageRepository.GetAsync(
@@ -100,15 +91,6 @@ namespace SnapLink_Service.Service
             return imageEntity != null ? _mapper.Map<ImageResponse>(imageEntity) : null;
         }
 
-        public async Task<ImageResponse?> GetPrimaryByPhotographerEventIdAsync(int photographerEventId)
-        {
-            var primaryImage = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.PhotographerEventId == photographerEventId && img.IsPrimary
-            );
-            var imageEntity = primaryImage.FirstOrDefault();
-            return imageEntity != null ? _mapper.Map<ImageResponse>(imageEntity) : null;
-        }
-
 
         public async Task<ImageResponse> UploadImageAsync(UploadImageRequest request)
         {
@@ -117,8 +99,7 @@ namespace SnapLink_Service.Service
                 request.File,
                 request.UserId,
                 request.PhotographerId,
-                request.LocationId,
-                request.PhotographerEventId
+                request.LocationId
             );
             // Get the public URL
             var imageUrl = await _azureStorageService.GetImageUrlAsync(blobName);
@@ -130,7 +111,6 @@ namespace SnapLink_Service.Service
                 UserId = request.UserId,
                 PhotographerId = request.PhotographerId,
                 LocationId = request.LocationId,
-                PhotographerEventId = request.PhotographerEventId,
                 IsPrimary = request.IsPrimary,
                 Caption = request.Caption,
                 CreatedAt = DateTime.UtcNow
@@ -168,8 +148,8 @@ namespace SnapLink_Service.Service
                         filter: img =>
                             ((img.UserId != null && img.UserId == imageEntity.UserId) ||
                              (img.PhotographerId != null && img.PhotographerId == imageEntity.PhotographerId) ||
-                             (img.LocationId != null && img.LocationId == imageEntity.LocationId) ||
-                             (img.PhotographerEventId != null && img.PhotographerEventId == imageEntity.PhotographerEventId)) &&
+                             (img.LocationId != null && img.LocationId == imageEntity.LocationId)
+                            ) &&
                             img.Id != request.Id &&
                             img.IsPrimary
                     );
@@ -232,8 +212,8 @@ namespace SnapLink_Service.Service
                 filter: img =>
                     ((img.UserId != null && img.UserId == imageEntity.UserId) ||
                      (img.PhotographerId != null && img.PhotographerId == imageEntity.PhotographerId) ||
-                     (img.LocationId != null && img.LocationId == imageEntity.LocationId) ||
-                     (img.PhotographerEventId != null && img.PhotographerEventId == imageEntity.PhotographerEventId)) &&
+                     (img.LocationId != null && img.LocationId == imageEntity.LocationId) 
+                     ) &&
                     img.Id != imageId &&
                     img.IsPrimary
             );
