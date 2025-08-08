@@ -138,6 +138,38 @@ namespace SnapLink_Model.DTO
                       opt => opt.MapFrom(src => src.UserRoles.Select(ur => ur.Role.RoleName)));
             CreateMap<Location, LocationDto>();
 
+            // LocationEvent mappings
+            CreateMap<LocationEvent, LocationEventResponse>()
+                .ForMember(dest => dest.Location, opt => opt.MapFrom(src => src.Location))
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images))
+                .ForMember(dest => dest.PrimaryImage, opt => opt.MapFrom(src => src.Images.FirstOrDefault(i => i.IsPrimary)));
+
+            CreateMap<LocationEvent, LocationEventDetailResponse>()
+                .ForMember(dest => dest.Location, opt => opt.MapFrom(src => src.Location))
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images))
+                .ForMember(dest => dest.PrimaryImage, opt => opt.MapFrom(src => src.Images.FirstOrDefault(i => i.IsPrimary)))
+                .ForMember(dest => dest.EventPhotographers, opt => opt.MapFrom(src => src.EventPhotographers))
+                .ForMember(dest => dest.EventBookings, opt => opt.MapFrom(src => src.EventBookings));
+
+            CreateMap<LocationEvent, EventListResponse>()
+                .ForMember(dest => dest.LocationName, opt => opt.MapFrom(src => src.Location.Name))
+                .ForMember(dest => dest.LocationAddress, opt => opt.MapFrom(src => src.Location.Address));
+
+            CreateMap<CreateLocationEventRequest, LocationEvent>();
+            CreateMap<UpdateLocationEventRequest, LocationEvent>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            // EventPhotographer mappings
+            CreateMap<EventPhotographer, EventPhotographerResponse>()
+                .ForMember(dest => dest.Photographer, opt => opt.MapFrom(src => src.Photographer))
+                .ForMember(dest => dest.Event, opt => opt.MapFrom(src => src.Event));
+
+            // EventBooking mappings
+            CreateMap<EventBooking, EventBookingResponse>()
+                .ForMember(dest => dest.Booking, opt => opt.MapFrom(src => src.Booking))
+                .ForMember(dest => dest.EventPhotographer, opt => opt.MapFrom(src => src.EventPhotographer))
+                .ForMember(dest => dest.Event, opt => opt.MapFrom(src => src.Event));
+
         }
     }
 }

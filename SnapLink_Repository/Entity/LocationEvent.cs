@@ -36,9 +36,6 @@ public partial class LocationEvent
     [MaxLength(30)]
     public string Status { get; set; } = "Draft"; // "Draft", "Open", "Active", "Closed", "Cancelled"
 
-    [MaxLength(500)]
-    public string? EventImageUrl { get; set; }
-
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
@@ -49,4 +46,6 @@ public partial class LocationEvent
     public virtual ICollection<EventPhotographer> EventPhotographers { get; set; } = new List<EventPhotographer>();
 
     public virtual ICollection<EventBooking> EventBookings { get; set; } = new List<EventBooking>();
+
+    public virtual ICollection<Image> Images { get; set; } = new List<Image>();
 }

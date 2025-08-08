@@ -32,9 +32,6 @@ namespace SnapLink_Model.DTO.Request
 
         [Range(1, int.MaxValue)]
         public int MaxBookingsPerSlot { get; set; } = 5;
-
-        [MaxLength(500)]
-        public string? EventImageUrl { get; set; }
     }
 
     public class UpdateLocationEventRequest
@@ -63,9 +60,6 @@ namespace SnapLink_Model.DTO.Request
 
         [MaxLength(30)]
         public string? Status { get; set; }
-
-        [MaxLength(500)]
-        public string? EventImageUrl { get; set; }
     }
 
     public class EventApplicationRequest
