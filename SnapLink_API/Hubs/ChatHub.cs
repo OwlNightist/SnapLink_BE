@@ -8,7 +8,6 @@ namespace SnapLink_API.Hubs
     public class ChatHub : Hub
     {
         private static readonly Dictionary<string, int> _userConnections = new Dictionary<string, int>();
-        private static readonly Dictionary<string, DateTime> _typingUsers = new Dictionary<string, DateTime>();
         private readonly IChatService _chatService;
 
         public ChatHub(IChatService chatService)
@@ -26,15 +25,7 @@ namespace SnapLink_API.Hubs
             // Remove user from connection mapping
             if (_userConnections.ContainsKey(Context.ConnectionId))
             {
-                var userId = _userConnections[Context.ConnectionId];
                 _userConnections.Remove(Context.ConnectionId);
-                
-                // Clean up typing indicators for this user
-                var keysToRemove = _typingUsers.Keys.Where(key => key.EndsWith($"_{userId}")).ToList();
-                foreach (var key in keysToRemove)
-                {
-                    _typingUsers.Remove(key);
-                }
             }
 
             await base.OnDisconnectedAsync(exception);
@@ -196,29 +187,7 @@ namespace SnapLink_API.Hubs
         /// </summary>
         public async Task SendTypingIndicator(int conversationId, int userId, bool isTyping)
         {
-            var key = $"{conversationId}_{userId}";
-            
-            if (isTyping)
-            {
-                // Only broadcast if user wasn't already typing recently (within 3 seconds)
-                if (!_typingUsers.ContainsKey(key) || 
-                    DateTime.UtcNow.Subtract(_typingUsers[key]).TotalSeconds >= 3)
-                {
-                    _typingUsers[key] = DateTime.UtcNow;
-                    await Clients.GroupExcept($"conversation_{conversationId}", Context.ConnectionId)
-                        .SendAsync("UserTyping", userId, isTyping);
-                }
-            }
-            else
-            {
-                // Only broadcast "stopped typing" if user was actually typing
-                if (_typingUsers.ContainsKey(key))
-                {
-                    _typingUsers.Remove(key);
-                    await Clients.GroupExcept($"conversation_{conversationId}", Context.ConnectionId)
-                        .SendAsync("UserTyping", userId, isTyping);
-                }
-            }
+            await Clients.Group($"conversation_{conversationId}").SendAsync("UserTyping", userId, isTyping);
         }
     }
 } 
