@@ -226,7 +226,7 @@ namespace SnapLink_Service.Service
         }
 
 
-        public async Task<List<NearbyCombinedItem>> GetNearbyCombinedAsync(string address, double radiusInKm, string? tags, int limit)
+        /*public async Task<List<NearbyCombinedItem>> GetNearbyCombinedAsync(string address, double radiusInKm, string? tags, int limit)
         {
             var coords = await _geo.GeocodeAsync(address);
             if (coords == null) return new List<NearbyCombinedItem>();
@@ -234,7 +234,7 @@ namespace SnapLink_Service.Service
 
             var radiusMeters = (int)Math.Round(radiusInKm * 1000);
 
-            // INTERNAL (DB)
+            
             var db = await _repo.GetAllAsyncc();
             var internals = db
                 .Where(l => l.Latitude.HasValue && l.Longitude.HasValue)
@@ -265,8 +265,52 @@ namespace SnapLink_Service.Service
             // combined = DeduplicateByProximity(combined);
 
             return combined;
-        }
+        }*/
+        public async Task<List<NearbyCombinedItem>> GetNearbyCombinedAsync(string address, double radiusInKm, string? tags, int limit)
+        {
+            if (radiusInKm <= 0) radiusInKm = 1;
 
+            var coords = await _geo.GeocodeAsync(address);
+            if (coords == null) return new List<NearbyCombinedItem>();
+            var (lat, lon) = coords.Value;
+
+            // 1) INTERNAL (DB): tính khoảng cách bằng Haversine
+            var db = await _repo.GetAllAsync();
+            var internals = db
+                .Where(l => l.Latitude.HasValue && l.Longitude.HasValue)
+                .Select(l => new NearbyCombinedItem
+                {
+                    Source = "internal",
+                    LocationId = l.LocationId,
+                    Name = l.Name,
+                    Address = l.Address,
+                    Latitude = l.Latitude!.Value,
+                    Longitude = l.Longitude!.Value,
+                    DistanceInKm = Math.Round(HaversineKm(lat, lon, l.Latitude!.Value, l.Longitude!.Value), 2)
+                })
+                .Where(x => x.DistanceInKm <= radiusInKm)
+                .ToList();
+
+            // 2) EXTERNAL (LocationIQ Nearby): dùng distance do API trả nếu có
+            var radiusMeters = (int)Math.Round(radiusInKm * 1000);
+            var externals = await _poi.GetNearbyAsync(lat, lon, radiusMeters, tags, limit);
+
+            // fallback: nếu item nào không có distance (0), thì tính Haversine cho chắc
+            foreach (var e in externals)
+            {
+                if (e.DistanceInKm <= 0)
+                {
+                    e.DistanceInKm = Math.Round(HaversineKm(lat, lon, e.Latitude, e.Longitude), 2);
+                }
+            }
+
+            // 3) Gộp & sort
+            var combined = internals.Concat(externals)
+                                    .OrderBy(x => x.DistanceInKm)
+                                    .ToList();
+
+            return combined;
+        }
         private static double HaversineKm(double lat1, double lon1, double lat2, double lon2)
         {
             const double R = 6371;
