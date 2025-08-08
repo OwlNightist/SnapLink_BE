@@ -37,6 +37,9 @@ namespace SnapLink_Repository.Repository
         private IGenericRepository<WithdrawalRequest> _withdrawalRequestRepository;
         private IGenericRepository<Image> _imageRepository;
         private IGenericRepository<Availability> _availabilityRepository;
+        private IGenericRepository<LocationEvent> _locationEventRepository;
+        private IGenericRepository<EventPhotographer> _eventPhotographerRepository;
+        private IGenericRepository<EventBooking> _eventBookingRepository;
 
         public UnitOfWork(SnaplinkDbContext context)
         {
@@ -118,6 +121,15 @@ namespace SnapLink_Repository.Repository
 
         public IGenericRepository<Availability> AvailabilityRepository =>
             _availabilityRepository ??= new GenericRepository<Availability>(_context);
+
+        public IGenericRepository<LocationEvent> LocationEventRepository =>
+            _locationEventRepository ??= new GenericRepository<LocationEvent>(_context);
+
+        public IGenericRepository<EventPhotographer> EventPhotographerRepository =>
+            _eventPhotographerRepository ??= new GenericRepository<EventPhotographer>(_context);
+
+        public IGenericRepository<EventBooking> EventBookingRepository =>
+            _eventBookingRepository ??= new GenericRepository<EventBooking>(_context);
 
         // Transaction methods
         public async Task<int> SaveChangesAsync()

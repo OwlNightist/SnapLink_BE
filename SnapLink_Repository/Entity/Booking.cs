@@ -41,4 +41,7 @@ public partial class Booking
 
     // Photo delivery relationship
     public virtual PhotoDelivery? PhotoDelivery { get; set; }
+    
+    // Event booking relationship
+    public virtual EventBooking? EventBooking { get; set; }
 }
