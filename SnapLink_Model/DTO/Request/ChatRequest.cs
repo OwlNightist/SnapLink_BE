@@ -50,11 +50,7 @@ namespace SnapLink_Model.DTO.Request
         public int UserId { get; set; }
     }
 
-    public class MarkMessageAsReadRequest
-    {
-        [Required]
-        public int MessageId { get; set; }
-    }
+    
 
     public class GetConversationMessagesRequest
     {
@@ -64,5 +60,11 @@ namespace SnapLink_Model.DTO.Request
         public int Page { get; set; } = 1;
 
         public int PageSize { get; set; } = 20;
+    }
+
+    public class TypingIndicatorRequest
+    {
+        [Required]
+        public bool IsTyping { get; set; }
     }
 } 

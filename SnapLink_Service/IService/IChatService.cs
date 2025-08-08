@@ -9,7 +9,7 @@ namespace SnapLink_Service.IService
         Task<SendMessageResponse> SendMessageAsync(SendMessageRequest request, int senderId);
         Task<MessageResponse?> GetMessageByIdAsync(int messageId);
         Task<GetMessagesResponse> GetConversationMessagesAsync(GetConversationMessagesRequest request);
-        Task<bool> MarkMessageAsReadAsync(MarkMessageAsReadRequest request, int userId);
+        Task<bool> MarkMessageAsReadAsync(int messageId, int userId);
         Task<bool> DeleteMessageAsync(int messageId, int userId);
 
         // Conversation operations

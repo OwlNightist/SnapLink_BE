@@ -1,11 +1,19 @@
 using Microsoft.AspNetCore.SignalR;
 using SnapLink_Model.DTO.Response;
+using SnapLink_Model.DTO.Request;
+using SnapLink_Service.IService;
 
 namespace SnapLink_API.Hubs
 {
     public class ChatHub : Hub
     {
         private static readonly Dictionary<string, int> _userConnections = new Dictionary<string, int>();
+        private readonly IChatService _chatService;
+
+        public ChatHub(IChatService chatService)
+        {
+            _chatService = chatService;
+        }
 
         public override async Task OnConnectedAsync()
         {
@@ -59,7 +67,63 @@ namespace SnapLink_API.Hubs
         /// </summary>
         public async Task SendMessageToConversation(int conversationId, MessageResponse message)
         {
-            await Clients.Group($"conversation_{conversationId}").SendAsync("ReceiveMessage", message);
+            try
+            {
+                // Validate message
+                if (message == null || string.IsNullOrWhiteSpace(message.Content))
+                {
+                    await Clients.Caller.SendAsync("Error", "Invalid message");
+                    return;
+                }
+
+                // Validate conversation ID
+                if (conversationId <= 0)
+                {
+                    await Clients.Caller.SendAsync("Error", "Invalid conversation ID");
+                    return;
+                }
+
+                // Get current user ID
+                var currentUserId = GetCurrentUserId();
+                if (!currentUserId.HasValue || currentUserId.Value != message.SenderId)
+                {
+                    await Clients.Caller.SendAsync("Error", "Unauthorized to send message");
+                    return;
+                }
+
+                // Persist message to database
+                var sendMessageRequest = new SendMessageRequest
+                {
+                    RecipientId = message.RecipientId ?? 0,
+                    Content = message.Content,
+                    MessageType = message.MessageType ?? "Text",
+                    ConversationId = conversationId
+                };
+
+                var result = await _chatService.SendMessageAsync(sendMessageRequest, currentUserId.Value);
+                
+                if (!result.Success)
+                {
+                    await Clients.Caller.SendAsync("Error", $"Failed to persist message: {result.Message}");
+                    return;
+                }
+
+                // Use the persisted message data for broadcasting
+                var persistedMessage = result.MessageData;
+                if (persistedMessage != null)
+                {
+                    // Broadcast message to conversation group EXCEPT the sender
+                    await Clients.GroupExcept($"conversation_{conversationId}", Context.ConnectionId)
+                        .SendAsync("ReceiveMessage", persistedMessage);
+                    
+                    // Send confirmation to the sender with persisted data
+                    await Clients.Caller.SendAsync("MessageSent", persistedMessage);
+                }
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", $"Failed to send message: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -116,6 +180,14 @@ namespace SnapLink_API.Hubs
         public bool IsUserOnline(int userId)
         {
             return _userConnections.Values.Contains(userId);
+        }
+
+        /// <summary>
+        /// Send typing indicator to conversation participants
+        /// </summary>
+        public async Task SendTypingIndicator(int conversationId, int userId, bool isTyping)
+        {
+            await Clients.Group($"conversation_{conversationId}").SendAsync("UserTyping", userId, isTyping);
         }
     }
 } 

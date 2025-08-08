@@ -16,6 +16,8 @@ namespace SnapLink_Repository.IRepository
         Task DeleteAsync(Location location);
         Task SaveChangesAsync();
         Task<List<Location>> GetAllLocationsAsync();
-
+        Task<List<Location>> GetAllAsyncc();
+        Task<Location?> GetByIdAsyncc(int id);
+        Task UpdateAsyncc(Location location);
     }
 }

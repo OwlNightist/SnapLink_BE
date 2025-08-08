@@ -39,6 +39,22 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings.Audience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
     };
+
+    // Configure for SignalR
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // Add services to the container.
@@ -148,6 +164,9 @@ builder.Services.AddScoped<IPhotoDeliveryRepository, PhotoDeliveryRepository>();
 builder.Services.AddScoped<IPhotoDeliveryService, PhotoDeliveryService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IEscrowService, EscrowService>();
+builder.Services.AddScoped<IGeoProvider, LocationIqGeoProvider>();
+builder.Services.AddScoped<INearbyPoiProvider, LocationIqNearbyProvider>();
+
 
 
 // Add Background Services
@@ -200,8 +219,10 @@ else if (app.Environment.IsStaging() || app.Environment.IsProduction())
 
 
 app.UseHttpsRedirection();
-app.UseAuthentication();
+
+// Order is important for SignalR + CORS + Auth
 app.UseCors("corspolicy");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

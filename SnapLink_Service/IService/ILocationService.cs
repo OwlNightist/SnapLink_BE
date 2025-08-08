@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SnapLink_Model.DTO.Response;
 
 namespace SnapLink_Service.IService
 {
@@ -18,5 +19,10 @@ namespace SnapLink_Service.IService
 
         Task<List<LocationNearbyDto>> GetNearbyLocationsAsync(string address);
         Task UpdateCoordinatesAsync(int locationId);
+        Task<List<LocationNearbyResponse>> GetLocationsNearbyAsync(string address, double radiusInKm, bool debug = false);
+
+        Task UpdateCoordinatesByAddressAsync(int locationId);
+        Task<List<NearbyCombinedItem>> GetNearbyCombinedAsync(string address, double radiusInKm, string? tags, int limit);
+
     }
 }

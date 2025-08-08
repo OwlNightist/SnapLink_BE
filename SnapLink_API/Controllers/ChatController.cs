@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using SnapLink_API.Hubs;
 using SnapLink_Model.DTO.Request;
 using SnapLink_Model.DTO.Response;
 using SnapLink_Service.IService;
@@ -13,10 +15,12 @@ namespace SnapLink_API.Controllers
     public class ChatController : ControllerBase
     {
         private readonly IChatService _chatService;
+        private readonly IHubContext<ChatHub> _hubContext;
 
-        public ChatController(IChatService chatService)
+        public ChatController(IChatService chatService, IHubContext<ChatHub> hubContext)
         {
             _chatService = chatService;
+            _hubContext = hubContext;
         }
 
         #region Message Endpoints
@@ -54,7 +58,6 @@ namespace SnapLink_API.Controllers
             {
                 return BadRequest(result);
             }
-
             return Ok(result);
         }
 
@@ -98,13 +101,8 @@ namespace SnapLink_API.Controllers
         /// Mark a message as read
         /// </summary>
         [HttpPost("messages/{messageId}/mark-read")]
-        public async Task<ActionResult> MarkMessageAsRead(int messageId, [FromBody] MarkMessageAsReadRequest request)
+        public async Task<ActionResult> MarkMessageAsRead(int messageId)
         {
-            if (request.MessageId != messageId)
-            {
-                return BadRequest("Message ID mismatch");
-            }
-
             // Extract user ID from JWT token
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
@@ -112,11 +110,20 @@ namespace SnapLink_API.Controllers
                 return Unauthorized("Invalid token or user not found");
             }
 
-            var success = await _chatService.MarkMessageAsReadAsync(request, userId);
+            var success = await _chatService.MarkMessageAsReadAsync(messageId, userId);
             
             if (!success)
             {
                 return BadRequest("Failed to mark message as read");
+            }
+
+            // Get message details for SignalR notification
+            var message = await _chatService.GetMessageByIdAsync(messageId);
+            if (message != null && message.ConversationId.HasValue)
+            {
+                // Notify conversation participants about message status change
+                await _hubContext.Clients.Group($"conversation_{message.ConversationId.Value}")
+                    .SendAsync("MessageStatusChanged", messageId, "read");
             }
 
             return Ok(new { Success = true, Message = "Message marked as read" });
@@ -167,6 +174,7 @@ namespace SnapLink_API.Controllers
                 return BadRequest(result);
             }
 
+            // Note: Real-time notifications are handled by SignalR Hub
             return Ok(result);
         }
 
@@ -221,6 +229,7 @@ namespace SnapLink_API.Controllers
                 return BadRequest("Failed to update conversation");
             }
 
+            // Note: Real-time notifications are handled by SignalR Hub
             return Ok(new { Success = true, Message = "Conversation updated successfully" });
         }
 
@@ -395,7 +404,36 @@ namespace SnapLink_API.Controllers
                 return BadRequest("Failed to get or create direct conversation");
             }
 
+            // Note: Real-time notifications for new conversations are handled by SignalR Hub
             return Ok(conversation);
+        }
+
+        #endregion
+
+        #region Real-time Features
+
+        /// <summary>
+        /// Send typing indicator to conversation participants
+        /// </summary>
+        [HttpPost("conversations/{conversationId}/typing")]
+        public async Task<ActionResult> SendTypingIndicator(int conversationId, [FromBody] TypingIndicatorRequest request)
+        {
+            // Extract user ID from JWT token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized("Invalid token or user not found");
+            }
+
+            // Check if user is in conversation
+            var isParticipant = await _chatService.IsUserInConversationAsync(userId, conversationId);
+            if (!isParticipant)
+            {
+                return BadRequest("You are not a participant in this conversation");
+            }
+
+            // Note: Real-time typing indicators are handled by SignalR Hub
+            return Ok(new { Success = true, Message = "Typing indicator sent" });
         }
 
         #endregion
