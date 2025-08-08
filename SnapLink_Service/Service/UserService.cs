@@ -62,7 +62,7 @@ namespace SnapLink_Service.Service
 
             if (!string.IsNullOrEmpty(dto.FullName)) user.FullName = dto.FullName;
             if (!string.IsNullOrEmpty(dto.PhoneNumber)) user.PhoneNumber = dto.PhoneNumber;
-           
+
             if (!string.IsNullOrEmpty(dto.ProfileImage)) user.ProfileImage = dto.ProfileImage;
             if (!string.IsNullOrEmpty(dto.Bio)) user.Bio = dto.Bio;
             user.UpdateAt = DateTime.UtcNow;
@@ -163,6 +163,35 @@ namespace SnapLink_Service.Service
             await _repo.UpdateUserAsync(user);
             await _repo.SaveChangesAsync();
             return true;
+        }
+        public async Task<string> ChangePasswordAsync(int userId, ChangePasswordDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.CurrentPassword) ||
+                string.IsNullOrWhiteSpace(dto.NewPassword) ||
+                string.IsNullOrWhiteSpace(dto.ConfirmNewPassword))
+                throw new Exception("Vui lòng nhập đầy đủ các trường.");
+
+            if (dto.NewPassword != dto.ConfirmNewPassword)
+                throw new Exception("Xác nhận mật khẩu không khớp.");
+
+            if (dto.NewPassword.Length < 6)
+                throw new Exception("Mật khẩu mới phải từ 6 ký tự trở lên.");
+
+            var user = await _repo.GetUserByIdAsync(userId);
+            if (user == null || user.Status == "Deleted")
+                throw new Exception("User không tồn tại.");
+
+
+            if (user.PasswordHash != dto.CurrentPassword)
+                throw new Exception("Mật khẩu hiện tại không đúng.");
+
+            user.PasswordHash = dto.NewPassword;
+            user.UpdateAt = DateTime.UtcNow;
+
+            await _repo.UpdateUserAsync(user);
+            await _repo.SaveChangesAsync();
+
+            return "Đổi mật khẩu thành công.";
         }
     }
 }

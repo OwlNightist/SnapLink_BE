@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SnapLink_Model.DTO;
 using SnapLink_Service.IService;
+using System.Security.Claims;
 
 namespace SnapLink_API.Controllers
 {
@@ -115,6 +117,37 @@ namespace SnapLink_API.Controllers
             var success = await _userService.VerifyEmailAsync(dto.Email, dto.Code);
             if (!success) return BadRequest("Invalid or expired verification code.");
             return Ok("Email verified successfully.");
+        }
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized("Không xác định được user.");
+            if (!int.TryParse(userIdClaim, out var userId)) return Unauthorized("UserId không hợp lệ.");
+
+            try
+            {
+                var msg = await _userService.ChangePasswordAsync(userId, dto);
+                return Ok(new { message = msg });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpPost("change-password-for/{targetUserId:int}")]
+        public async Task<IActionResult> ChangePasswordFor(int targetUserId, [FromBody] ChangePasswordDto dto)
+        {
+            try
+            {
+                var msg = await _userService.ChangePasswordAsync(targetUserId, dto);
+                return Ok(new { message = msg });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
