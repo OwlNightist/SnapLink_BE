@@ -37,7 +37,14 @@ namespace SnapLink_Service.Service
                         Message = "Sender or recipient not found"
                     };
                 }
-
+                if (sender == recipient)
+                {
+                    return new SendMessageResponse
+                    {
+                        Success = false,
+                        Message = "Dont Fuck your self"
+                    };
+                }
                 // Get or create conversation
                 int conversationId;
                 // First, try to find existing 1-to-1 conversation with the recipient
