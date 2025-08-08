@@ -179,16 +179,7 @@ namespace SnapLink_API.Controllers
                 return BadRequest(result);
             }
 
-            // Notify all participants about the new conversation
-            if (result.Conversation != null)
-            {
-                foreach (var participant in result.Conversation.Participants)
-                {
-                    await _hubContext.Clients.Group($"user_{participant.UserId}")
-                        .SendAsync("NewConversation", result.Conversation);
-                }
-            }
-
+            // Note: Real-time notifications are handled by SignalR Hub
             return Ok(result);
         }
 
@@ -243,11 +234,7 @@ namespace SnapLink_API.Controllers
                 return BadRequest("Failed to update conversation");
             }
 
-            // Notify conversation participants about the update
-            var update = new { conversationId, title, status };
-            await _hubContext.Clients.Group($"conversation_{conversationId}")
-                .SendAsync("ConversationUpdated", update);
-
+            // Note: Real-time notifications are handled by SignalR Hub
             return Ok(new { Success = true, Message = "Conversation updated successfully" });
         }
 
@@ -422,16 +409,7 @@ namespace SnapLink_API.Controllers
                 return BadRequest("Failed to get or create direct conversation");
             }
 
-            // If this is a newly created conversation, notify both users
-            if (conversation.CreatedAt > DateTime.UtcNow.AddMinutes(-1)) // Check if recently created
-            {
-                foreach (var participant in conversation.Participants)
-                {
-                    await _hubContext.Clients.Group($"user_{participant.UserId}")
-                        .SendAsync("NewConversation", conversation);
-                }
-            }
-
+            // Note: Real-time notifications for new conversations are handled by SignalR Hub
             return Ok(conversation);
         }
 
@@ -459,10 +437,7 @@ namespace SnapLink_API.Controllers
                 return BadRequest("You are not a participant in this conversation");
             }
 
-            // Send typing indicator to conversation group
-            await _hubContext.Clients.Group($"conversation_{conversationId}")
-                .SendAsync("UserTyping", userId, request.IsTyping);
-
+            // Note: Real-time typing indicators are handled by SignalR Hub
             return Ok(new { Success = true, Message = "Typing indicator sent" });
         }
 
