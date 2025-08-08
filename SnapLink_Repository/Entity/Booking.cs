@@ -13,8 +13,6 @@ public partial class Booking
 
     public int LocationId { get; set; }
 
-    public int? EventId { get; set; }
-
     public DateTime? StartDatetime { get; set; }
 
     public DateTime? EndDatetime { get; set; }

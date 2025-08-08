@@ -138,8 +138,6 @@ namespace SnapLink_Model.DTO
                       opt => opt.MapFrom(src => src.UserRoles.Select(ur => ur.Role.RoleName)));
             CreateMap<Location, LocationDto>();
 
-            // Location mappings for PhotographerEvent
-            CreateMap<Location, LocationResponse>();
         }
     }
 }

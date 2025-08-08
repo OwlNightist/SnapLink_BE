@@ -165,7 +165,6 @@ public partial class SnaplinkDbContext : DbContext
                 .HasColumnName("endDatetime");
             entity.Property(e => e.LocationId).HasColumnName("locationId");
             entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
-            entity.Property(e => e.EventId).HasColumnName("eventId");
             entity.Property(e => e.SpecialRequests).HasColumnName("specialRequests");
             entity.Property(e => e.StartDatetime)
                 .HasColumnType("datetime")

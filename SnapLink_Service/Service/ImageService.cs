@@ -99,8 +99,7 @@ namespace SnapLink_Service.Service
                 request.File,
                 request.UserId,
                 request.PhotographerId,
-                request.LocationId,
-                request.PhotographerEventId
+                request.LocationId
             );
             // Get the public URL
             var imageUrl = await _azureStorageService.GetImageUrlAsync(blobName);
