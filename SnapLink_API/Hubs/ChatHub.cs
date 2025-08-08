@@ -112,10 +112,12 @@ namespace SnapLink_API.Hubs
                 var persistedMessage = result.MessageData;
                 if (persistedMessage != null)
                 {
-                    // Send single message to entire conversation group (including sender)
-                    // This reduces SignalR message count from 2 to 1
-                    await Clients.Group($"conversation_{conversationId}")
+                    // Broadcast message to conversation group EXCEPT the sender
+                    await Clients.GroupExcept($"conversation_{conversationId}", Context.ConnectionId)
                         .SendAsync("ReceiveMessage", persistedMessage);
+                    
+                    // Send confirmation to the sender with persisted data
+                    await Clients.Caller.SendAsync("MessageSent", persistedMessage);
                 }
             }
             catch (Exception ex)
