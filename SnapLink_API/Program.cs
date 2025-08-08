@@ -166,6 +166,7 @@ builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IEscrowService, EscrowService>();
 builder.Services.AddScoped<IGeoProvider, LocationIqGeoProvider>();
 builder.Services.AddScoped<INearbyPoiProvider, LocationIqNearbyProvider>();
+builder.Services.AddScoped<ILocationEventService, LocationEventService>();
 
 
 

@@ -308,21 +308,27 @@ public partial class SnaplinkDbContext : DbContext
             entity.Property(e => e.Caption).HasColumnName("caption");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())").HasColumnType("datetime").HasColumnName("created_at");
             entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.EventId).HasColumnName("event_id");
 
             entity.HasOne(e => e.User)
                 .WithMany(u => u.Images)
                 .HasForeignKey(e => e.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(e => e.Photographer)
                 .WithMany(p => p.Images)
                 .HasForeignKey(e => e.PhotographerId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(e => e.Location)
                 .WithMany(l => l.Images)
                 .HasForeignKey(e => e.LocationId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.LocationEvent)
+                .WithMany(le => le.Images)
+                .HasForeignKey(e => e.EventId)
+                .OnDelete(DeleteBehavior.Restrict);
 
         });
 
@@ -1116,9 +1122,6 @@ public partial class SnaplinkDbContext : DbContext
             entity.Property(e => e.Status)
                 .HasMaxLength(30)
                 .HasColumnName("status");
-            entity.Property(e => e.EventImageUrl)
-                .HasMaxLength(500)
-                .HasColumnName("eventImageUrl");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")

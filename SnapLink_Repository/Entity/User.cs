@@ -28,7 +28,9 @@ public partial class User
     public string? Status { get; set; }
     public string? VerificationCode { get; set; }
     public bool IsVerified { get; set; } = false;
-
+    public string? PasswordResetCode { get; set; }
+    public DateTime? PasswordResetExpiry { get; set; }
+    public int? PasswordResetAttempts { get; set; }
     public virtual ICollection<Administrator> Administrators { get; set; } = new List<Administrator>();
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();

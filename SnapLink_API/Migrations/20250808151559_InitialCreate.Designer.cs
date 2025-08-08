@@ -12,7 +12,7 @@ using SnapLink_Repository.DBContext;
 namespace SnapLink_API.Migrations
 {
     [DbContext(typeof(SnaplinkDbContext))]
-    [Migration("20250808111935_InitialCreate")]
+    [Migration("20250808151559_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -656,6 +656,10 @@ namespace SnapLink_API.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
+                    b.Property<int?>("EventId")
+                        .HasColumnType("int")
+                        .HasColumnName("event_id");
+
                     b.Property<bool>("IsPrimary")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -680,6 +684,8 @@ namespace SnapLink_API.Migrations
 
                     b.HasKey("Id")
                         .HasName("PK_Image_Id");
+
+                    b.HasIndex("EventId");
 
                     b.HasIndex("LocationId");
 
@@ -815,11 +821,6 @@ namespace SnapLink_API.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime")
                         .HasColumnName("endDate");
-
-                    b.Property<string>("EventImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("eventImageUrl");
 
                     b.Property<int>("LocationId")
                         .HasColumnType("int")
@@ -1623,6 +1624,15 @@ namespace SnapLink_API.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("passwordHash");
 
+                    b.Property<int?>("PasswordResetAttempts")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PasswordResetCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("PasswordResetExpiry")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)")
@@ -2004,22 +2014,29 @@ namespace SnapLink_API.Migrations
 
             modelBuilder.Entity("SnapLink_Repository.Entity.Image", b =>
                 {
+                    b.HasOne("SnapLink_Repository.Entity.LocationEvent", "LocationEvent")
+                        .WithMany("Images")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("SnapLink_Repository.Entity.Location", "Location")
                         .WithMany("Images")
                         .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("SnapLink_Repository.Entity.Photographer", "Photographer")
                         .WithMany("Images")
                         .HasForeignKey("PhotographerId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("SnapLink_Repository.Entity.User", "User")
                         .WithMany("Images")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Location");
+
+                    b.Navigation("LocationEvent");
 
                     b.Navigation("Photographer");
 
@@ -2321,6 +2338,8 @@ namespace SnapLink_API.Migrations
                     b.Navigation("EventBookings");
 
                     b.Navigation("EventPhotographers");
+
+                    b.Navigation("Images");
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.LocationOwner", b =>

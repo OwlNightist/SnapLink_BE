@@ -16,12 +16,13 @@ namespace SnapLink_Model.DTO.Response
         public int MaxPhotographers { get; set; }
         public int MaxBookingsPerSlot { get; set; }
         public string Status { get; set; } = string.Empty;
-        public string? EventImageUrl { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         
         // Navigation properties
         public LocationDto? Location { get; set; }
+        public List<ImageResponse> Images { get; set; } = new List<ImageResponse>();
+        public ImageResponse? PrimaryImage { get; set; }
         public int ApprovedPhotographersCount { get; set; }
         public int TotalBookingsCount { get; set; }
         public bool IsActive => Status == "Active" && StartDate <= DateTime.UtcNow && EndDate >= DateTime.UtcNow;
@@ -98,7 +99,6 @@ namespace SnapLink_Model.DTO.Response
         public decimal? DiscountedPrice { get; set; }
         public decimal? OriginalPrice { get; set; }
         public string Status { get; set; } = string.Empty;
-        public string? EventImageUrl { get; set; }
         public int ApprovedPhotographersCount { get; set; }
         public int TotalBookingsCount { get; set; }
         public bool IsActive { get; set; }

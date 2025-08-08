@@ -91,7 +91,10 @@ namespace SnapLink_API.Migrations
                     updateAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
                     status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true),
                     VerificationCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsVerified = table.Column<bool>(type: "bit", nullable: false)
+                    IsVerified = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordResetCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PasswordResetExpiry = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PasswordResetAttempts = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -532,43 +535,6 @@ namespace SnapLink_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Image",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    url = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    is_primary = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    caption = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
-                    user_id = table.Column<int>(type: "int", nullable: true),
-                    PhotographerId = table.Column<int>(type: "int", nullable: true),
-                    LocationId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Image_Id", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_Image_Location_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Location",
-                        principalColumn: "locationId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Image_Photographer_PhotographerId",
-                        column: x => x.PhotographerId,
-                        principalTable: "Photographer",
-                        principalColumn: "photographerId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Image_Users_user_id",
-                        column: x => x.user_id,
-                        principalTable: "Users",
-                        principalColumn: "userId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "LocationEvent",
                 columns: table => new
                 {
@@ -584,7 +550,6 @@ namespace SnapLink_API.Migrations
                     maxPhotographers = table.Column<int>(type: "int", nullable: false),
                     maxBookingsPerSlot = table.Column<int>(type: "int", nullable: false),
                     status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    eventImageUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     createdAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
                     updatedAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())")
                 },
@@ -757,6 +722,50 @@ namespace SnapLink_API.Migrations
                         principalTable: "Photographer",
                         principalColumn: "photographerId",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Image",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    url = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    is_primary = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    caption = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
+                    user_id = table.Column<int>(type: "int", nullable: true),
+                    PhotographerId = table.Column<int>(type: "int", nullable: true),
+                    LocationId = table.Column<int>(type: "int", nullable: true),
+                    event_id = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Image_Id", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_Image_LocationEvent_event_id",
+                        column: x => x.event_id,
+                        principalTable: "LocationEvent",
+                        principalColumn: "eventId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Image_Location_LocationId",
+                        column: x => x.LocationId,
+                        principalTable: "Location",
+                        principalColumn: "locationId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Image_Photographer_PhotographerId",
+                        column: x => x.PhotographerId,
+                        principalTable: "Photographer",
+                        principalColumn: "photographerId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Image_Users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "Users",
+                        principalColumn: "userId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -1068,6 +1077,11 @@ namespace SnapLink_API.Migrations
                 name: "IX_EventPhotographer_Status",
                 table: "EventPhotographer",
                 column: "status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Image_event_id",
+                table: "Image",
+                column: "event_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Image_LocationId",

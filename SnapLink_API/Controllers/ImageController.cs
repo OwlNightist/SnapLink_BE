@@ -55,6 +55,14 @@ namespace SnapLink_API.Controllers
             return Ok(images);
         }
 
+        // GET: api/image/event/{eventId}
+        [HttpGet("event/{eventId}")]
+        public async Task<ActionResult<IEnumerable<ImageResponse>>> GetByEventId(int eventId)
+        {
+            var images = await _imageService.GetByEventIdAsync(eventId);
+            return Ok(images);
+        }
+
         // GET: api/image/user/{userId}/primary
         [HttpGet("user/{userId}/primary")]
         public async Task<ActionResult<ImageResponse>> GetPrimaryByUserId(int userId)
@@ -82,6 +90,16 @@ namespace SnapLink_API.Controllers
             var image = await _imageService.GetPrimaryByLocationIdAsync(locationId);
             if (image == null)
                 return NotFound($"No primary image found for location with ID {locationId}");
+            return Ok(image);
+        }
+
+        // GET: api/image/event/{eventId}/primary
+        [HttpGet("event/{eventId}/primary")]
+        public async Task<ActionResult<ImageResponse>> GetPrimaryByEventId(int eventId)
+        {
+            var image = await _imageService.GetPrimaryByEventIdAsync(eventId);
+            if (image == null)
+                return NotFound($"No primary image found for event with ID {eventId}");
             return Ok(image);
         }
 
