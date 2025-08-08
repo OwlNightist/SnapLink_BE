@@ -50,11 +50,7 @@ namespace SnapLink_Model.DTO.Request
         public int UserId { get; set; }
     }
 
-    public class MarkMessageAsReadRequest
-    {
-        [Required]
-        public int MessageId { get; set; }
-    }
+    
 
     public class GetConversationMessagesRequest
     {

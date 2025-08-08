@@ -101,13 +101,8 @@ namespace SnapLink_API.Controllers
         /// Mark a message as read
         /// </summary>
         [HttpPost("messages/{messageId}/mark-read")]
-        public async Task<ActionResult> MarkMessageAsRead(int messageId, [FromBody] MarkMessageAsReadRequest request)
+        public async Task<ActionResult> MarkMessageAsRead(int messageId)
         {
-            if (request.MessageId != messageId)
-            {
-                return BadRequest("Message ID mismatch");
-            }
-
             // Extract user ID from JWT token
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
@@ -115,7 +110,7 @@ namespace SnapLink_API.Controllers
                 return Unauthorized("Invalid token or user not found");
             }
 
-            var success = await _chatService.MarkMessageAsReadAsync(request, userId);
+            var success = await _chatService.MarkMessageAsReadAsync(messageId, userId);
             
             if (!success)
             {

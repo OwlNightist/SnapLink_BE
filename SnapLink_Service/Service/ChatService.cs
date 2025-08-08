@@ -245,10 +245,10 @@ namespace SnapLink_Service.Service
             };
         }
 
-        public async Task<bool> MarkMessageAsReadAsync(MarkMessageAsReadRequest request, int userId)
+        public async Task<bool> MarkMessageAsReadAsync(int messageId, int userId)
         {
             var message = await _context.Messagesses
-                .FirstOrDefaultAsync(m => m.MessageId == request.MessageId);
+                .FirstOrDefaultAsync(m => m.MessageId == messageId);
 
             if (message == null) return false;
 
