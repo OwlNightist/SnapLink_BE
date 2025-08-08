@@ -230,6 +230,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Map SignalR Hub
-/*app.MapHub<SnapLink_API.Hubs.ChatHub>("/chatHub");*/
+app.MapHub<SnapLink_API.Hubs.ChatHub>("/chatHub");
 
 app.Run();
