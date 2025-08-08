@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SnapLink_Model.DTO;
 using SnapLink_Repository.DBContext;
+using SnapLink_Service.IService;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -16,11 +17,14 @@ namespace SnapLink_API.Controllers
     {
         private readonly JwtSettings _jwtSettings;
         private readonly SnaplinkDbContext _context;
+        private readonly IAuthService _auth;
+       
 
-        public AuthController(IOptions<JwtSettings> jwtOptions, SnaplinkDbContext context)
+        public AuthController(IOptions<JwtSettings> jwtOptions, SnaplinkDbContext context, IAuthService auth)
         {
             _jwtSettings = jwtOptions.Value;
             _context = context;
+            _auth = auth;
         }
 
         [HttpPost("login")]
@@ -71,6 +75,27 @@ namespace SnapLink_API.Controllers
         public IActionResult Logout()
         {
             return Ok(new { message = "Logged out successfully." });
+        }
+
+        [HttpPost("forgot-password/start")]
+        public async Task<IActionResult> ForgotPasswordStart([FromBody] ForgotPasswordRequest req)
+        {
+            try { return Ok(new { message = await _auth.ForgotPasswordStartAsync(req) }); }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+        }
+
+        [HttpPost("forgot-password/verify")]
+        public async Task<IActionResult> VerifyResetCode([FromBody] VerifyResetCodeRequest req)
+        {
+            try { return Ok(new { message = await _auth.VerifyResetCodeAsync(req) }); }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+        }
+
+        [HttpPost("forgot-password/reset")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest req)
+        {
+            try { return Ok(new { message = await _auth.ResetPasswordAsync(req) }); }
+            catch (Exception ex) { return BadRequest(ex.Message); }
         }
     }
 }

@@ -168,7 +168,7 @@ builder.Services.AddScoped<IGeoProvider, LocationIqGeoProvider>();
 builder.Services.AddScoped<INearbyPoiProvider, LocationIqNearbyProvider>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<ILocationEventService, LocationEventService>();
-
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 // Add Background Services
@@ -230,6 +230,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Map SignalR Hub
-app.MapHub<SnapLink_API.Hubs.ChatHub>("/chatHub");
+/*app.MapHub<SnapLink_API.Hubs.ChatHub>("/chatHub");*/
 
 app.Run();
