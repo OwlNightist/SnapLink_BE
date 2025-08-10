@@ -179,7 +179,7 @@ public partial class SnaplinkDbContext : DbContext
                 .HasMaxLength(30)
                 .HasColumnName("status");
             entity.Property(e => e.TotalPrice)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(15, 2)")
                 .HasColumnName("totalPrice");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -458,7 +458,7 @@ public partial class SnaplinkDbContext : DbContext
             entity.Property(e => e.CustomerId).HasColumnName("customerId");
             entity.Property(e => e.BookingId).HasColumnName("bookingId");
             entity.Property(e => e.TotalAmount)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(15, 2)")
                 .HasColumnName("totalAmount");
             entity.Property(e => e.Currency)
                 .HasMaxLength(3)
@@ -563,7 +563,7 @@ public partial class SnaplinkDbContext : DbContext
             entity.Property(e => e.WalletId).HasColumnName("walletId");
             entity.Property(e => e.Balance)
                 .HasDefaultValue(0m)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(15, 2)")
                 .HasColumnName("balance");
             entity.Property(e => e.UserId).HasColumnName("userId");
             entity.Property(e => e.UpdatedAt)
@@ -700,7 +700,7 @@ public partial class SnaplinkDbContext : DbContext
             entity.Property(e => e.FromUserId).HasColumnName("fromUserId");
             entity.Property(e => e.ToUserId).HasColumnName("toUserId");
             entity.Property(e => e.Amount)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(15, 2)")
                 .HasColumnName("amount");
             entity.Property(e => e.Currency)
                 .HasMaxLength(3)
@@ -829,7 +829,7 @@ public partial class SnaplinkDbContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.WalletId).HasColumnName("walletId");
             entity.Property(e => e.Amount)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(15, 2)")
                 .HasColumnName("amount");
             entity.Property(e => e.BankAccountName)
                 .HasMaxLength(100)
