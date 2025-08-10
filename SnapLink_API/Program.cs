@@ -169,6 +169,8 @@ builder.Services.AddScoped<INearbyPoiProvider, LocationIqNearbyProvider>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<ILocationEventService, LocationEventService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IRatingRepository, RatingRepository>();
+builder.Services.AddScoped<IRatingService, RatingService>();
 
 
 // Add Background Services

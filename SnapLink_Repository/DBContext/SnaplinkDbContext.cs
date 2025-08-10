@@ -82,6 +82,7 @@ public partial class SnaplinkDbContext : DbContext
     public virtual DbSet<EventPhotographer> EventPhotographers { get; set; }
 
     public virtual DbSet<EventBooking> EventBookings { get; set; }
+    public virtual DbSet<Rating> Ratings { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer(GetConnectionString());
@@ -1228,6 +1229,74 @@ public partial class SnaplinkDbContext : DbContext
             entity.HasIndex(e => e.BookingId).HasDatabaseName("IX_EventBooking_BookingId");
             entity.HasIndex(e => e.EventPhotographerId).HasDatabaseName("IX_EventBooking_EventPhotographerId");
             entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_EventBooking_CreatedAt");
+        });
+        modelBuilder.Entity<Rating>(entity =>
+        {
+            entity.HasKey(e => e.RatingId).HasName("PK__Rating__ratingId");
+
+            entity.ToTable("Rating");
+
+            // Column mapping
+            entity.Property(e => e.RatingId).HasColumnName("ratingId");
+            entity.Property(e => e.BookingId).HasColumnName("bookingId");
+            entity.Property(e => e.ReviewerUserId).HasColumnName("reviewerUserId");
+            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
+            entity.Property(e => e.LocationId).HasColumnName("locationId");
+            entity.Property(e => e.Score).HasColumnName("score");
+            entity.Property(e => e.Comment).HasColumnName("comment");
+            entity.Property(e => e.CreatedAt)
+                  .HasDefaultValueSql("(getdate())")
+                  .HasColumnType("datetime")
+                  .HasColumnName("createdAt");
+            entity.Property(e => e.UpdatedAt)
+                  .HasDefaultValueSql("(getdate())")
+                  .HasColumnType("datetime")
+                  .HasColumnName("updatedAt");
+
+            // Check constraints
+            entity.HasCheckConstraint("CK_Rating_Score_1_5", "[score] BETWEEN 1 AND 5");
+            entity.HasCheckConstraint(
+                "CK_Rating_ExactlyOneTarget",
+                "((photographerId IS NOT NULL AND locationId IS NULL) OR (photographerId IS NULL AND locationId IS NOT NULL))"
+            );
+
+            // Relationships
+            entity.HasOne(e => e.Booking)
+                .WithMany(b => b.Ratings)
+                .HasForeignKey(e => e.BookingId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_Rating_Booking");
+
+            entity.HasOne(e => e.ReviewerUser)
+                .WithMany(u => u.RatingsAuthored)
+                .HasForeignKey(e => e.ReviewerUserId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_Rating_ReviewerUser");
+
+            entity.HasOne(e => e.Photographer)
+                .WithMany(p => p.Ratings)
+                .HasForeignKey(e => e.PhotographerId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_Rating_Photographer");
+
+            entity.HasOne(e => e.Location)
+                .WithMany(l => l.Ratings)
+                .HasForeignKey(e => e.LocationId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_Rating_Location");
+
+            // Unique per booking per target (filtered unique index – SQL Server)
+            entity.HasIndex(e => new { e.BookingId, e.PhotographerId })
+                .IsUnique()
+                .HasFilter("[photographerId] IS NOT NULL")
+                .HasDatabaseName("UX_Rating_Booking_Photographer");
+
+            entity.HasIndex(e => new { e.BookingId, e.LocationId })
+                .IsUnique()
+                .HasFilter("[locationId] IS NOT NULL")
+                .HasDatabaseName("UX_Rating_Booking_Location");
         });
 
         OnModelCreatingPartial(modelBuilder);
