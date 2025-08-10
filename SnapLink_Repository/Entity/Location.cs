@@ -50,4 +50,5 @@ public partial class Location
     public virtual ICollection<Image> Images { get; set; } = new List<Image>();
     
     public virtual ICollection<LocationEvent> LocationEvents { get; set; } = new List<LocationEvent>();
+    public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
 }

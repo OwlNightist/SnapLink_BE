@@ -44,4 +44,5 @@ public partial class Booking
     
     // Event booking relationship
     public virtual EventBooking? EventBooking { get; set; }
+    public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
 }
