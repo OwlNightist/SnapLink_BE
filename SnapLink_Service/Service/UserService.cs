@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using SnapLink_Model.DTO;
+using SnapLink_Model.DTO.Request;
 using SnapLink_Repository.Entity;
 using SnapLink_Repository.IRepository;
 using SnapLink_Repository.Repository;
@@ -18,10 +19,13 @@ namespace SnapLink_Service.Service
     {
         private readonly IUserRepository _repo;
         private readonly IMapper _mapper;
-        public UserService(IUserRepository repo, IMapper mapper)
+        private readonly IChatService _chatService;
+        
+        public UserService(IUserRepository repo, IMapper mapper, IChatService chatService)
         {
             _repo = repo;
             _mapper = mapper;
+            _chatService = chatService;
         }
         public async Task<string> CreateUserWithRoleAsync(CreateUserDto dto, string roleName)
         {
@@ -52,6 +56,41 @@ namespace SnapLink_Service.Service
             await _repo.AddUserWithRoleAsync(user, role.RoleId);
             await _repo.SaveChangesAsync();
             await SendVerificationEmail(dto.Email, verifyCode);
+
+            // Create AI conversation and send welcome message from system (user ID 1) to new user
+            try
+            {
+                // First, create an AI conversation
+                var createConversationRequest = new CreateConversationRequest
+                {
+                    Title = $"AI Assistant",
+                    Type = "AI", // Special type for AI conversations
+                    ParticipantIds = new List<int> { 1, user.UserId }, // System AI (ID 1) and new user
+                    Status = "Active"
+                };
+                
+                var conversationResult = await _chatService.CreateConversationAsync(createConversationRequest);
+                
+                if (conversationResult.Success && conversationResult.Conversation != null)
+                {
+                    // Send welcome message using the created conversation
+                    var welcomeMessage = new SendMessageRequest
+                    {
+                        RecipientId = user.UserId,
+                        Content = "Tôi có thể giúp bạn sửa ảnh",
+                        MessageType = "Text",
+                        ConversationId = conversationResult.Conversation.ConversationId
+                    };
+                    
+                    await _chatService.SendMessageAsync(welcomeMessage, 1); // System user ID 1
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail user creation
+                // In production, you might want to use proper logging
+                Console.WriteLine($"Failed to create AI conversation or send welcome message: {ex.Message}");
+            }
 
             return $"User created with role '{roleName}'.";
         }

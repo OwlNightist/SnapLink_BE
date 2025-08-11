@@ -4,3 +4,23 @@ GET {{SnapLink_API_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+# AI Image Generation API Tests
+
+### Generate Image
+POST {{SnapLink_API_HostAddress}}/api/ImageGeneration/generate
+Content-Type: application/json
+
+{
+  "prompt": "A beautiful sunset over mountains"
+}
+
+### Edit Image
+POST {{SnapLink_API_HostAddress}}/api/ImageGeneration/edit
+Content-Type: application/json
+
+{
+  "prompt": "Add a rainbow to this image",
+  "imageBase64": "your_base64_image_data_here",
+  "mimeType": "image/png"
+}

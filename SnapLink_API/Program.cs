@@ -171,6 +171,7 @@ builder.Services.AddScoped<ILocationEventService, LocationEventService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IRatingService, RatingService>();
+builder.Services.AddScoped<IImageGenerationService, ImageGenerationService>();
 
 
 // Add Background Services

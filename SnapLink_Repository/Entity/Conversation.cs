@@ -15,7 +15,7 @@ public partial class Conversation
 
     public string? Status { get; set; } // Active, Archived, Deleted
 
-    public string? Type { get; set; } // Direct, Group
+    public string? Type { get; set; } // Direct, Group, AI
 
     // Navigation properties
     public virtual ICollection<Messagess> Messages { get; set; } = new List<Messagess>();

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using SnapLink_Repository.DBContext;
 using SnapLink_Repository.Entity;
@@ -31,16 +31,17 @@ namespace SnapLink_Repository.Data
             {
                 var users = new[]
                 {
-                    new User { UserName = "alice", Email = "alice@example.com", PasswordHash = "hash1", PhoneNumber = "1234567890", FullName = "Alice Smith", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "linkka", Email = "linkka@example.com", PasswordHash = "hash2", PhoneNumber = "1234567891", FullName = "linhka", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "carol", Email = "carol@example.com", PasswordHash = "hash3", PhoneNumber = "1234567892", FullName = "Carol White", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "dave", Email = "dave@example.com", PasswordHash = "hash4", PhoneNumber = "1234567893", FullName = "Dave Brown", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "eve", Email = "eve@example.com", PasswordHash = "hash5", PhoneNumber = "1234567894", FullName = "Eve Black", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "frank", Email = "frank@example.com", PasswordHash = "hash6", PhoneNumber = "1234567895", FullName = "Frank Miller", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "grace", Email = "grace@example.com", PasswordHash = "hash7", PhoneNumber = "1234567896", FullName = "Grace Lee", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "henry", Email = "henry@example.com", PasswordHash = "hash8", PhoneNumber = "1234567897", FullName = "Henry Wilson", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "iris", Email = "iris@example.com", PasswordHash = "hash9", PhoneNumber = "1234567898", FullName = "Iris Davis", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "jack", Email = "jack@example.com", PasswordHash = "hash10", PhoneNumber = "1234567899", FullName = "Jack Taylor", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "SnaplinkAI", Email = "SnaplinkAI@example.com", PasswordHash = "Snaplink", PhoneNumber = "", FullName = "Snap link", Status = "Active", IsVerified = true, CreateAt = DateTime.Now, ProfileImage ="" },
+                    new User { UserName = "linkka", Email = "linkka@example.com", PasswordHash = "hash2", PhoneNumber = "1234567891", FullName = "linhka", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
+                    new User { UserName = "alice", Email = "alice@example.com", PasswordHash = "hash1", PhoneNumber = "1234567890", FullName = "Linh", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
+                    new User { UserName = "carol", Email = "carol@example.com", PasswordHash = "hash3", PhoneNumber = "1234567892", FullName = "Chu Diệu Linh", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
+                    new User { UserName = "dave", Email = "dave@example.com", PasswordHash = "hash4", PhoneNumber = "1234567893", FullName = "Dave Brown", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
+                    new User { UserName = "eve", Email = "eve@example.com", PasswordHash = "hash5", PhoneNumber = "1234567894", FullName = "Eve Black", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
+                    new User { UserName = "frank", Email = "frank@example.com", PasswordHash = "hash6", PhoneNumber = "1234567895", FullName = "Frank Miller", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
+                    new User { UserName = "grace", Email = "grace@example.com", PasswordHash = "hash7", PhoneNumber = "1234567896", FullName = "Grace Lee", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
+                    new User { UserName = "henry", Email = "henry@example.com", PasswordHash = "hash8", PhoneNumber = "1234567897", FullName = "Henry Wilson", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
+                    new User { UserName = "iris", Email = "iris@example.com", PasswordHash = "hash9", PhoneNumber = "1234567898", FullName = "Iris Davis", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
+                    new User { UserName = "jack", Email = "jack@example.com", PasswordHash = "hash10", PhoneNumber = "1234567899", FullName = "Jack Taylor", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
                     new User { UserName = "kate", Email = "kate@example.com", PasswordHash = "hash11", PhoneNumber = "1234567900", FullName = "Kate Anderson", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
                     new User { UserName = "leo", Email = "leo@example.com", PasswordHash = "hash12", PhoneNumber = "1234567901", FullName = "Leo Martinez", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
                     new User { UserName = "maya", Email = "maya@example.com", PasswordHash = "hash13", PhoneNumber = "1234567902", FullName = "Maya Rodriguez", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
@@ -62,11 +63,11 @@ namespace SnapLink_Repository.Data
             {
                 var userRoles = new[]
                 {
-                    new UserRole { UserId = context.Users.First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Admin").RoleId },
-                    new UserRole { UserId = context.Users.Skip(1).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Photographer").RoleId },
+                    new UserRole { UserId = context.Users.First().UserId, RoleId = context.Roles.First(r => r.RoleName == "User").RoleId },
+                    new UserRole { UserId = context.Users.Skip(1).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "User").RoleId },
                     new UserRole { UserId = context.Users.Skip(2).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "User").RoleId },
-                    new UserRole { UserId = context.Users.Skip(3).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Moderator").RoleId },
-                    new UserRole { UserId = context.Users.Skip(4).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId },
+                    new UserRole { UserId = context.Users.Skip(3).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "User").RoleId },
+                    new UserRole { UserId = context.Users.Skip(4).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "User").RoleId },
                     // Additional user roles for new location owners
                     new UserRole { UserId = context.Users.Skip(15).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId }, // Peter
                     new UserRole { UserId = context.Users.Skip(16).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId }, // Sarah
@@ -99,8 +100,7 @@ namespace SnapLink_Repository.Data
                 var users = context.Users.Take(15).ToList();
                 var photographers = new[]
                 {
-                    new Photographer { UserId = users[0].UserId, YearsExperience = 5, Equipment = "Iphone 20 Pro Max", HourlyRate = 5000, AvailabilityStatus = "Available", Rating = 4.8M },
-                    new Photographer { UserId = users[1].UserId, YearsExperience = 3, Equipment = "Iphone 19 Pro Max", HourlyRate = 200000, AvailabilityStatus = "Available", Rating = 4.5M },
+                    new Photographer { UserId = users[1].UserId, YearsExperience = 3, Equipment = "Iphone 19 Pro Max", HourlyRate = 5000, AvailabilityStatus = "Available", Rating = 4.5M },
                     new Photographer { UserId = users[2].UserId, YearsExperience = 7, Equipment = "Iphone 18 Pro Max", HourlyRate = 120000, AvailabilityStatus = "Busy", Rating = 4.9M },
                     new Photographer { UserId = users[3].UserId, YearsExperience = 2, Equipment = "Iphone 17 Pro Max", HourlyRate = 70000, AvailabilityStatus = "Available", Rating = 4.3M },
                     new Photographer { UserId = users[4].UserId, YearsExperience = 4, Equipment = "Iphone 6 Pro Max", HourlyRate = 90000, AvailabilityStatus = "Available", Rating = 4.7M },
