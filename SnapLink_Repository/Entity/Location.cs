@@ -51,4 +51,6 @@ public partial class Location
     
     public virtual ICollection<LocationEvent> LocationEvents { get; set; } = new List<LocationEvent>();
     public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
+    public virtual ICollection<PremiumSubscription> PremiumSubscriptions { get; set; }
+    = new List<PremiumSubscription>();
 }

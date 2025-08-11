@@ -618,6 +618,37 @@ public partial class SnaplinkDbContext : DbContext
                 .HasMaxLength(30)
                 .HasColumnName("status");
             entity.Property(e => e.UserId).HasColumnName("userId");
+            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
+            entity.Property(e => e.LocationId).HasColumnName("locationId");
+
+            entity.HasOne(d => d.Photographer)
+    .WithMany(p => p.PremiumSubscriptions)
+    .HasForeignKey(d => d.PhotographerId)
+    .OnDelete(DeleteBehavior.NoAction)
+    .HasConstraintName("FK_PremiumSubscription_Photographer");
+
+            entity.HasOne(d => d.Location)
+    .WithMany(l => l.PremiumSubscriptions)
+    .HasForeignKey(d => d.LocationId)
+    .OnDelete(DeleteBehavior.NoAction)
+    .HasConstraintName("FK_PremiumSubscription_Location");
+
+            // Chỉ cho phép đúng 1 mục tiêu (Photographer XOR Location)
+            entity.HasCheckConstraint(
+     "CK_PremiumSubscription_ExactlyOneTarget",
+     "((photographerId IS NOT NULL AND locationId IS NULL) OR (photographerId IS NULL AND locationId IS NOT NULL))"
+ );
+
+            // Mỗi target chỉ có 1 subscription 'active' còn hạn
+            entity.HasIndex(e => new { e.PhotographerId, e.Status, e.EndDate })
+                .IsUnique()
+                .HasFilter("[photographerId] IS NOT NULL AND [Status] = 'active' AND [EndDate] >= getdate()")
+                .HasDatabaseName("UX_Sub_Active_Photographer");
+
+            entity.HasIndex(e => new { e.LocationId, e.Status, e.EndDate })
+                .IsUnique()
+                .HasFilter("[locationId] IS NOT NULL AND [Status] = 'active' AND [EndDate] >= getdate()")
+                .HasDatabaseName("UX_Sub_Active_Location");
 
             entity.HasOne(d => d.Package).WithMany(p => p.PremiumSubscriptions)
                 .HasForeignKey(d => d.PackageId)
@@ -860,7 +891,7 @@ public partial class SnaplinkDbContext : DbContext
                 .HasConstraintName("FK_WithdrawalRequest_Wallet");
         });
 
-     
+
         modelBuilder.Entity<Availability>(entity =>
         {
             entity.HasKey(e => e.AvailabilityId).HasName("PK__Availability__AvailabilityId");
@@ -892,11 +923,11 @@ public partial class SnaplinkDbContext : DbContext
             entity.HasIndex(e => e.PhotographerId).HasDatabaseName("IX_Availability_PhotographerId");
             entity.HasIndex(e => e.DayOfWeek).HasDatabaseName("IX_Availability_DayOfWeek");
             entity.HasIndex(e => e.Status).HasDatabaseName("IX_Availability_Status");
-            
+
             // Composite indexes for complex queries
             entity.HasIndex(e => new { e.PhotographerId, e.DayOfWeek, e.Status })
                 .HasDatabaseName("IX_Availability_Photographer_Day_Status");
-            
+
             entity.HasIndex(e => new { e.DayOfWeek, e.Status, e.StartTime, e.EndTime })
                 .HasDatabaseName("IX_Availability_Day_Status_Time");
         });
