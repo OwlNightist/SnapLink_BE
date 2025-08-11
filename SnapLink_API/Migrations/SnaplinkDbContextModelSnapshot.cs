@@ -214,7 +214,7 @@ namespace SnapLink_API.Migrations
                         .HasColumnName("status");
 
                     b.Property<decimal?>("TotalPrice")
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(15, 2)")
                         .HasColumnName("totalPrice");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -1115,7 +1115,7 @@ namespace SnapLink_API.Migrations
                         .HasColumnName("status");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(15, 2)")
                         .HasColumnName("totalAmount");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -1374,6 +1374,10 @@ namespace SnapLink_API.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("endDate");
 
+                    b.Property<int?>("LocationId")
+                        .HasColumnType("int")
+                        .HasColumnName("locationId");
+
                     b.Property<int>("PackageId")
                         .HasColumnType("int")
                         .HasColumnName("packageId");
@@ -1381,6 +1385,10 @@ namespace SnapLink_API.Migrations
                     b.Property<int?>("PaymentId")
                         .HasColumnType("int")
                         .HasColumnName("paymentId");
+
+                    b.Property<int?>("PhotographerId")
+                        .HasColumnType("int")
+                        .HasColumnName("photographerId");
 
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime")
@@ -1404,7 +1412,92 @@ namespace SnapLink_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PremiumSubscription", (string)null);
+                    b.HasIndex("LocationId", "Status")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Sub_Active_Location")
+                        .HasFilter("[locationId] IS NOT NULL AND [Status] = 'active'");
+
+                    b.HasIndex("PhotographerId", "Status")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Sub_Active_Photographer")
+                        .HasFilter("[photographerId] IS NOT NULL AND [Status] = 'active'");
+
+                    b.ToTable("PremiumSubscription", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_PremiumSubscription_ExactlyOneTarget", "((photographerId IS NOT NULL AND locationId IS NULL) OR (photographerId IS NULL AND locationId IS NOT NULL))");
+                        });
+                });
+
+            modelBuilder.Entity("SnapLink_Repository.Entity.Rating", b =>
+                {
+                    b.Property<int>("RatingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ratingId");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RatingId"));
+
+                    b.Property<int>("BookingId")
+                        .HasColumnType("int")
+                        .HasColumnName("bookingId");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("comment");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("createdAt")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<int?>("LocationId")
+                        .HasColumnType("int")
+                        .HasColumnName("locationId");
+
+                    b.Property<int?>("PhotographerId")
+                        .HasColumnType("int")
+                        .HasColumnName("photographerId");
+
+                    b.Property<int>("ReviewerUserId")
+                        .HasColumnType("int")
+                        .HasColumnName("reviewerUserId");
+
+                    b.Property<byte>("Score")
+                        .HasColumnType("tinyint")
+                        .HasColumnName("score");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("updatedAt")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.HasKey("RatingId")
+                        .HasName("PK__Rating__ratingId");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("PhotographerId");
+
+                    b.HasIndex("ReviewerUserId");
+
+                    b.HasIndex("BookingId", "LocationId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Rating_Booking_Location")
+                        .HasFilter("[locationId] IS NOT NULL");
+
+                    b.HasIndex("BookingId", "PhotographerId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Rating_Booking_Photographer")
+                        .HasFilter("[photographerId] IS NOT NULL");
+
+                    b.ToTable("Rating", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Rating_ExactlyOneTarget", "((photographerId IS NOT NULL AND locationId IS NULL) OR (photographerId IS NULL AND locationId IS NOT NULL))");
+
+                            t.HasCheckConstraint("CK_Rating_Score_1_5", "[score] BETWEEN 1 AND 5");
+                        });
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.Review", b =>
@@ -1520,7 +1613,7 @@ namespace SnapLink_API.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransactionId"));
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(15, 2)")
                         .HasColumnName("amount");
 
                     b.Property<DateTime>("CreatedAt")
@@ -1739,7 +1832,7 @@ namespace SnapLink_API.Migrations
 
                     b.Property<decimal?>("Balance")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(15, 2)")
                         .HasDefaultValue(0m)
                         .HasColumnName("balance");
 
@@ -1771,7 +1864,7 @@ namespace SnapLink_API.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(15, 2)")
                         .HasColumnName("amount");
 
                     b.Property<string>("BankAccountName")
@@ -2182,6 +2275,12 @@ namespace SnapLink_API.Migrations
 
             modelBuilder.Entity("SnapLink_Repository.Entity.PremiumSubscription", b =>
                 {
+                    b.HasOne("SnapLink_Repository.Entity.Location", "Location")
+                        .WithMany("PremiumSubscriptions")
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_PremiumSubscription_Location");
+
                     b.HasOne("SnapLink_Repository.Entity.PremiumPackage", "Package")
                         .WithMany("PremiumSubscriptions")
                         .HasForeignKey("PackageId")
@@ -2193,17 +2292,64 @@ namespace SnapLink_API.Migrations
                         .HasForeignKey("PaymentId")
                         .HasConstraintName("FK_PremiumSubscription_Payment");
 
+                    b.HasOne("SnapLink_Repository.Entity.Photographer", "Photographer")
+                        .WithMany("PremiumSubscriptions")
+                        .HasForeignKey("PhotographerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_PremiumSubscription_Photographer");
+
                     b.HasOne("SnapLink_Repository.Entity.User", "User")
                         .WithMany("PremiumSubscriptions")
                         .HasForeignKey("UserId")
                         .IsRequired()
                         .HasConstraintName("FK_PremiumSubscription_Users");
 
+                    b.Navigation("Location");
+
                     b.Navigation("Package");
 
                     b.Navigation("Payment");
 
+                    b.Navigation("Photographer");
+
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SnapLink_Repository.Entity.Rating", b =>
+                {
+                    b.HasOne("SnapLink_Repository.Entity.Booking", "Booking")
+                        .WithMany("Ratings")
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_Rating_Booking");
+
+                    b.HasOne("SnapLink_Repository.Entity.Location", "Location")
+                        .WithMany("Ratings")
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_Rating_Location");
+
+                    b.HasOne("SnapLink_Repository.Entity.Photographer", "Photographer")
+                        .WithMany("Ratings")
+                        .HasForeignKey("PhotographerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_Rating_Photographer");
+
+                    b.HasOne("SnapLink_Repository.Entity.User", "ReviewerUser")
+                        .WithMany("RatingsAuthored")
+                        .HasForeignKey("ReviewerUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_Rating_ReviewerUser");
+
+                    b.Navigation("Booking");
+
+                    b.Navigation("Location");
+
+                    b.Navigation("Photographer");
+
+                    b.Navigation("ReviewerUser");
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.Review", b =>
@@ -2309,6 +2455,8 @@ namespace SnapLink_API.Migrations
 
                     b.Navigation("PhotoDelivery");
 
+                    b.Navigation("Ratings");
+
                     b.Navigation("Reviews");
                 });
 
@@ -2328,6 +2476,10 @@ namespace SnapLink_API.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("LocationEvents");
+
+                    b.Navigation("PremiumSubscriptions");
+
+                    b.Navigation("Ratings");
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.LocationEvent", b =>
@@ -2371,6 +2523,10 @@ namespace SnapLink_API.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("PhotographerStyles");
+
+                    b.Navigation("PremiumSubscriptions");
+
+                    b.Navigation("Ratings");
                 });
 
             modelBuilder.Entity("SnapLink_Repository.Entity.PremiumPackage", b =>
@@ -2419,6 +2575,8 @@ namespace SnapLink_API.Migrations
                     b.Navigation("Photographers");
 
                     b.Navigation("PremiumSubscriptions");
+
+                    b.Navigation("RatingsAuthored");
 
                     b.Navigation("ToTransactions");
 

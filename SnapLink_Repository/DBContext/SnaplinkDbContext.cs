@@ -639,15 +639,15 @@ public partial class SnaplinkDbContext : DbContext
      "((photographerId IS NOT NULL AND locationId IS NULL) OR (photographerId IS NULL AND locationId IS NOT NULL))"
  );
 
-            // Mỗi target chỉ có 1 subscription 'active' còn hạn
-            entity.HasIndex(e => new { e.PhotographerId, e.Status, e.EndDate })
+            // One active subscription per target (enforced via Status flag)
+            entity.HasIndex(e => new { e.PhotographerId, e.Status })
                 .IsUnique()
-                .HasFilter("[photographerId] IS NOT NULL AND [Status] = 'active' AND [EndDate] >= getdate()")
+                .HasFilter("[photographerId] IS NOT NULL AND [Status] = 'active'")
                 .HasDatabaseName("UX_Sub_Active_Photographer");
 
-            entity.HasIndex(e => new { e.LocationId, e.Status, e.EndDate })
+            entity.HasIndex(e => new { e.LocationId, e.Status })
                 .IsUnique()
-                .HasFilter("[locationId] IS NOT NULL AND [Status] = 'active' AND [EndDate] >= getdate()")
+                .HasFilter("[locationId] IS NOT NULL AND [Status] = 'active'")
                 .HasDatabaseName("UX_Sub_Active_Location");
 
             entity.HasOne(d => d.Package).WithMany(p => p.PremiumSubscriptions)

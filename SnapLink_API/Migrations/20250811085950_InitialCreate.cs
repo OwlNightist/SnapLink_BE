@@ -339,7 +339,7 @@ namespace SnapLink_API.Migrations
                     walletId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     userId = table.Column<int>(type: "int", nullable: false),
-                    balance = table.Column<decimal>(type: "decimal(10,2)", nullable: true, defaultValue: 0m),
+                    balance = table.Column<decimal>(type: "decimal(15,2)", nullable: true, defaultValue: 0m),
                     updatedAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
@@ -477,7 +477,7 @@ namespace SnapLink_API.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     walletId = table.Column<int>(type: "int", nullable: false),
-                    amount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    amount = table.Column<decimal>(type: "decimal(15,2)", nullable: false),
                     bankAccountNumber = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     bankAccountName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     bankName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
@@ -510,7 +510,7 @@ namespace SnapLink_API.Migrations
                     endDatetime = table.Column<DateTime>(type: "datetime", nullable: true),
                     status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true),
                     specialRequests = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    totalPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: true),
+                    totalPrice = table.Column<decimal>(type: "decimal(15,2)", nullable: true),
                     createdAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
                     updatedAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
                 },
@@ -614,7 +614,7 @@ namespace SnapLink_API.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     customerId = table.Column<int>(type: "int", nullable: false),
                     bookingId = table.Column<int>(type: "int", nullable: true),
-                    totalAmount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    totalAmount = table.Column<decimal>(type: "decimal(15,2)", nullable: false),
                     currency = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false, defaultValue: "VND"),
                     status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     externalTransactionId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
@@ -666,6 +666,48 @@ namespace SnapLink_API.Migrations
                         principalTable: "Booking",
                         principalColumn: "bookingId",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Rating",
+                columns: table => new
+                {
+                    ratingId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    bookingId = table.Column<int>(type: "int", nullable: false),
+                    reviewerUserId = table.Column<int>(type: "int", nullable: false),
+                    photographerId = table.Column<int>(type: "int", nullable: true),
+                    locationId = table.Column<int>(type: "int", nullable: true),
+                    score = table.Column<byte>(type: "tinyint", nullable: false),
+                    comment = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    createdAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
+                    updatedAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__Rating__ratingId", x => x.ratingId);
+                    table.CheckConstraint("CK_Rating_ExactlyOneTarget", "((photographerId IS NOT NULL AND locationId IS NULL) OR (photographerId IS NULL AND locationId IS NOT NULL))");
+                    table.CheckConstraint("CK_Rating_Score_1_5", "[score] BETWEEN 1 AND 5");
+                    table.ForeignKey(
+                        name: "FK_Rating_Booking",
+                        column: x => x.bookingId,
+                        principalTable: "Booking",
+                        principalColumn: "bookingId");
+                    table.ForeignKey(
+                        name: "FK_Rating_Location",
+                        column: x => x.locationId,
+                        principalTable: "Location",
+                        principalColumn: "locationId");
+                    table.ForeignKey(
+                        name: "FK_Rating_Photographer",
+                        column: x => x.photographerId,
+                        principalTable: "Photographer",
+                        principalColumn: "photographerId");
+                    table.ForeignKey(
+                        name: "FK_Rating_ReviewerUser",
+                        column: x => x.reviewerUserId,
+                        principalTable: "Users",
+                        principalColumn: "userId");
                 });
 
             migrationBuilder.CreateTable(
@@ -810,16 +852,29 @@ namespace SnapLink_API.Migrations
                     startDate = table.Column<DateTime>(type: "datetime", nullable: true),
                     endDate = table.Column<DateTime>(type: "datetime", nullable: true),
                     status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true),
-                    paymentId = table.Column<int>(type: "int", nullable: true)
+                    paymentId = table.Column<int>(type: "int", nullable: true),
+                    photographerId = table.Column<int>(type: "int", nullable: true),
+                    locationId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK__PremiumS__CE9A698AE4183E7A", x => x.premiumSubscriptionId);
+                    table.CheckConstraint("CK_PremiumSubscription_ExactlyOneTarget", "((photographerId IS NOT NULL AND locationId IS NULL) OR (photographerId IS NULL AND locationId IS NOT NULL))");
+                    table.ForeignKey(
+                        name: "FK_PremiumSubscription_Location",
+                        column: x => x.locationId,
+                        principalTable: "Location",
+                        principalColumn: "locationId");
                     table.ForeignKey(
                         name: "FK_PremiumSubscription_Payment",
                         column: x => x.paymentId,
                         principalTable: "Payment",
                         principalColumn: "paymentId");
+                    table.ForeignKey(
+                        name: "FK_PremiumSubscription_Photographer",
+                        column: x => x.photographerId,
+                        principalTable: "Photographer",
+                        principalColumn: "photographerId");
                     table.ForeignKey(
                         name: "FK_PremiumSubscription_PremiumPackage",
                         column: x => x.packageId,
@@ -841,7 +896,7 @@ namespace SnapLink_API.Migrations
                     referencePaymentId = table.Column<int>(type: "int", nullable: true),
                     fromUserId = table.Column<int>(type: "int", nullable: true),
                     toUserId = table.Column<int>(type: "int", nullable: true),
-                    amount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    amount = table.Column<decimal>(type: "decimal(15,2)", nullable: false),
                     currency = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false, defaultValue: "VND"),
                     type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
@@ -1227,6 +1282,49 @@ namespace SnapLink_API.Migrations
                 column: "userId");
 
             migrationBuilder.CreateIndex(
+                name: "UX_Sub_Active_Location",
+                table: "PremiumSubscription",
+                columns: new[] { "locationId", "status" },
+                unique: true,
+                filter: "[locationId] IS NOT NULL AND [Status] = 'active'");
+
+            migrationBuilder.CreateIndex(
+                name: "UX_Sub_Active_Photographer",
+                table: "PremiumSubscription",
+                columns: new[] { "photographerId", "status" },
+                unique: true,
+                filter: "[photographerId] IS NOT NULL AND [Status] = 'active'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rating_locationId",
+                table: "Rating",
+                column: "locationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rating_photographerId",
+                table: "Rating",
+                column: "photographerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rating_reviewerUserId",
+                table: "Rating",
+                column: "reviewerUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "UX_Rating_Booking_Location",
+                table: "Rating",
+                columns: new[] { "bookingId", "locationId" },
+                unique: true,
+                filter: "[locationId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "UX_Rating_Booking_Photographer",
+                table: "Rating",
+                columns: new[] { "bookingId", "photographerId" },
+                unique: true,
+                filter: "[photographerId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Review_bookingId",
                 table: "Review",
                 column: "bookingId");
@@ -1318,6 +1416,9 @@ namespace SnapLink_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "PremiumSubscription");
+
+            migrationBuilder.DropTable(
+                name: "Rating");
 
             migrationBuilder.DropTable(
                 name: "Review");
