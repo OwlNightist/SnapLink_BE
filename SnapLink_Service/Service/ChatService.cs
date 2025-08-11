@@ -216,7 +216,7 @@ namespace SnapLink_Service.Service
         {
             var query = _context.Messagesses
                 .Include(m => m.Sender)
-                .Where(m => m.ConversationId == request.ConversationId)
+                .Where(m => m.ConversationId == request.ConversationId && m.Status != "deleted")
                 .OrderByDescending(m => m.CreatedAt);
 
             var totalCount = await query.CountAsync();
@@ -279,7 +279,8 @@ namespace SnapLink_Service.Service
             // Check if user is the sender
             if (message.SenderId != userId) return false;
 
-            _context.Messagesses.Remove(message);
+            // Change status to "deleted" instead of removing
+            message.Status = "deleted";
             await _context.SaveChangesAsync();
             return true;
         }
