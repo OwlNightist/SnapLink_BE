@@ -57,7 +57,7 @@ namespace SnapLink_Service.Service
             await _repo.SaveChangesAsync();
             await SendVerificationEmail(dto.Email, verifyCode);
 
-            //// Create AI conversation and send welcome message from system (user ID 1) to new user
+            // Create AI conversation and send welcome message from system (user ID 1) to new user
             //try
             //{
             //    // First, create an AI conversation
@@ -82,15 +82,15 @@ namespace SnapLink_Service.Service
             //            ConversationId = conversationResult.Conversation.ConversationId
             //        };
                     
-                    await _chatService.SendMessageAsync(welcomeMessage, 1); // System user ID 1
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log error but don't fail user creation
-                // In production, you might want to use proper logging
-                Console.WriteLine($"Failed to create AI conversation or send welcome message: {ex.Message}");
-            }
+            //        await _chatService.SendMessageAsync(welcomeMessage, 1); // System user ID 1
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    // Log error but don't fail user creation
+            //    // In production, you might want to use proper logging
+            //    Console.WriteLine($"Failed to create AI conversation or send welcome message: {ex.Message}");
+            //}
 
             return $"User created with role '{roleName}'.";
         }
