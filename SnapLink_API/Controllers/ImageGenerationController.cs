@@ -43,29 +43,29 @@ public class ImageGenerationController : ControllerBase
         }
     }
 
-    [HttpPost("generate")]
-    public async Task<ActionResult<GeminiImageResponse>> GenerateImage([FromBody] GeminiImageRequest request)
-    {
-        try
-        {
-            var result = await _imageGenerationService.GenerateImageAsync(request);
+    //[HttpPost("generate")]
+    //public async Task<ActionResult<GeminiImageResponse>> GenerateImage([FromBody] GeminiImageRequest request)
+    //{
+    //    try
+    //    {
+    //        var result = await _imageGenerationService.GenerateImageAsync(request);
             
-            if (result.Success)
-            {
-                return Ok(result);
-            }
+    //        if (result.Success)
+    //        {
+    //            return Ok(result);
+    //        }
             
-            return BadRequest(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error generating image with prompt: {Prompt}", request.Prompt);
+    //        return BadRequest(result);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        _logger.LogError(ex, "Error generating image with prompt: {Prompt}", request.Prompt);
             
-            return StatusCode(500, new GeminiImageResponse
-            {
-                Success = false,
-                Error = $"An error occurred while generating the image: {ex.Message}"
-            });
-        }
-    }
+    //        return StatusCode(500, new GeminiImageResponse
+    //        {
+    //            Success = false,
+    //            Error = $"An error occurred while generating the image: {ex.Message}"
+    //        });
+    //    }
+    //}
 }
