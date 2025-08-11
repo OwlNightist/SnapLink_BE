@@ -32,9 +32,9 @@ namespace SnapLink_Repository.Data
                 var users = new[]
                 {
                     new User { UserName = "SnaplinkAI", Email = "SnaplinkAI@example.com", PasswordHash = "Snaplink", PhoneNumber = "", FullName = "Snap link", Status = "Active", IsVerified = true, CreateAt = DateTime.Now, ProfileImage ="" },
-                    new User { UserName = "linkka", Email = "linkka@example.com", PasswordHash = "hash2", PhoneNumber = "1234567891", FullName = "linhka", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
-                    new User { UserName = "alice", Email = "alice@example.com", PasswordHash = "hash1", PhoneNumber = "1234567890", FullName = "Linh", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
-                    new User { UserName = "carol", Email = "carol@example.com", PasswordHash = "hash3", PhoneNumber = "1234567892", FullName = "Chu Diệu Linh", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
+                    new User { UserName = "linkka", Email = "linkka@example.com", PasswordHash = "hash2", PhoneNumber = "1234567891", FullName = "linhka", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/20250715052645_linggka109_3670740457001717233_s2025-7-15-12.25.361_story.jpg" },
+                    new User { UserName = "alice", Email = "alice@example.com", PasswordHash = "hash1", PhoneNumber = "1234567890", FullName = "Linh", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2933653585994336284's2025-7-27-20.14.485%20story.jpg" },
+                    new User { UserName = "carol", Email = "carol@example.com", PasswordHash = "hash3", PhoneNumber = "1234567892", FullName = "Chu Diệu Linh", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_3691773221381401224's2025-8-9-3.40.579%20story.jpg" },
                     new User { UserName = "dave", Email = "dave@example.com", PasswordHash = "hash4", PhoneNumber = "1234567893", FullName = "Dave Brown", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
                     new User { UserName = "eve", Email = "eve@example.com", PasswordHash = "hash5", PhoneNumber = "1234567894", FullName = "Eve Black", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
                     new User { UserName = "frank", Email = "frank@example.com", PasswordHash = "hash6", PhoneNumber = "1234567895", FullName = "Frank Miller", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
@@ -125,10 +125,7 @@ namespace SnapLink_Repository.Data
                 var photographers = context.Photographers.Take(15).ToList();
                 var styles = context.Styles.Take(5).ToList();
                 var photographerStyles = new[]
-                {
-                    // Photographer 1 (Alice) - Portrait specialist
-                    new PhotographerStyle { PhotographerId = photographers[0].PhotographerId, StyleId = styles[0].StyleId },
-                    
+                {                    
                     // Photographer 2 (Bob) - Landscape specialist  
                     new PhotographerStyle { PhotographerId = photographers[1].PhotographerId, StyleId = styles[1].StyleId },
                     
@@ -192,7 +189,6 @@ namespace SnapLink_Repository.Data
                 var users = context.Users.Take(10).ToList(); // Take 10 users (5 original + 5 new)
                 var owners = new[]
                 {
-                    new LocationOwner { UserId = users[0].UserId, BusinessName = "VenueCo", BusinessAddress = "venueco@example.com" },
                     new LocationOwner { UserId = users[1].UserId, BusinessName = "EventSpaces", BusinessAddress = "eventspaces@example.com" },
                     new LocationOwner { UserId = users[2].UserId, BusinessName = "PhotoStudios", BusinessAddress = "photostudios@example.com" },
                     new LocationOwner { UserId = users[3].UserId, BusinessName = "UrbanVenues", BusinessAddress = "urbanvenues@example.com" },
@@ -217,16 +213,16 @@ namespace SnapLink_Repository.Data
                     // Original 5 registered locations with fees
                     new Location { 
                         LocationOwnerId = owners[0].LocationOwnerId, 
-                        Name = "Central Park Studio", 
-                        Address = "123 Main St, New York, NY", 
-                        Description = "Spacious studio downtown", 
-                        HourlyRate = 50, 
+                        Name = "Quảng Trường Sáng Tạo - ĐHQG TPHCM", 
+                        Address = "Đ. Quảng Trường Sáng Tạo, Đông Hoà, Dĩ An, Bình Dương 75306, Việt Nam", 
+                        Description = "Quảng Trường Sáng Tạo", 
+                        HourlyRate = 0, 
                         Capacity = 20, 
-                        Indoor = true, 
-                        Outdoor = false, 
+                        Indoor = false, 
+                        Outdoor = true, 
                         AvailabilityStatus = "Available", 
                         LocationType = "Registered",
-                        ExternalPlaceId = "ChIJKxjxuxlZwokRwA2Ire1V8mk", // Example Google Places ID
+                        ExternalPlaceId = "10.8748517,106.8026875", // Example Google Places ID
                         CreatedAt = DateTime.Now 
                     },
                     new Location { 
@@ -569,52 +565,52 @@ namespace SnapLink_Repository.Data
             }
 
             // Seed Administrators
-            if (!context.Administrators.Any())
-            {
-                var users = context.Users.Take(5).ToList();
-                var admins = new[]
-                {
-                    new Administrator { UserId = users[0].UserId, AccessLevel = "Super", Department = "IT" },
-                    new Administrator { UserId = users[1].UserId, AccessLevel = "Standard", Department = "Support" },
-                    new Administrator { UserId = users[2].UserId, AccessLevel = "Super", Department = "HR" },
-                    new Administrator { UserId = users[3].UserId, AccessLevel = "Standard", Department = "Finance" },
-                    new Administrator { UserId = users[4].UserId, AccessLevel = "Standard", Department = "Marketing" }
-                };
-                context.Administrators.AddRange(admins);
-                context.SaveChanges();
-            }
+            //if (!context.Administrators.Any())
+            //{
+            //    var users = context.Users.Take(5).ToList();
+            //    var admins = new[]
+            //    {
+            //        new Administrator { UserId = users[0].UserId, AccessLevel = "Super", Department = "IT" },
+            //        new Administrator { UserId = users[1].UserId, AccessLevel = "Standard", Department = "Support" },
+            //        new Administrator { UserId = users[2].UserId, AccessLevel = "Super", Department = "HR" },
+            //        new Administrator { UserId = users[3].UserId, AccessLevel = "Standard", Department = "Finance" },
+            //        new Administrator { UserId = users[4].UserId, AccessLevel = "Standard", Department = "Marketing" }
+            //    };
+            //    context.Administrators.AddRange(admins);
+            //    context.SaveChanges();
+            //}
 
             // Seed Moderators
-            if (!context.Moderators.Any())
-            {
-                var users = context.Users.Take(5).ToList();
-                var moderators = new[]
-                {
-                    new Moderator { UserId = users[0].UserId, AreasOfFocus = "Abuse" },
-                    new Moderator { UserId = users[1].UserId, AreasOfFocus = "Spam" },
-                    new Moderator { UserId = users[2].UserId, AreasOfFocus = "Payments" },
-                    new Moderator { UserId = users[3].UserId, AreasOfFocus = "Bookings" },
-                    new Moderator { UserId = users[4].UserId, AreasOfFocus = "General" }
-                };
-                context.Moderators.AddRange(moderators);
-                context.SaveChanges();
-            }
+            //if (!context.Moderators.Any())
+            //{
+            //    var users = context.Users.Take(5).ToList();
+            //    var moderators = new[]
+            //    {
+            //        new Moderator { UserId = users[0].UserId, AreasOfFocus = "Abuse" },
+            //        new Moderator { UserId = users[1].UserId, AreasOfFocus = "Spam" },
+            //        new Moderator { UserId = users[2].UserId, AreasOfFocus = "Payments" },
+            //        new Moderator { UserId = users[3].UserId, AreasOfFocus = "Bookings" },
+            //        new Moderator { UserId = users[4].UserId, AreasOfFocus = "General" }
+            //    };
+            //    context.Moderators.AddRange(moderators);
+            //    context.SaveChanges();
+            //}
 
             // Seed Messagess
-            if (!context.Messagesses.Any())
-            {
-                var users = context.Users.Take(5).ToList();
-                var messages = new[]
-                {
-                    new Messagess { SenderId = users[0].UserId, RecipientId = users[1].UserId, Content = "Hi Bob!", CreatedAt = DateTime.Now },
-                    new Messagess { SenderId = users[1].UserId, RecipientId = users[2].UserId, Content = "Hello Carol!", CreatedAt = DateTime.Now },
-                    new Messagess { SenderId = users[2].UserId, RecipientId = users[3].UserId, Content = "Hey Dave!", CreatedAt = DateTime.Now },
-                    new Messagess { SenderId = users[3].UserId, RecipientId = users[4].UserId, Content = "Hi Eve!", CreatedAt = DateTime.Now },
-                    new Messagess { SenderId = users[4].UserId, RecipientId = users[0].UserId, Content = "Hello Alice!", CreatedAt = DateTime.Now }
-                };
-                context.Messagesses.AddRange(messages);
-                context.SaveChanges();
-            }
+            //if (!context.Messagesses.Any())
+            //{
+            //    var users = context.Users.Take(5).ToList();
+            //    var messages = new[]
+            //    {
+            //        new Messagess { SenderId = users[0].UserId, RecipientId = users[1].UserId, Content = "Hi Bob!", CreatedAt = DateTime.Now },
+            //        new Messagess { SenderId = users[1].UserId, RecipientId = users[2].UserId, Content = "Hello Carol!", CreatedAt = DateTime.Now },
+            //        new Messagess { SenderId = users[2].UserId, RecipientId = users[3].UserId, Content = "Hey Dave!", CreatedAt = DateTime.Now },
+            //        new Messagess { SenderId = users[3].UserId, RecipientId = users[4].UserId, Content = "Hi Eve!", CreatedAt = DateTime.Now },
+            //        new Messagess { SenderId = users[4].UserId, RecipientId = users[0].UserId, Content = "Hello Alice!", CreatedAt = DateTime.Now }
+            //    };
+            //    context.Messagesses.AddRange(messages);
+            //    context.SaveChanges();
+            //}
 
             // Seed PremiumPackages
             if (!context.PremiumPackages.Any())
@@ -670,27 +666,27 @@ namespace SnapLink_Repository.Data
                 var users = context.Users.Take(20).ToList(); // Take all 20 users
                 var wallets = new[]
                 {
-                    new Wallet { UserId = users[0].UserId, Balance = 500, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[1].UserId, Balance = 300, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[2].UserId, Balance = 700, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[3].UserId, Balance = 200, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[4].UserId, Balance = 400, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[5].UserId, Balance = 150, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[6].UserId, Balance = 600, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[7].UserId, Balance = 250, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[8].UserId, Balance = 350, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[9].UserId, Balance = 450, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[0].UserId, Balance = 0, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[1].UserId, Balance = 200000, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[2].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[3].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[4].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[5].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[6].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[7].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[8].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[9].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
                     // Additional wallets for new users
-                    new Wallet { UserId = users[10].UserId, Balance = 800, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[11].UserId, Balance = 550, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[12].UserId, Balance = 650, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[13].UserId, Balance = 750, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[14].UserId, Balance = 900, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[15].UserId, Balance = 1200, UpdatedAt = DateTime.Now }, // Peter - Location Owner
-                    new Wallet { UserId = users[16].UserId, Balance = 1100, UpdatedAt = DateTime.Now }, // Sarah - Location Owner
-                    new Wallet { UserId = users[17].UserId, Balance = 1300, UpdatedAt = DateTime.Now }, // Mike - Location Owner
-                    new Wallet { UserId = users[18].UserId, Balance = 1400, UpdatedAt = DateTime.Now }, // Lisa - Location Owner
-                    new Wallet { UserId = users[19].UserId, Balance = 1600, UpdatedAt = DateTime.Now }  // David - Location Owner
+                    new Wallet { UserId = users[10].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[11].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[12].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[13].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[14].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+                    new Wallet { UserId = users[15].UserId, Balance = 100000, UpdatedAt = DateTime.Now }, // Peter - Location Owner
+                    new Wallet { UserId = users[16].UserId, Balance = 100000, UpdatedAt = DateTime.Now }, // Sarah - Location Owner
+                    new Wallet { UserId = users[17].UserId, Balance = 100000, UpdatedAt = DateTime.Now }, // Mike - Location Owner
+                    new Wallet { UserId = users[18].UserId, Balance = 100000, UpdatedAt = DateTime.Now }, // Lisa - Location Owner
+                    new Wallet { UserId = users[19].UserId, Balance = 100000, UpdatedAt = DateTime.Now }  // David - Location Owner
                 };
                 context.Wallets.AddRange(wallets);
                 context.SaveChanges();
@@ -755,16 +751,23 @@ namespace SnapLink_Repository.Data
                 var locations = context.Locations.Take(5).ToList();
                 var images = new[]
                 {
-                    new Image { Url = "photographer1.jpg", PhotographerId = photographers[0].PhotographerId, IsPrimary = true, Caption = "Photographer 1", CreatedAt = DateTime.Now },
-                    new Image { Url = "photographer2.jpg", PhotographerId = photographers[1].PhotographerId, IsPrimary = true, Caption = "Photographer 2", CreatedAt = DateTime.Now },
-                    new Image { Url = "location1.jpg", LocationId = locations[0].LocationId, IsPrimary = true, Caption = "Location 1", CreatedAt = DateTime.Now },
-                    new Image { Url = "location2.jpg", LocationId = locations[1].LocationId, IsPrimary = true, Caption = "Location 2", CreatedAt = DateTime.Now },
-                    new Image { Url = "location3.jpg", LocationId = locations[2].LocationId, IsPrimary = false, Caption = "Location 3", CreatedAt = DateTime.Now },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423583882606.png", PhotographerId = 2, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423449716041.png", PhotographerId = 2, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:13:35.237") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/location/1/20250715045320_428621570_1579447972877159_7932360639229696187_n.jpg", LocationId = 1, IsPrimary = false, Caption = "duoc", CreatedAt = DateTime.Parse("2025-07-15 04:53:21.597") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/20250715052645_linggka109_3670740457001717233_s2025-7-15-12.25.361_story.jpg", PhotographerId = 2, IsPrimary = false, Caption = "null real", CreatedAt = DateTime.Parse("2025-07-15 05:26:45.567") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/20250715053902_test.jpg", PhotographerId = 1, IsPrimary = false, Caption = "hehe", CreatedAt = DateTime.Parse("2025-07-15 05:39:02.590") }
+                    //photographer 1
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479659561498's2025-8-11-11.11.433%20story.jpg", PhotographerId = 1, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479626133367's2025-8-11-11.12.861%20story.jpg", PhotographerId = 1, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479491924526's2025-8-11-11.12.433%20story.jpg", PhotographerId = 1, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479491869661's2025-8-11-11.12.171%20story.jpg", PhotographerId = 1, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479483441064's2025-8-11-11.12.953%20story.jpg", PhotographerId = 1, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479634527198's2025-8-11-11.14.746%20story.jpg", PhotographerId = 1, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
+                    //photographer 2
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423449716041.png", PhotographerId = 2, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423458271940.png", PhotographerId = 2, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:13:35.237") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423575690541.png", PhotographerId = 2, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 05:26:45.567") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423583882606.png", PhotographerId = 2, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 05:39:02.590") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423584006215.png", PhotographerId = 2, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 05:39:02.590") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423609250785.png", PhotographerId = 2, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 05:39:02.590") },
+                    //location 1
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/location/1/118493381_725239154721936_7128225189019907505_n.jpg", LocationId = locations[0].LocationId, IsPrimary = true, Caption = "Location 1", CreatedAt = DateTime.Now },
+
                 };
                 context.Images.AddRange(images);
                 context.SaveChanges();
