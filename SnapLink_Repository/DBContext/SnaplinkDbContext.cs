@@ -304,7 +304,7 @@ public partial class SnaplinkDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK_Image_Id");
             entity.ToTable("Image");
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Url).HasMaxLength(255).HasColumnName("url");
+            entity.Property(e => e.Url).HasMaxLength(2048).HasColumnName("url");
             entity.Property(e => e.IsPrimary).HasDefaultValue(false).HasColumnName("is_primary");
             entity.Property(e => e.Caption).HasColumnName("caption");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())").HasColumnType("datetime").HasColumnName("created_at");

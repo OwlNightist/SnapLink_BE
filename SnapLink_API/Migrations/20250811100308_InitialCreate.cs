@@ -772,7 +772,7 @@ namespace SnapLink_API.Migrations
                 {
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    url = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    url = table.Column<string>(type: "nvarchar(2048)", maxLength: 2048, nullable: false),
                     is_primary = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     caption = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
