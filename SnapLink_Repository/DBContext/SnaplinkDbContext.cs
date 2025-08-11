@@ -69,8 +69,6 @@ public partial class SnaplinkDbContext : DbContext
 
     public virtual DbSet<WithdrawalRequest> WithdrawalRequests { get; set; }
 
-
-
     public virtual DbSet<Availability> Availabilities { get; set; }
 
     public virtual DbSet<PhotoDelivery> PhotoDeliveries { get; set; }
@@ -82,6 +80,7 @@ public partial class SnaplinkDbContext : DbContext
     public virtual DbSet<EventPhotographer> EventPhotographers { get; set; }
 
     public virtual DbSet<EventBooking> EventBookings { get; set; }
+    
     public virtual DbSet<Rating> Ratings { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -94,1243 +93,767 @@ public partial class SnaplinkDbContext : DbContext
                 .AddJsonFile("appsettings.json", true, true).Build();
         return configuration["ConnectionStrings:DefaultConnection"];
     }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Administrator>(entity =>
+        // User entity configuration
+        modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.AdminId).HasName("PK__Administ__AD0500A64814467C");
-
-            entity.ToTable("Administrator");
-
-            entity.Property(e => e.AdminId).HasColumnName("adminId");
-            entity.Property(e => e.AccessLevel)
-                .HasMaxLength(30)
-                .HasColumnName("accessLevel");
-            entity.Property(e => e.Department)
-                .HasMaxLength(100)
-                .HasColumnName("department");
-            entity.Property(e => e.UserId).HasColumnName("userId");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Administrators)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Administr__userI__6EF57B66");
+            entity.HasKey(e => e.UserId);
+            entity.Property(e => e.UserId).ValueGeneratedOnAdd();
+            entity.Property(e => e.UserName).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.Email).HasMaxLength(255).IsRequired();
+            entity.Property(e => e.PasswordHash).IsRequired();
+            entity.Property(e => e.PhoneNumber).HasMaxLength(20);
+            entity.Property(e => e.FullName).HasMaxLength(200);
+            entity.Property(e => e.ProfileImage).HasMaxLength(500);
+            entity.Property(e => e.Bio).HasMaxLength(1000);
+            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.VerificationCode).HasMaxLength(10);
+            entity.Property(e => e.PasswordResetCode).HasMaxLength(10);
+            
+            entity.HasIndex(e => e.Email).IsUnique();
+            entity.HasIndex(e => e.UserName).IsUnique();
         });
 
-        modelBuilder.Entity<Advertisement>(entity =>
+        // Role entity configuration
+        modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.AdvertisementId).HasName("PK__Advertis__4729E935E7D591B6");
-
-            entity.ToTable("Advertisement");
-
-            entity.Property(e => e.AdvertisementId).HasColumnName("advertisementId");
-            entity.Property(e => e.Cost)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("cost");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.EndDate)
-                .HasColumnType("datetime")
-                .HasColumnName("endDate");
-            entity.Property(e => e.ImageUrl)
-                .HasMaxLength(255)
-                .HasColumnName("imageUrl");
-            entity.Property(e => e.LocationId).HasColumnName("locationId");
-            entity.Property(e => e.PaymentId).HasColumnName("paymentId");
-            entity.Property(e => e.StartDate)
-                .HasColumnType("datetime")
-                .HasColumnName("startDate");
-            entity.Property(e => e.Status)
-                .HasMaxLength(30)
-                .HasColumnName("status");
-            entity.Property(e => e.Title)
-                .HasMaxLength(255)
-                .HasColumnName("title");
-
-            entity.HasOne(d => d.Location).WithMany(p => p.Advertisements)
-                .HasForeignKey(d => d.LocationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Advertisement_Location");
-
-            entity.HasOne(d => d.Payment).WithMany(p => p.Advertisements)
-                .HasForeignKey(d => d.PaymentId)
-                .HasConstraintName("FK_Advertisement_Payment");
+            entity.HasKey(e => e.RoleId);
+            entity.Property(e => e.RoleId).ValueGeneratedOnAdd();
+            entity.Property(e => e.RoleName).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.RoleDescription).HasMaxLength(500);
+            
+            entity.HasIndex(e => e.RoleName).IsUnique();
         });
 
-        modelBuilder.Entity<Booking>(entity =>
+        // UserRole entity configuration (many-to-many relationship)
+        modelBuilder.Entity<UserRole>(entity =>
         {
-            entity.HasKey(e => e.BookingId).HasName("PK__Booking__C6D03BCDDFA35959");
-
-            entity.ToTable("Booking");
-
-            entity.Property(e => e.BookingId).HasColumnName("bookingId");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.EndDatetime)
-                .HasColumnType("datetime")
-                .HasColumnName("endDatetime");
-            entity.Property(e => e.LocationId).HasColumnName("locationId");
-            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
-            entity.Property(e => e.SpecialRequests).HasColumnName("specialRequests");
-            entity.Property(e => e.StartDatetime)
-                .HasColumnType("datetime")
-                .HasColumnName("startDatetime");
-            entity.Property(e => e.Status)
-                .HasMaxLength(30)
-                .HasColumnName("status");
-            entity.Property(e => e.TotalPrice)
-                .HasColumnType("decimal(15, 2)")
-                .HasColumnName("totalPrice");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-            entity.Property(e => e.UserId).HasColumnName("userId");
-
-            entity.HasOne(d => d.Photographer).WithMany(p => p.Bookings)
-                .HasForeignKey(d => d.PhotographerId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Booking_Photographer");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Bookings)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Booking_Users");
-
-            entity.HasOne(d => d.Location).WithMany(p => p.Bookings)
-                .HasForeignKey(d => d.LocationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Booking_Location");
+            entity.HasKey(e => e.UserRoleId);
+            entity.Property(e => e.UserRoleId).ValueGeneratedOnAdd();
+            
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.UserRoles)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Role)
+                .WithMany(r => r.UserRoles)
+                .HasForeignKey(e => e.RoleId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
-        modelBuilder.Entity<Complaint>(entity =>
+        // Photographer entity configuration
+        modelBuilder.Entity<Photographer>(entity =>
         {
-            entity.HasKey(e => e.ComplaintId).HasName("PK__Complain__489708C12E34784F");
-
-            entity.ToTable("Complaint");
-
-            entity.Property(e => e.ComplaintId).HasColumnName("complaintId");
-            entity.Property(e => e.AssignedModeratorId).HasColumnName("assignedModeratorId");
-            entity.Property(e => e.BookingId).HasColumnName("bookingId");
-            entity.Property(e => e.ComplaintType)
-                .HasMaxLength(30)
-                .HasColumnName("complaintType");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.ReportedUserId).HasColumnName("reportedUserId");
-            entity.Property(e => e.ReporterId).HasColumnName("reporterId");
-            entity.Property(e => e.ResolutionNotes).HasColumnName("resolutionNotes");
-            entity.Property(e => e.Status)
-                .HasMaxLength(30)
-                .HasColumnName("status");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-
-            entity.HasOne(d => d.AssignedModerator).WithMany(p => p.Complaints)
-                .HasForeignKey(d => d.AssignedModeratorId)
-                .HasConstraintName("FK_Complaint_Moderator");
-
-            entity.HasOne(d => d.Booking).WithMany(p => p.Complaints)
-                .HasForeignKey(d => d.BookingId)
-                .HasConstraintName("FK_Complaint_Booking");
-
-            entity.HasOne(d => d.ReportedUser).WithMany(p => p.ComplaintReportedUsers)
-                .HasForeignKey(d => d.ReportedUserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Complaint_ReportedUser");
-
-            entity.HasOne(d => d.Reporter).WithMany(p => p.ComplaintReporters)
-                .HasForeignKey(d => d.ReporterId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Complaint_Reporter");
+            entity.HasKey(e => e.PhotographerId);
+            entity.Property(e => e.PhotographerId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Equipment).HasMaxLength(1000);
+            entity.Property(e => e.AvailabilityStatus).HasMaxLength(50);
+            entity.Property(e => e.VerificationStatus).HasMaxLength(50);
+            entity.Property(e => e.Address).HasMaxLength(500);
+            entity.Property(e => e.GoogleMapsAddress).HasMaxLength(500);
+            entity.Property(e => e.Latitude).HasPrecision(10, 8);
+            entity.Property(e => e.Longitude).HasPrecision(11, 8);
+            entity.Property(e => e.HourlyRate).HasPrecision(10, 2);
+            entity.Property(e => e.Rating).HasPrecision(3, 2);
+            entity.Property(e => e.RatingSum).HasPrecision(10, 2);
+            
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.Photographers)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
+        // Location entity configuration
         modelBuilder.Entity<Location>(entity =>
         {
-            entity.HasKey(e => e.LocationId).HasName("PK__Location__30646B6EDF76987D");
-
-            entity.ToTable("Location");
-
-            entity.Property(e => e.LocationId).HasColumnName("locationId");
-            entity.Property(e => e.Address).HasColumnName("address");
-            entity.Property(e => e.Amenities).HasColumnName("amenities");
-            entity.Property(e => e.AvailabilityStatus)
-                .HasMaxLength(30)
-                .HasColumnName("availabilityStatus");
-            entity.Property(e => e.Capacity).HasColumnName("capacity");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.FeaturedStatus)
-                .HasDefaultValue(false)
-                .HasColumnName("featuredStatus");
-            entity.Property(e => e.HourlyRate)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("hourlyRate");
-            entity.Property(e => e.Indoor)
-                .HasDefaultValue(false)
-                .HasColumnName("indoor");
-            entity.Property(e => e.LocationOwnerId).HasColumnName("locationOwnerId");
-            entity.Property(e => e.Name)
-                .HasMaxLength(255)
-                .HasColumnName("name");
-            entity.Property(e => e.Outdoor)
-                .HasDefaultValue(false)
-                .HasColumnName("outdoor");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-            entity.Property(e => e.VerificationStatus)
-                .HasMaxLength(30)
-                .HasColumnName("verificationStatus");
-
-            entity.HasOne(d => d.LocationOwner).WithMany(p => p.Locations)
-                .HasForeignKey(d => d.LocationOwnerId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Location_LocationOwner");
+            entity.HasKey(e => e.LocationId);
+            entity.Property(e => e.LocationId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Address).HasMaxLength(500);
+            entity.Property(e => e.Description).HasMaxLength(2000);
+            entity.Property(e => e.Amenities).HasMaxLength(1000);
+            entity.Property(e => e.HourlyRate).HasPrecision(10, 2);
+            entity.Property(e => e.AvailabilityStatus).HasMaxLength(50);
+            entity.Property(e => e.VerificationStatus).HasMaxLength(50);
+            entity.Property(e => e.LocationType).HasMaxLength(50);
+            entity.Property(e => e.ExternalPlaceId).HasMaxLength(100);
+            entity.Property(e => e.Latitude).HasPrecision(10, 8);
+            entity.Property(e => e.Longitude).HasPrecision(11, 8);
+            
+            entity.HasOne(e => e.LocationOwner)
+                .WithMany(lo => lo.Locations)
+                .HasForeignKey(e => e.LocationOwnerId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
+        // LocationOwner entity configuration
+        modelBuilder.Entity<LocationOwner>(entity =>
+        {
+            entity.HasKey(e => e.LocationOwnerId);
+            entity.Property(e => e.LocationOwnerId).ValueGeneratedOnAdd();
+            entity.Property(e => e.BusinessName).HasMaxLength(200);
+            entity.Property(e => e.BusinessAddress).HasMaxLength(500);
+            entity.Property(e => e.BusinessRegistrationNumber).HasMaxLength(100);
+            entity.Property(e => e.VerificationStatus).HasMaxLength(50);
+            
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.LocationOwners)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Booking entity configuration
+        modelBuilder.Entity<Booking>(entity =>
+        {
+            entity.HasKey(e => e.BookingId);
+            entity.Property(e => e.BookingId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.SpecialRequests).HasMaxLength(1000);
+            entity.Property(e => e.TotalPrice).HasPrecision(10, 2);
+            
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.Bookings)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Photographer)
+                .WithMany(p => p.Bookings)
+                .HasForeignKey(e => e.PhotographerId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Location)
+                .WithMany(l => l.Bookings)
+                .HasForeignKey(e => e.LocationId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Payment entity configuration
+        modelBuilder.Entity<Payment>(entity =>
+        {
+            entity.HasKey(e => e.PaymentId);
+            entity.Property(e => e.PaymentId).ValueGeneratedOnAdd();
+            entity.Property(e => e.TotalAmount).HasPrecision(10, 2).IsRequired();
+            entity.Property(e => e.Currency).HasMaxLength(3).IsRequired();
+            entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.ExternalTransactionId).HasMaxLength(100);
+            entity.Property(e => e.Method).HasMaxLength(50);
+            entity.Property(e => e.Note).HasMaxLength(500);
+            
+            entity.HasOne(e => e.Customer)
+                .WithMany()
+                .HasForeignKey(e => e.CustomerId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Booking)
+                .WithOne(b => b.Payment)
+                .HasForeignKey<Payment>(e => e.BookingId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Transaction entity configuration
+        modelBuilder.Entity<Transaction>(entity =>
+        {
+            entity.HasKey(e => e.TransactionId);
+            entity.Property(e => e.TransactionId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Amount).HasPrecision(10, 2).IsRequired();
+            entity.Property(e => e.Currency).HasMaxLength(3).IsRequired();
+            entity.Property(e => e.Type).IsRequired();
+            entity.Property(e => e.Status).IsRequired();
+            entity.Property(e => e.Note).HasMaxLength(500);
+            
+            entity.HasOne(e => e.ReferencePayment)
+                .WithMany(p => p.Transactions)
+                .HasForeignKey(e => e.ReferencePaymentId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.FromUser)
+                .WithMany(u => u.FromTransactions)
+                .HasForeignKey(e => e.FromUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.ToUser)
+                .WithMany(u => u.ToTransactions)
+                .HasForeignKey(e => e.ToUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Image entity configuration
         modelBuilder.Entity<Image>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_Image_Id");
-            entity.ToTable("Image");
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Url).HasMaxLength(2048).HasColumnName("url");
-            entity.Property(e => e.IsPrimary).HasDefaultValue(false).HasColumnName("is_primary");
-            entity.Property(e => e.Caption).HasColumnName("caption");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())").HasColumnType("datetime").HasColumnName("created_at");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-            entity.Property(e => e.EventId).HasColumnName("event_id");
-
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Url).HasMaxLength(500).IsRequired();
+            entity.Property(e => e.Caption).HasMaxLength(500);
+            entity.Property(e => e.IsPrimary).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            
             entity.HasOne(e => e.User)
                 .WithMany(u => u.Images)
                 .HasForeignKey(e => e.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
+                .OnDelete(DeleteBehavior.NoAction);
+                
             entity.HasOne(e => e.Photographer)
                 .WithMany(p => p.Images)
                 .HasForeignKey(e => e.PhotographerId)
-                .OnDelete(DeleteBehavior.Restrict);
-
+                .OnDelete(DeleteBehavior.NoAction);
+                
             entity.HasOne(e => e.Location)
                 .WithMany(l => l.Images)
                 .HasForeignKey(e => e.LocationId)
-                .OnDelete(DeleteBehavior.Restrict);
-
+                .OnDelete(DeleteBehavior.NoAction);
+                
             entity.HasOne(e => e.LocationEvent)
                 .WithMany(le => le.Images)
                 .HasForeignKey(e => e.EventId)
-                .OnDelete(DeleteBehavior.Restrict);
-
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
-        modelBuilder.Entity<LocationOwner>(entity =>
-        {
-            entity.HasKey(e => e.LocationOwnerId).HasName("PK__Location__0285A3BB6376E1CF");
-
-            entity.ToTable("LocationOwner");
-
-            entity.Property(e => e.LocationOwnerId).HasColumnName("locationOwnerId");
-            entity.Property(e => e.BusinessAddress).HasColumnName("businessAddress");
-            entity.Property(e => e.BusinessName)
-                .HasMaxLength(255)
-                .HasColumnName("businessName");
-            entity.Property(e => e.BusinessRegistrationNumber)
-                .HasMaxLength(100)
-                .HasColumnName("businessRegistrationNumber");
-            entity.Property(e => e.UserId).HasColumnName("userId");
-            entity.Property(e => e.VerificationStatus)
-                .HasMaxLength(30)
-                .HasColumnName("verificationStatus");
-
-            entity.HasOne(d => d.User).WithMany(p => p.LocationOwners)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_LocationOwner_Users");
-        });
-
-        modelBuilder.Entity<Messagess>(entity =>
-        {
-            entity.HasKey(e => e.MessageId).HasName("PK__Messages__4808B993F0C0786B");
-
-            entity.ToTable("Messagess");
-
-            entity.Property(e => e.MessageId).HasColumnName("messageId");
-            entity.Property(e => e.SenderId).HasColumnName("senderId");
-            entity.Property(e => e.RecipientId).HasColumnName("recipientId");
-            entity.Property(e => e.ConversationId).HasColumnName("conversationId");
-            entity.Property(e => e.Content)
-                .HasMaxLength(400)
-                .HasColumnName("content");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.MessageType)
-                .HasMaxLength(20)
-                .HasColumnName("messageType");
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .HasColumnName("status");
-            entity.Property(e => e.ReadAt)
-                .HasColumnType("datetime")
-                .HasColumnName("readAt");
-
-            entity.HasOne(d => d.Recipient).WithMany(p => p.MessagessRecipients)
-                .HasForeignKey(d => d.RecipientId)
-                .HasConstraintName("FK_Messagess_Recipient");
-
-            entity.HasOne(d => d.Sender).WithMany(p => p.MessagessSenders)
-                .HasForeignKey(d => d.SenderId)
-                .HasConstraintName("FK_Messagess_Sender");
-
-            entity.HasOne(d => d.Conversation).WithMany(p => p.Messages)
-                .HasForeignKey(d => d.ConversationId)
-                .HasConstraintName("FK_Messagess_Conversation");
-
-            // Add indexes for better performance
-            entity.HasIndex(e => e.SenderId).HasDatabaseName("IX_Messagess_SenderId");
-            entity.HasIndex(e => e.RecipientId).HasDatabaseName("IX_Messagess_RecipientId");
-            entity.HasIndex(e => e.ConversationId).HasDatabaseName("IX_Messagess_ConversationId");
-            entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_Messagess_CreatedAt");
-            entity.HasIndex(e => e.Status).HasDatabaseName("IX_Messagess_Status");
-        });
-
-        modelBuilder.Entity<Moderator>(entity =>
-        {
-            entity.HasKey(e => e.ModeratorId).HasName("PK__Moderato__CA327EF233C4DF91");
-
-            entity.ToTable("Moderator");
-
-            entity.Property(e => e.ModeratorId).HasColumnName("moderatorId");
-            entity.Property(e => e.AreasOfFocus).HasColumnName("areasOfFocus");
-            entity.Property(e => e.UserId).HasColumnName("userId");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Moderators)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Moderator_Users");
-        });
-
-        modelBuilder.Entity<Notification>(entity =>
-        {
-            entity.HasKey(e => e.MotificationId).HasName("PK__Notifica__9F9C8614B3C7E2AF");
-
-            entity.Property(e => e.MotificationId).HasColumnName("motificationId");
-            entity.Property(e => e.Content).HasColumnName("content");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.NotificationType)
-                .HasMaxLength(30)
-                .HasColumnName("notificationType");
-            entity.Property(e => e.ReadStatus)
-                .HasDefaultValue(false)
-                .HasColumnName("readStatus");
-            entity.Property(e => e.ReferenceId).HasColumnName("referenceId");
-            entity.Property(e => e.Title)
-                .HasMaxLength(255)
-                .HasColumnName("title");
-            entity.Property(e => e.UserId).HasColumnName("userId");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Notifications)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Notifications_Users");
-        });
-
-        modelBuilder.Entity<Payment>(entity =>
-        {
-            entity.HasKey(e => e.PaymentId).HasName("PK__Payment__A0D9EFC6D01669A5");
-
-            entity.ToTable("Payment");
-
-            entity.Property(e => e.PaymentId).HasColumnName("paymentId");
-            entity.Property(e => e.CustomerId).HasColumnName("customerId");
-            entity.Property(e => e.BookingId).HasColumnName("bookingId");
-            entity.Property(e => e.TotalAmount)
-                .HasColumnType("decimal(15, 2)")
-                .HasColumnName("totalAmount");
-            entity.Property(e => e.Currency)
-                .HasMaxLength(3)
-                .HasDefaultValue("VND")
-                .HasColumnName("currency");
-            entity.Property(e => e.Status)
-                .HasConversion<string>()
-                .HasMaxLength(20)
-                .HasColumnName("status");
-            entity.Property(e => e.ExternalTransactionId)
-                .HasMaxLength(255)
-                .HasColumnName("externalTransactionId");
-            entity.Property(e => e.Method)
-                .HasMaxLength(50)
-                .HasDefaultValue("PayOS")
-                .HasColumnName("method");
-            entity.Property(e => e.Note).HasColumnName("note");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-
-            entity.HasOne(d => d.Customer).WithMany()
-                .HasForeignKey(d => d.CustomerId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Payment_Customer");
-
-            entity.HasOne(d => d.Booking).WithOne(p => p.Payment)
-                .HasForeignKey<Payment>(d => d.BookingId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Payment_Booking");
-        });
-
-        modelBuilder.Entity<Photographer>(entity =>
-        {
-            entity.HasKey(e => e.PhotographerId).HasName("PK__Photogra__476AAC030CF022A8");
-
-            entity.ToTable("Photographer");
-
-            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
-            entity.Property(e => e.AvailabilityStatus)
-                .HasMaxLength(30)
-                .HasColumnName("availabilityStatus");
-            entity.Property(e => e.Equipment).HasColumnName("equipment");
-            entity.Property(e => e.FeaturedStatus)
-                .HasDefaultValue(false)
-                .HasColumnName("featuredStatus");
-            entity.Property(e => e.HourlyRate)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("hourlyRate");
-            entity.Property(e => e.Rating)
-                .HasColumnType("decimal(3, 2)")
-                .HasColumnName("rating");
-            entity.Property(e => e.RatingSum)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("ratingSum");
-            entity.Property(e => e.RatingCount)
-                .HasColumnName("ratingCount");
-            entity.Property(e => e.UserId).HasColumnName("userId");
-            entity.Property(e => e.VerificationStatus)
-                .HasMaxLength(30)
-                .HasColumnName("verificationStatus");
-            entity.Property(e => e.YearsExperience).HasColumnName("yearsExperience");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Photographers)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Photographer_Users");
-        });
-
-        modelBuilder.Entity<PhotographerStyle>(entity =>
-        {
-            entity.HasKey(e => e.PhotographerStyleId).HasName("PK__Photogra__D64320D6694031E8");
-
-            entity.ToTable("PhotographerStyle");
-
-            entity.Property(e => e.PhotographerStyleId).HasColumnName("photographerStyleId");
-            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
-            entity.Property(e => e.StyleId).HasColumnName("styleId");
-
-            entity.HasOne(d => d.Photographer).WithMany(p => p.PhotographerStyles)
-                .HasForeignKey(d => d.PhotographerId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PhotographerStyle_Photographer");
-
-            entity.HasOne(d => d.Style).WithMany(p => p.PhotographerStyles)
-                .HasForeignKey(d => d.StyleId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PhotographerStyle_Style");
-        });
-
-        modelBuilder.Entity<Wallet>(entity =>
-        {
-            entity.HasKey(e => e.WalletId).HasName("PK__Wallet__A5C5D5C5D5C5D5C5");
-
-            entity.ToTable("Wallet");
-
-            entity.Property(e => e.WalletId).HasColumnName("walletId");
-            entity.Property(e => e.Balance)
-                .HasDefaultValue(0m)
-                .HasColumnType("decimal(15, 2)")
-                .HasColumnName("balance");
-            entity.Property(e => e.UserId).HasColumnName("userId");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Wallets)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Wallet_User");
-        });
-
-        modelBuilder.Entity<PremiumPackage>(entity =>
-        {
-            entity.HasKey(e => e.PackageId).HasName("PK__PremiumP__AA8D20C86F773089");
-
-            entity.ToTable("PremiumPackage");
-
-            entity.Property(e => e.PackageId).HasColumnName("packageId");
-            entity.Property(e => e.ApplicableTo)
-                .HasMaxLength(30)
-                .HasColumnName("applicableTo");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.DurationDays).HasColumnName("durationDays");
-            entity.Property(e => e.Features).HasColumnName("features");
-            entity.Property(e => e.Name)
-                .HasMaxLength(255)
-                .HasColumnName("name");
-            entity.Property(e => e.Price)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("price");
-        });
-
-        modelBuilder.Entity<PremiumSubscription>(entity =>
-        {
-            entity.HasKey(e => e.PremiumSubscriptionId).HasName("PK__PremiumS__CE9A698AE4183E7A");
-
-            entity.ToTable("PremiumSubscription");
-
-            entity.Property(e => e.PremiumSubscriptionId).HasColumnName("premiumSubscriptionId");
-            entity.Property(e => e.EndDate)
-                .HasColumnType("datetime")
-                .HasColumnName("endDate");
-            entity.Property(e => e.PackageId).HasColumnName("packageId");
-            entity.Property(e => e.PaymentId).HasColumnName("paymentId");
-            entity.Property(e => e.StartDate)
-                .HasColumnType("datetime")
-                .HasColumnName("startDate");
-            entity.Property(e => e.Status)
-                .HasMaxLength(30)
-                .HasColumnName("status");
-            entity.Property(e => e.UserId).HasColumnName("userId");
-            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
-            entity.Property(e => e.LocationId).HasColumnName("locationId");
-
-            entity.HasOne(d => d.Photographer)
-    .WithMany(p => p.PremiumSubscriptions)
-    .HasForeignKey(d => d.PhotographerId)
-    .OnDelete(DeleteBehavior.NoAction)
-    .HasConstraintName("FK_PremiumSubscription_Photographer");
-
-            entity.HasOne(d => d.Location)
-    .WithMany(l => l.PremiumSubscriptions)
-    .HasForeignKey(d => d.LocationId)
-    .OnDelete(DeleteBehavior.NoAction)
-    .HasConstraintName("FK_PremiumSubscription_Location");
-
-            // Chỉ cho phép đúng 1 mục tiêu (Photographer XOR Location)
-            entity.HasCheckConstraint(
-     "CK_PremiumSubscription_ExactlyOneTarget",
-     "((photographerId IS NOT NULL AND locationId IS NULL) OR (photographerId IS NULL AND locationId IS NOT NULL))"
- );
-
-            // One active subscription per target (enforced via Status flag)
-            entity.HasIndex(e => new { e.PhotographerId, e.Status })
-                .IsUnique()
-                .HasFilter("[photographerId] IS NOT NULL AND [Status] = 'active'")
-                .HasDatabaseName("UX_Sub_Active_Photographer");
-
-            entity.HasIndex(e => new { e.LocationId, e.Status })
-                .IsUnique()
-                .HasFilter("[locationId] IS NOT NULL AND [Status] = 'active'")
-                .HasDatabaseName("UX_Sub_Active_Location");
-
-            entity.HasOne(d => d.Package).WithMany(p => p.PremiumSubscriptions)
-                .HasForeignKey(d => d.PackageId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PremiumSubscription_PremiumPackage");
-
-            entity.HasOne(d => d.Payment).WithMany(p => p.PremiumSubscriptions)
-                .HasForeignKey(d => d.PaymentId)
-                .HasConstraintName("FK_PremiumSubscription_Payment");
-
-            entity.HasOne(d => d.User).WithMany(p => p.PremiumSubscriptions)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PremiumSubscription_Users");
-        });
-
-        modelBuilder.Entity<Review>(entity =>
-        {
-            entity.HasKey(e => e.ReviewId).HasName("PK__Review__2ECD6E04FCF9D780");
-
-            entity.ToTable("Review");
-
-            entity.Property(e => e.ReviewId).HasColumnName("reviewId");
-            entity.Property(e => e.BookingId).HasColumnName("bookingId");
-            entity.Property(e => e.Comment).HasColumnName("comment");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.Rating).HasColumnName("rating");
-            entity.Property(e => e.RevieweeId).HasColumnName("revieweeId");
-            entity.Property(e => e.RevieweeType)
-                .HasMaxLength(30)
-                .HasColumnName("revieweeType");
-            entity.Property(e => e.ReviewerId).HasColumnName("reviewerId");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-
-            entity.HasOne(d => d.Booking).WithMany(p => p.Reviews)
-                .HasForeignKey(d => d.BookingId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Review_Booking");
-        });
-
-        modelBuilder.Entity<Role>(entity =>
-        {
-            entity.HasKey(e => e.RoleId).HasName("PK__Roles__CD98462AC9EEEE46");
-
-            entity.Property(e => e.RoleId).HasColumnName("roleId");
-            entity.Property(e => e.RoleDescription)
-                .HasMaxLength(500)
-                .HasColumnName("roleDescription");
-            entity.Property(e => e.RoleName)
-                .HasMaxLength(30)
-                .HasColumnName("roleName");
-        });
-
+        // Style entity configuration
         modelBuilder.Entity<Style>(entity =>
         {
-            entity.HasKey(e => e.StyleId).HasName("PK__Style__1F798D1E10021AA4");
-
-            entity.ToTable("Style");
-
-            entity.Property(e => e.StyleId).HasColumnName("styleId");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.Name)
-                .HasMaxLength(255)
-                .HasColumnName("name");
+            entity.HasKey(e => e.StyleId);
+            entity.Property(e => e.StyleId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Name).HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            
+            entity.HasIndex(e => e.Name).IsUnique();
         });
 
-        modelBuilder.Entity<Transaction>(entity =>
-        {
-            entity.HasKey(e => e.TransactionId).HasName("PK__Transact__9B57CF7272086B9B");
-
-            entity.ToTable("Transaction");
-
-            entity.Property(e => e.TransactionId).HasColumnName("transactionId");
-            entity.Property(e => e.ReferencePaymentId).HasColumnName("referencePaymentId");
-            entity.Property(e => e.FromUserId).HasColumnName("fromUserId");
-            entity.Property(e => e.ToUserId).HasColumnName("toUserId");
-            entity.Property(e => e.Amount)
-                .HasColumnType("decimal(15, 2)")
-                .HasColumnName("amount");
-            entity.Property(e => e.Currency)
-                .HasMaxLength(3)
-                .HasDefaultValue("VND")
-                .HasColumnName("currency");
-            entity.Property(e => e.Type)
-                .HasConversion<string>()
-                .HasMaxLength(20)
-                .HasColumnName("type");
-            entity.Property(e => e.Status)
-                .HasConversion<string>()
-                .HasMaxLength(20)
-                .HasColumnName("status");
-            entity.Property(e => e.Note).HasColumnName("note");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-
-            entity.HasOne(d => d.ReferencePayment).WithMany(p => p.Transactions)
-                .HasForeignKey(d => d.ReferencePaymentId)
-                .HasConstraintName("FK_Transaction_Payment");
-
-            entity.HasOne(d => d.FromUser).WithMany(p => p.FromTransactions)
-                .HasForeignKey(d => d.FromUserId)
-                .HasConstraintName("FK_Transaction_FromUser");
-
-            entity.HasOne(d => d.ToUser).WithMany(p => p.ToTransactions)
-                .HasForeignKey(d => d.ToUserId)
-                .HasConstraintName("FK_Transaction_ToUser");
-        });
-
-        modelBuilder.Entity<User>(entity =>
-        {
-            entity.HasKey(e => e.UserId).HasName("PK__Users__CB9A1CFF1A716FE7");
-
-            entity.Property(e => e.UserId).HasColumnName("userId");
-            entity.Property(e => e.Bio)
-                .HasMaxLength(300)
-                .HasColumnName("bio");
-            entity.Property(e => e.CreateAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createAt");
-            entity.Property(e => e.Email)
-                .HasMaxLength(30)
-                .HasColumnName("email");
-            entity.Property(e => e.FullName)
-                .HasMaxLength(50)
-                .HasColumnName("fullName");
-            entity.Property(e => e.PasswordHash)
-                .HasMaxLength(100)
-                .HasColumnName("passwordHash");
-            entity.Property(e => e.PhoneNumber)
-                .HasMaxLength(15)
-                .HasColumnName("phoneNumber");
-            entity.Property(e => e.ProfileImage)
-                .HasMaxLength(200)
-                .HasColumnName("profileImage");
-            entity.Property(e => e.Status)
-                .HasMaxLength(30)
-                .HasColumnName("status");
-            entity.Property(e => e.UpdateAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updateAt");
-            entity.Property(e => e.UserName)
-                .HasMaxLength(30)
-                .HasColumnName("userName");
-        });
-
-        modelBuilder.Entity<UserRole>(entity =>
-        {
-            entity.HasKey(e => e.UserRoleId).HasName("PK__UserRole__CD3149CC42F7DFB1");
-
-            entity.ToTable("UserRole");
-
-            entity.Property(e => e.UserRoleId).HasColumnName("userRoleId");
-            entity.Property(e => e.AssignedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("assignedAt");
-            entity.Property(e => e.RoleId).HasColumnName("roleId");
-            entity.Property(e => e.UserId).HasColumnName("userId");
-
-            entity.HasOne(d => d.Role).WithMany(p => p.UserRoles)
-                .HasForeignKey(d => d.RoleId)
-                .HasConstraintName("FK_UserRole_Role");
-
-            entity.HasOne(d => d.User).WithMany(p => p.UserRoles)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK_UserRole_User");
-        });
-
+        // UserStyle entity configuration (many-to-many relationship)
         modelBuilder.Entity<UserStyle>(entity =>
         {
-            entity.HasKey(e => e.UserStyleId).HasName("PK__UserStyle__476AAC030CF022A8");
-
-            entity.ToTable("UserStyle");
-
-            entity.Property(e => e.UserStyleId).HasColumnName("userStyleId");
-            entity.Property(e => e.StyleId).HasColumnName("styleId");
-            entity.Property(e => e.UserId).HasColumnName("userId");
-
-            entity.HasOne(d => d.Style).WithMany(p => p.UserStyles)
-                .HasForeignKey(d => d.StyleId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_UserStyle_Style");
-
-            entity.HasOne(d => d.User).WithMany(p => p.UserStyles)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_UserStyle_User");
+            entity.HasKey(e => e.UserStyleId);
+            entity.Property(e => e.UserStyleId).ValueGeneratedOnAdd();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.UserStyles)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Style)
+                .WithMany(s => s.UserStyles)
+                .HasForeignKey(e => e.StyleId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
-        modelBuilder.Entity<WithdrawalRequest>(entity =>
+        // PhotographerStyle entity configuration (many-to-many relationship)
+        modelBuilder.Entity<PhotographerStyle>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Withdraw__3213E83FE86C5098");
-
-            entity.ToTable("WithdrawalRequest");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.WalletId).HasColumnName("walletId");
-            entity.Property(e => e.Amount)
-                .HasColumnType("decimal(15, 2)")
-                .HasColumnName("amount");
-            entity.Property(e => e.BankAccountName)
-                .HasMaxLength(100)
-                .HasColumnName("bankAccountName");
-            entity.Property(e => e.BankAccountNumber)
-                .HasMaxLength(100)
-                .HasColumnName("bankAccountNumber");
-            entity.Property(e => e.BankName)
-                .HasMaxLength(100)
-                .HasColumnName("bankName");
-            entity.Property(e => e.ProcessedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("processedAt");
-            entity.Property(e => e.ProcessedByModeratorId).HasColumnName("processedByModeratorId");
-            entity.Property(e => e.RejectionReason).HasColumnName("rejectionReason");
-            entity.Property(e => e.RequestStatus)
-                .HasMaxLength(30)
-                .HasColumnName("requestStatus");
-            entity.Property(e => e.RequestedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("requestedAt");
-
-            entity.HasOne(d => d.Wallet).WithMany(p => p.WithdrawalRequests)
-                .HasForeignKey(d => d.WalletId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_WithdrawalRequest_Wallet");
+            entity.HasKey(e => e.PhotographerStyleId);
+            entity.Property(e => e.PhotographerStyleId).ValueGeneratedOnAdd();
+            
+            entity.HasOne(e => e.Photographer)
+                .WithMany(p => p.PhotographerStyles)
+                .HasForeignKey(e => e.PhotographerId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Style)
+                .WithMany(s => s.PhotographerStyles)
+                .HasForeignKey(e => e.StyleId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
-
-        modelBuilder.Entity<Availability>(entity =>
+        // Review entity configuration
+        modelBuilder.Entity<Review>(entity =>
         {
-            entity.HasKey(e => e.AvailabilityId).HasName("PK__Availability__AvailabilityId");
-
-            entity.ToTable("Availability");
-
-            entity.Property(e => e.AvailabilityId).HasColumnName("availabilityId");
-            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
-            entity.Property(e => e.DayOfWeek).HasColumnName("dayOfWeek");
-            entity.Property(e => e.StartTime).HasColumnName("startTime");
-            entity.Property(e => e.EndTime).HasColumnName("endTime");
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .HasColumnName("status");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.UpdatedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-
-            entity.HasOne(d => d.Photographer).WithMany(p => p.Availabilities)
-                .HasForeignKey(d => d.PhotographerId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_Availability_Photographer");
-
-            // Add indexes for better performance
-            entity.HasIndex(e => e.PhotographerId).HasDatabaseName("IX_Availability_PhotographerId");
-            entity.HasIndex(e => e.DayOfWeek).HasDatabaseName("IX_Availability_DayOfWeek");
-            entity.HasIndex(e => e.Status).HasDatabaseName("IX_Availability_Status");
-
-            // Composite indexes for complex queries
-            entity.HasIndex(e => new { e.PhotographerId, e.DayOfWeek, e.Status })
-                .HasDatabaseName("IX_Availability_Photographer_Day_Status");
-
-            entity.HasIndex(e => new { e.DayOfWeek, e.Status, e.StartTime, e.EndTime })
-                .HasDatabaseName("IX_Availability_Day_Status_Time");
+            entity.HasKey(e => e.ReviewId);
+            entity.Property(e => e.ReviewId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Comment).HasMaxLength(1000);
+            entity.Property(e => e.Rating).IsRequired();
+            entity.Property(e => e.RevieweeType).HasMaxLength(50);
+            entity.Property(e => e.RevieweeId).IsRequired();
+            entity.Property(e => e.ReviewerId).IsRequired();
+            
+            entity.HasOne(e => e.Booking)
+                .WithMany(b => b.Reviews)
+                .HasForeignKey(e => e.BookingId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
-        modelBuilder.Entity<PhotoDelivery>(entity =>
-        {
-            entity.HasKey(e => e.PhotoDeliveryId).HasName("PK__PhotoDelivery__PhotoDeliveryId");
-
-            entity.ToTable("PhotoDelivery");
-
-            entity.Property(e => e.PhotoDeliveryId).HasColumnName("photoDeliveryId");
-            entity.Property(e => e.BookingId).HasColumnName("bookingId");
-            entity.Property(e => e.DeliveryMethod)
-                .HasMaxLength(50)
-                .HasColumnName("deliveryMethod");
-            entity.Property(e => e.DriveLink)
-                .HasMaxLength(500)
-                .HasColumnName("driveLink");
-            entity.Property(e => e.DriveFolderName)
-                .HasMaxLength(100)
-                .HasColumnName("driveFolderName");
-            entity.Property(e => e.PhotoCount).HasColumnName("photoCount");
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .HasColumnName("status");
-            entity.Property(e => e.UploadedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("uploadedAt");
-            entity.Property(e => e.DeliveredAt)
-                .HasColumnType("datetime")
-                .HasColumnName("deliveredAt");
-            entity.Property(e => e.ExpiresAt)
-                .HasColumnType("datetime")
-                .HasColumnName("expiresAt");
-            entity.Property(e => e.Notes)
-                .HasMaxLength(500)
-                .HasColumnName("notes");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.UpdatedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-
-            entity.HasOne(d => d.Booking).WithOne(p => p.PhotoDelivery)
-                .HasForeignKey<PhotoDelivery>(d => d.BookingId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_PhotoDelivery_Booking");
-
-            // Add indexes for better performance
-            entity.HasIndex(e => e.BookingId).HasDatabaseName("IX_PhotoDelivery_BookingId");
-            entity.HasIndex(e => e.Status).HasDatabaseName("IX_PhotoDelivery_Status");
-            entity.HasIndex(e => e.DeliveryMethod).HasDatabaseName("IX_PhotoDelivery_DeliveryMethod");
-        });
-
-        modelBuilder.Entity<DeviceInfo>(entity =>
-        {
-            entity.HasKey(e => e.DeviceInfoId).HasName("PK__DeviceInfo__DeviceInfoId");
-
-            entity.ToTable("DeviceInfo");
-
-            entity.Property(e => e.DeviceInfoId).HasColumnName("deviceInfoId");
-            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
-            entity.Property(e => e.DeviceType)
-                .HasMaxLength(100)
-                .HasColumnName("deviceType");
-            entity.Property(e => e.Brand)
-                .HasMaxLength(100)
-                .HasColumnName("brand");
-            entity.Property(e => e.Model)
-                .HasMaxLength(100)
-                .HasColumnName("model");
-            entity.Property(e => e.OperatingSystem)
-                .HasMaxLength(20)
-                .HasColumnName("operatingSystem");
-            entity.Property(e => e.OsVersion)
-                .HasMaxLength(20)
-                .HasColumnName("osVersion");
-            entity.Property(e => e.ScreenResolution)
-                .HasMaxLength(50)
-                .HasColumnName("screenResolution");
-            entity.Property(e => e.CameraResolution)
-                .HasMaxLength(20)
-                .HasColumnName("cameraResolution");
-            entity.Property(e => e.StorageCapacity)
-                .HasMaxLength(100)
-                .HasColumnName("storageCapacity");
-            entity.Property(e => e.BatteryCapacity)
-                .HasMaxLength(100)
-                .HasColumnName("batteryCapacity");
-            entity.Property(e => e.Features)
-                .HasMaxLength(500)
-                .HasColumnName("features");
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .HasColumnName("status");
-            entity.Property(e => e.Notes)
-                .HasMaxLength(500)
-                .HasColumnName("notes");
-            entity.Property(e => e.LastUsedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("lastUsedAt");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.UpdatedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-
-            entity.HasOne(d => d.Photographer).WithMany(p => p.DeviceInfos)
-                .HasForeignKey(d => d.PhotographerId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_DeviceInfo_Photographer");
-
-            // Add indexes for better performance
-            entity.HasIndex(e => e.PhotographerId).HasDatabaseName("IX_DeviceInfo_PhotographerId");
-            entity.HasIndex(e => e.DeviceType).HasDatabaseName("IX_DeviceInfo_DeviceType");
-            entity.HasIndex(e => e.Brand).HasDatabaseName("IX_DeviceInfo_Brand");
-            entity.HasIndex(e => e.Status).HasDatabaseName("IX_DeviceInfo_Status");
-            entity.HasIndex(e => e.LastUsedAt).HasDatabaseName("IX_DeviceInfo_LastUsedAt");
-        });
-
-        modelBuilder.Entity<Conversation>(entity =>
-        {
-            entity.HasKey(e => e.ConversationId).HasName("PK__Conversation__ConversationId");
-
-            entity.ToTable("Conversation");
-
-            entity.Property(e => e.ConversationId).HasColumnName("conversationId");
-            entity.Property(e => e.Title)
-                .HasMaxLength(200)
-                .HasColumnName("title");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.UpdatedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .HasColumnName("status");
-            entity.Property(e => e.Type)
-                .HasMaxLength(20)
-                .HasColumnName("type");
-
-            // Add indexes for better performance
-            entity.HasIndex(e => e.Status).HasDatabaseName("IX_Conversation_Status");
-            entity.HasIndex(e => e.Type).HasDatabaseName("IX_Conversation_Type");
-            entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_Conversation_CreatedAt");
-        });
-
-        modelBuilder.Entity<ConversationParticipant>(entity =>
-        {
-            entity.HasKey(e => e.ConversationParticipantId).HasName("PK__ConversationParticipant__ConversationParticipantId");
-
-            entity.ToTable("ConversationParticipant");
-
-            entity.Property(e => e.ConversationParticipantId).HasColumnName("conversationParticipantId");
-            entity.Property(e => e.ConversationId).HasColumnName("conversationId");
-            entity.Property(e => e.UserId).HasColumnName("userId");
-            entity.Property(e => e.JoinedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("joinedAt");
-            entity.Property(e => e.LeftAt)
-                .HasColumnType("datetime")
-                .HasColumnName("leftAt");
-            entity.Property(e => e.Role)
-                .HasMaxLength(20)
-                .HasColumnName("role");
-            entity.Property(e => e.IsActive)
-                .HasColumnName("isActive");
-
-            entity.HasOne(d => d.Conversation).WithMany(p => p.Participants)
-                .HasForeignKey(d => d.ConversationId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_ConversationParticipant_Conversation");
-
-            entity.HasOne(d => d.User).WithMany(p => p.ConversationParticipants)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_ConversationParticipant_User");
-
-            // Add indexes for better performance
-            entity.HasIndex(e => e.ConversationId).HasDatabaseName("IX_ConversationParticipant_ConversationId");
-            entity.HasIndex(e => e.UserId).HasDatabaseName("IX_ConversationParticipant_UserId");
-            entity.HasIndex(e => e.IsActive).HasDatabaseName("IX_ConversationParticipant_IsActive");
-            entity.HasIndex(e => e.Role).HasDatabaseName("IX_ConversationParticipant_Role");
-        });
-
-        modelBuilder.Entity<LocationEvent>(entity =>
-        {
-            entity.HasKey(e => e.EventId).HasName("PK__LocationEvent__EventId");
-
-            entity.ToTable("LocationEvent");
-
-            entity.Property(e => e.EventId).HasColumnName("eventId");
-            entity.Property(e => e.LocationId).HasColumnName("locationId");
-            entity.Property(e => e.Name)
-                .HasMaxLength(255)
-                .HasColumnName("name");
-            entity.Property(e => e.Description)
-                .HasMaxLength(1000)
-                .HasColumnName("description");
-            entity.Property(e => e.StartDate)
-                .HasColumnType("datetime")
-                .HasColumnName("startDate");
-            entity.Property(e => e.EndDate)
-                .HasColumnType("datetime")
-                .HasColumnName("endDate");
-            entity.Property(e => e.DiscountedPrice)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("discountedPrice");
-            entity.Property(e => e.OriginalPrice)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("originalPrice");
-            entity.Property(e => e.MaxPhotographers)
-                .HasColumnName("maxPhotographers");
-            entity.Property(e => e.MaxBookingsPerSlot)
-                .HasColumnName("maxBookingsPerSlot");
-            entity.Property(e => e.Status)
-                .HasMaxLength(30)
-                .HasColumnName("status");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-
-            entity.HasOne(d => d.Location).WithMany(p => p.LocationEvents)
-                .HasForeignKey(d => d.LocationId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_LocationEvent_Location");
-
-            // Add indexes for better performance
-            entity.HasIndex(e => e.LocationId).HasDatabaseName("IX_LocationEvent_LocationId");
-            entity.HasIndex(e => e.Status).HasDatabaseName("IX_LocationEvent_Status");
-            entity.HasIndex(e => e.StartDate).HasDatabaseName("IX_LocationEvent_StartDate");
-            entity.HasIndex(e => e.EndDate).HasDatabaseName("IX_LocationEvent_EndDate");
-            entity.HasIndex(e => new { e.Status, e.StartDate, e.EndDate })
-                .HasDatabaseName("IX_LocationEvent_Status_DateRange");
-        });
-
-        modelBuilder.Entity<EventPhotographer>(entity =>
-        {
-            entity.HasKey(e => e.EventPhotographerId).HasName("PK__EventPhotographer__EventPhotographerId");
-
-            entity.ToTable("EventPhotographer");
-
-            entity.Property(e => e.EventPhotographerId).HasColumnName("eventPhotographerId");
-            entity.Property(e => e.EventId).HasColumnName("eventId");
-            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
-            entity.Property(e => e.Status)
-                .HasMaxLength(30)
-                .HasColumnName("status");
-            entity.Property(e => e.AppliedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("appliedAt");
-            entity.Property(e => e.ApprovedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("approvedAt");
-            entity.Property(e => e.RejectionReason)
-                .HasMaxLength(500)
-                .HasColumnName("rejectionReason");
-            entity.Property(e => e.SpecialRate)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("specialRate");
-
-            entity.HasOne(d => d.Event).WithMany(p => p.EventPhotographers)
-                .HasForeignKey(d => d.EventId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_EventPhotographer_LocationEvent");
-
-            entity.HasOne(d => d.Photographer).WithMany(p => p.EventPhotographers)
-                .HasForeignKey(d => d.PhotographerId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_EventPhotographer_Photographer");
-
-            // Add indexes for better performance
-            entity.HasIndex(e => e.EventId).HasDatabaseName("IX_EventPhotographer_EventId");
-            entity.HasIndex(e => e.PhotographerId).HasDatabaseName("IX_EventPhotographer_PhotographerId");
-            entity.HasIndex(e => e.Status).HasDatabaseName("IX_EventPhotographer_Status");
-            entity.HasIndex(e => new { e.EventId, e.PhotographerId })
-                .IsUnique()
-                .HasDatabaseName("IX_EventPhotographer_Event_Photographer_Unique");
-        });
-
-        modelBuilder.Entity<EventBooking>(entity =>
-        {
-            entity.HasKey(e => e.EventBookingId).HasName("PK__EventBooking__EventBookingId");
-
-            entity.ToTable("EventBooking");
-
-            entity.Property(e => e.EventBookingId).HasColumnName("eventBookingId");
-            entity.Property(e => e.EventId).HasColumnName("eventId");
-            entity.Property(e => e.BookingId).HasColumnName("bookingId");
-            entity.Property(e => e.EventPhotographerId).HasColumnName("eventPhotographerId");
-            entity.Property(e => e.EventPrice)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("eventPrice");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-
-            entity.HasOne(d => d.Event).WithMany(p => p.EventBookings)
-                .HasForeignKey(d => d.EventId)
-                .OnDelete(DeleteBehavior.NoAction)
-                .HasConstraintName("FK_EventBooking_LocationEvent");
-
-            entity.HasOne(d => d.Booking).WithOne(p => p.EventBooking)
-                .HasForeignKey<EventBooking>(d => d.BookingId)
-                .OnDelete(DeleteBehavior.NoAction)
-                .HasConstraintName("FK_EventBooking_Booking");
-
-            entity.HasOne(d => d.EventPhotographer).WithMany()
-                .HasForeignKey(d => d.EventPhotographerId)
-                .OnDelete(DeleteBehavior.NoAction)
-                .HasConstraintName("FK_EventBooking_EventPhotographer");
-
-            // Add indexes for better performance
-            entity.HasIndex(e => e.EventId).HasDatabaseName("IX_EventBooking_EventId");
-            entity.HasIndex(e => e.BookingId).HasDatabaseName("IX_EventBooking_BookingId");
-            entity.HasIndex(e => e.EventPhotographerId).HasDatabaseName("IX_EventBooking_EventPhotographerId");
-            entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_EventBooking_CreatedAt");
-        });
+        // Rating entity configuration
         modelBuilder.Entity<Rating>(entity =>
         {
-            entity.HasKey(e => e.RatingId).HasName("PK__Rating__ratingId");
-
-            entity.ToTable("Rating");
-
-            // Column mapping
-            entity.Property(e => e.RatingId).HasColumnName("ratingId");
-            entity.Property(e => e.BookingId).HasColumnName("bookingId");
-            entity.Property(e => e.ReviewerUserId).HasColumnName("reviewerUserId");
-            entity.Property(e => e.PhotographerId).HasColumnName("photographerId");
-            entity.Property(e => e.LocationId).HasColumnName("locationId");
-            entity.Property(e => e.Score).HasColumnName("score");
-            entity.Property(e => e.Comment).HasColumnName("comment");
-            entity.Property(e => e.CreatedAt)
-                  .HasDefaultValueSql("(getdate())")
-                  .HasColumnType("datetime")
-                  .HasColumnName("createdAt");
-            entity.Property(e => e.UpdatedAt)
-                  .HasDefaultValueSql("(getdate())")
-                  .HasColumnType("datetime")
-                  .HasColumnName("updatedAt");
-
-            // Check constraints
-            entity.HasCheckConstraint("CK_Rating_Score_1_5", "[score] BETWEEN 1 AND 5");
-            entity.HasCheckConstraint(
-                "CK_Rating_ExactlyOneTarget",
-                "((photographerId IS NOT NULL AND locationId IS NULL) OR (photographerId IS NULL AND locationId IS NOT NULL))"
-            );
-
-            // Relationships
-            entity.HasOne(e => e.Booking)
-                .WithMany(b => b.Ratings)
-                .HasForeignKey(e => e.BookingId)
-                .OnDelete(DeleteBehavior.NoAction)
-                .HasConstraintName("FK_Rating_Booking");
-
+            entity.HasKey(e => e.RatingId);
+            entity.Property(e => e.RatingId).ValueGeneratedOnAdd();
+            entity.Property(e => e.BookingId).IsRequired();
+            entity.Property(e => e.ReviewerUserId).IsRequired();
+            entity.Property(e => e.Score).IsRequired();
+            entity.Property(e => e.Comment).HasMaxLength(1000);
+            entity.Property(e => e.CreatedAt);
+            entity.Property(e => e.UpdatedAt);
+            
             entity.HasOne(e => e.ReviewerUser)
                 .WithMany(u => u.RatingsAuthored)
                 .HasForeignKey(e => e.ReviewerUserId)
-                .OnDelete(DeleteBehavior.NoAction)
-                .HasConstraintName("FK_Rating_ReviewerUser");
-
+                .OnDelete(DeleteBehavior.NoAction);
+                
             entity.HasOne(e => e.Photographer)
                 .WithMany(p => p.Ratings)
                 .HasForeignKey(e => e.PhotographerId)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.NoAction)
-                .HasConstraintName("FK_Rating_Photographer");
-
+                .OnDelete(DeleteBehavior.NoAction);
+                
             entity.HasOne(e => e.Location)
                 .WithMany(l => l.Ratings)
                 .HasForeignKey(e => e.LocationId)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.NoAction)
-                .HasConstraintName("FK_Rating_Location");
-
-            // Unique per booking per target (filtered unique index – SQL Server)
-            entity.HasIndex(e => new { e.BookingId, e.PhotographerId })
-                .IsUnique()
-                .HasFilter("[photographerId] IS NOT NULL")
-                .HasDatabaseName("UX_Rating_Booking_Photographer");
-
-            entity.HasIndex(e => new { e.BookingId, e.LocationId })
-                .IsUnique()
-                .HasFilter("[locationId] IS NOT NULL")
-                .HasDatabaseName("UX_Rating_Booking_Location");
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Booking)
+                .WithMany(b => b.Ratings)
+                .HasForeignKey(e => e.BookingId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
-        OnModelCreatingPartial(modelBuilder);
+        // Availability entity configuration
+        modelBuilder.Entity<Availability>(entity =>
+        {
+            entity.HasKey(e => e.AvailabilityId);
+            entity.Property(e => e.AvailabilityId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Status).HasMaxLength(20).IsRequired();
+            entity.Property(e => e.DayOfWeek).IsRequired();
+            entity.Property(e => e.StartTime).IsRequired();
+            entity.Property(e => e.EndTime).IsRequired();
+            
+            entity.HasOne(e => e.Photographer)
+                .WithMany(p => p.Availabilities)
+                .HasForeignKey(e => e.PhotographerId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // PhotoDelivery entity configuration
+        modelBuilder.Entity<PhotoDelivery>(entity =>
+        {
+            entity.HasKey(e => e.PhotoDeliveryId);
+            entity.Property(e => e.PhotoDeliveryId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Status).HasMaxLength(20);
+            entity.Property(e => e.DeliveryMethod).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.DriveLink).HasMaxLength(500);
+            entity.Property(e => e.DriveFolderName).HasMaxLength(100);
+            entity.Property(e => e.Notes).HasMaxLength(500);
+            
+            entity.HasOne(e => e.Booking)
+                .WithOne(b => b.PhotoDelivery)
+                .HasForeignKey<PhotoDelivery>(e => e.BookingId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // LocationEvent entity configuration
+        modelBuilder.Entity<LocationEvent>(entity =>
+        {
+            entity.HasKey(e => e.EventId);
+            entity.Property(e => e.EventId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Name).HasMaxLength(255).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.StartDate).IsRequired();
+            entity.Property(e => e.EndDate).IsRequired();
+            entity.Property(e => e.DiscountedPrice).HasPrecision(10, 2);
+            entity.Property(e => e.OriginalPrice).HasPrecision(10, 2);
+            entity.Property(e => e.MaxPhotographers).IsRequired();
+            entity.Property(e => e.MaxBookingsPerSlot).IsRequired();
+            entity.Property(e => e.Status).HasMaxLength(30).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.UpdatedAt).IsRequired();
+            
+            entity.HasOne(e => e.Location)
+                .WithMany(l => l.LocationEvents)
+                .HasForeignKey(e => e.LocationId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // EventPhotographer entity configuration
+        modelBuilder.Entity<EventPhotographer>(entity =>
+        {
+            entity.HasKey(e => e.EventPhotographerId);
+            entity.Property(e => e.EventPhotographerId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Status).HasMaxLength(30).IsRequired();
+            entity.Property(e => e.AppliedAt).IsRequired();
+            entity.Property(e => e.ApprovedAt);
+            entity.Property(e => e.RejectionReason).HasMaxLength(500);
+            entity.Property(e => e.SpecialRate).HasPrecision(10, 2);
+            
+            entity.HasOne(e => e.Event)
+                .WithMany()
+                .HasForeignKey(e => e.EventId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Photographer)
+                .WithMany(p => p.EventPhotographers)
+                .HasForeignKey(e => e.PhotographerId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // EventBooking entity configuration
+        modelBuilder.Entity<EventBooking>(entity =>
+        {
+            entity.HasKey(e => e.EventBookingId);
+            entity.Property(e => e.EventBookingId).ValueGeneratedOnAdd();
+            entity.Property(e => e.EventPrice).HasPrecision(10, 2).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            
+            entity.HasOne(e => e.Event)
+                .WithMany()
+                .HasForeignKey(e => e.EventId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Booking)
+                .WithOne(b => b.EventBooking)
+                .HasForeignKey<EventBooking>(e => e.BookingId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.EventPhotographer)
+                .WithMany()
+                .HasForeignKey(e => e.EventPhotographerId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Notification entity configuration
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.MotificationId);
+            entity.Property(e => e.MotificationId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Title).HasMaxLength(200);
+            entity.Property(e => e.Content).HasMaxLength(1000);
+            entity.Property(e => e.NotificationType).HasMaxLength(50);
+            entity.Property(e => e.ReferenceId);
+            entity.Property(e => e.ReadStatus);
+            entity.Property(e => e.CreatedAt);
+            
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.Notifications)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Wallet entity configuration
+        modelBuilder.Entity<Wallet>(entity =>
+        {
+            entity.HasKey(e => e.WalletId);
+            entity.Property(e => e.WalletId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Balance).HasPrecision(10, 2);
+            entity.Property(e => e.UpdatedAt);
+            
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.Wallets)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // PremiumPackage entity configuration
+        modelBuilder.Entity<PremiumPackage>(entity =>
+        {
+            entity.HasKey(e => e.PackageId);
+            entity.Property(e => e.PackageId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Name).HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Price).HasPrecision(10, 2);
+            entity.Property(e => e.DurationDays);
+            entity.Property(e => e.Features).HasMaxLength(1000);
+            entity.Property(e => e.ApplicableTo).HasMaxLength(100);
+        });
+
+        // PremiumSubscription entity configuration
+        modelBuilder.Entity<PremiumSubscription>(entity =>
+        {
+            entity.HasKey(e => e.PremiumSubscriptionId);
+            entity.Property(e => e.PremiumSubscriptionId).ValueGeneratedOnAdd();
+            entity.Property(e => e.StartDate);
+            entity.Property(e => e.EndDate);
+            entity.Property(e => e.Status).HasMaxLength(50);
+            
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.PremiumSubscriptions)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Photographer)
+                .WithMany(p => p.PremiumSubscriptions)
+                .HasForeignKey(e => e.PhotographerId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Location)
+                .WithMany(l => l.PremiumSubscriptions)
+                .HasForeignKey(e => e.LocationId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Package)
+                .WithMany()
+                .HasForeignKey(e => e.PackageId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Payment)
+                .WithMany(p => p.PremiumSubscriptions)
+                .HasForeignKey(e => e.PaymentId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Complaint entity configuration
+        modelBuilder.Entity<Complaint>(entity =>
+        {
+            entity.HasKey(e => e.ComplaintId);
+            entity.Property(e => e.ComplaintId).ValueGeneratedOnAdd();
+            entity.Property(e => e.ComplaintType).HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(2000);
+            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.ResolutionNotes).HasMaxLength(1000);
+            
+            entity.HasOne(e => e.Reporter)
+                .WithMany(u => u.ComplaintReporters)
+                .HasForeignKey(e => e.ReporterId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.ReportedUser)
+                .WithMany(u => u.ComplaintReportedUsers)
+                .HasForeignKey(e => e.ReportedUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Booking)
+                .WithMany(b => b.Complaints)
+                .HasForeignKey(e => e.BookingId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.AssignedModerator)
+                .WithMany()
+                .HasForeignKey(e => e.AssignedModeratorId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Conversation entity configuration
+        modelBuilder.Entity<Conversation>(entity =>
+        {
+            entity.HasKey(e => e.ConversationId);
+            entity.Property(e => e.ConversationId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Title).HasMaxLength(200);
+            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.Type).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt);
+            entity.Property(e => e.UpdatedAt);
+        });
+
+        // ConversationParticipant entity configuration
+        modelBuilder.Entity<ConversationParticipant>(entity =>
+        {
+            entity.HasKey(e => e.ConversationParticipantId);
+            entity.Property(e => e.ConversationParticipantId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Role).HasMaxLength(50);
+            entity.Property(e => e.JoinedAt);
+            entity.Property(e => e.LeftAt);
+            entity.Property(e => e.IsActive).IsRequired();
+            
+            entity.HasOne(e => e.Conversation)
+                .WithMany(c => c.Participants)
+                .HasForeignKey(e => e.ConversationId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.ConversationParticipants)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Messagess entity configuration
+        modelBuilder.Entity<Messagess>(entity =>
+        {
+            entity.HasKey(e => e.MessageId);
+            entity.Property(e => e.MessageId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Content).HasMaxLength(2000);
+            entity.Property(e => e.MessageType).HasMaxLength(50);
+            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt);
+            entity.Property(e => e.ReadAt);
+            
+            entity.HasOne(e => e.Sender)
+                .WithMany(u => u.MessagessSenders)
+                .HasForeignKey(e => e.SenderId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Recipient)
+                .WithMany(u => u.MessagessRecipients)
+                .HasForeignKey(e => e.RecipientId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Conversation)
+                .WithMany(c => c.Messages)
+                .HasForeignKey(e => e.ConversationId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Administrator entity configuration
+        modelBuilder.Entity<Administrator>(entity =>
+        {
+            entity.HasKey(e => e.AdminId);
+            entity.Property(e => e.AdminId).ValueGeneratedOnAdd();
+            entity.Property(e => e.AccessLevel).HasMaxLength(50);
+            entity.Property(e => e.Department).HasMaxLength(100);
+            
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.Administrators)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Moderator entity configuration
+        modelBuilder.Entity<Moderator>(entity =>
+        {
+            entity.HasKey(e => e.ModeratorId);
+            entity.Property(e => e.ModeratorId).ValueGeneratedOnAdd();
+            entity.Property(e => e.AreasOfFocus).HasMaxLength(200);
+            
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.Moderators)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Advertisement entity configuration
+        modelBuilder.Entity<Advertisement>(entity =>
+        {
+            entity.HasKey(e => e.AdvertisementId);
+            entity.Property(e => e.AdvertisementId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Title).HasMaxLength(200);
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.ImageUrl).HasMaxLength(500);
+            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.StartDate);
+            entity.Property(e => e.EndDate);
+            entity.Property(e => e.Cost).HasPrecision(10, 2);
+            
+            entity.HasOne(e => e.Location)
+                .WithMany(l => l.Advertisements)
+                .HasForeignKey(e => e.LocationId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            entity.HasOne(e => e.Payment)
+                .WithMany(p => p.Advertisements)
+                .HasForeignKey(e => e.PaymentId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // DeviceInfo entity configuration
+        modelBuilder.Entity<DeviceInfo>(entity =>
+        {
+            entity.HasKey(e => e.DeviceInfoId);
+            entity.Property(e => e.DeviceInfoId).ValueGeneratedOnAdd();
+            entity.Property(e => e.DeviceType).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.Brand).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.Model).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.OperatingSystem).HasMaxLength(20);
+            entity.Property(e => e.OsVersion).HasMaxLength(20);
+            entity.Property(e => e.ScreenResolution).HasMaxLength(20);
+            entity.Property(e => e.CameraResolution).HasMaxLength(20);
+            entity.Property(e => e.StorageCapacity).HasMaxLength(100);
+            entity.Property(e => e.BatteryCapacity).HasMaxLength(100);
+            entity.Property(e => e.Features).HasMaxLength(500);
+            entity.Property(e => e.Status).HasMaxLength(20).IsRequired();
+            entity.Property(e => e.Notes).HasMaxLength(500);
+            entity.Property(e => e.LastUsedAt);
+            entity.Property(e => e.CreatedAt);
+            entity.Property(e => e.UpdatedAt);
+            
+            entity.HasOne(e => e.Photographer)
+                .WithMany(p => p.DeviceInfos)
+                .HasForeignKey(e => e.PhotographerId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // WithdrawalRequest entity configuration
+        modelBuilder.Entity<WithdrawalRequest>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Amount).HasPrecision(10, 2).IsRequired();
+            entity.Property(e => e.BankAccountNumber).HasMaxLength(100);
+            entity.Property(e => e.BankAccountName).HasMaxLength(100);
+            entity.Property(e => e.BankName).HasMaxLength(100);
+            entity.Property(e => e.RequestStatus).HasMaxLength(50);
+            entity.Property(e => e.RequestedAt);
+            entity.Property(e => e.ProcessedAt);
+            entity.Property(e => e.RejectionReason).HasMaxLength(500);
+            
+            entity.HasOne(e => e.Wallet)
+                .WithMany(w => w.WithdrawalRequests)
+                .HasForeignKey(e => e.WalletId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Configure decimal precision for all decimal properties
+        modelBuilder.Entity<Payment>()
+            .Property(e => e.TotalAmount)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Transaction>()
+            .Property(e => e.Amount)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Wallet>()
+            .Property(e => e.Balance)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<PremiumPackage>()
+            .Property(e => e.Price)
+            .HasPrecision(18, 2);
+        // Configure indexes for better performance
+        modelBuilder.Entity<Booking>()
+            .HasIndex(e => new { e.UserId, e.Status });
+
+        modelBuilder.Entity<Booking>()
+            .HasIndex(e => new { e.PhotographerId, e.Status });
+
+        modelBuilder.Entity<Transaction>()
+            .HasIndex(e => new { e.FromUserId, e.CreatedAt });
+
+        modelBuilder.Entity<Transaction>()
+            .HasIndex(e => new { e.ToUserId, e.CreatedAt });
+
+        modelBuilder.Entity<Rating>()
+            .HasIndex(e => new { e.PhotographerId, e.CreatedAt });
+
+        modelBuilder.Entity<Rating>()
+            .HasIndex(e => new { e.LocationId, e.CreatedAt });
+
+        // Configure cascade delete behaviors
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.Photographers)
+            .WithOne(p => p.User)
+            .HasForeignKey(p => p.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.LocationOwners)
+            .WithOne(lo => lo.User)
+            .HasForeignKey(lo => lo.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Photographer>()
+            .HasMany(p => p.Bookings)
+            .WithOne(b => b.Photographer)
+            .HasForeignKey(b => b.PhotographerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Location>()
+            .HasMany(l => l.Bookings)
+            .WithOne(b => b.Location)
+            .HasForeignKey(b => b.LocationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure unique constraints
+        modelBuilder.Entity<UserRole>()
+            .HasIndex(e => new { e.UserId, e.RoleId })
+            .IsUnique();
+
+        modelBuilder.Entity<UserStyle>()
+            .HasIndex(e => new { e.UserId, e.StyleId })
+            .IsUnique();
+
+        modelBuilder.Entity<PhotographerStyle>()
+            .HasIndex(e => new { e.PhotographerId, e.StyleId })
+            .IsUnique();
+
+        modelBuilder.Entity<ConversationParticipant>()
+            .HasIndex(e => new { e.ConversationId, e.UserId })
+            .IsUnique();
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
