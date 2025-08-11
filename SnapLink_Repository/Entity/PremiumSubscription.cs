@@ -18,10 +18,15 @@ public partial class PremiumSubscription
     public string? Status { get; set; }
 
     public int? PaymentId { get; set; }
+    public int? PhotographerId { get; set; }
+    public int? LocationId { get; set; }
+
 
     public virtual PremiumPackage Package { get; set; } = null!;
 
     public virtual Payment? Payment { get; set; }
 
     public virtual User User { get; set; } = null!;
+    public virtual Photographer? Photographer { get; set; }
+    public virtual Location? Location { get; set; }
 }

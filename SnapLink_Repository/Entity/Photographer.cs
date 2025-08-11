@@ -54,4 +54,6 @@ public partial class Photographer
     
     public virtual ICollection<EventPhotographer> EventPhotographers { get; set; } = new List<EventPhotographer>();
     public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
+    public virtual ICollection<PremiumSubscription> PremiumSubscriptions { get; set; }
+    = new List<PremiumSubscription>();
 }
