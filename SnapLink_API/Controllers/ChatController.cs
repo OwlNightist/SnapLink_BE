@@ -64,34 +64,34 @@ namespace SnapLink_API.Controllers
         /// <summary>
         /// AI sends a message with default sender ID = 1
         /// </summary>
-        [HttpPost("ai-send-message")]
-        public async Task<ActionResult<SendMessageResponse>> AiSendMessage([FromBody] SendMessageRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //[HttpPost("ai-send-message")]
+        //public async Task<ActionResult<SendMessageResponse>> AiSendMessage([FromBody] SendMessageRequest request)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            // Use default AI sender ID = 1
-            const int aiSenderId = 1;
+        //    // Use default AI sender ID = 1
+        //    const int aiSenderId = 1;
 
-            // Create request with AI sender ID
-            var sendMessageRequest = new SendMessageRequest
-            {
-                RecipientId = request.RecipientId,
-                Content = request.Content,
-                MessageType = request.MessageType,
-                ConversationId = request.ConversationId
-            };
+        //    // Create request with AI sender ID
+        //    var sendMessageRequest = new SendMessageRequest
+        //    {
+        //        RecipientId = request.RecipientId,
+        //        Content = request.Content,
+        //        MessageType = request.MessageType,
+        //        ConversationId = request.ConversationId
+        //    };
 
-            var result = await _chatService.SendMessageAsync(sendMessageRequest, aiSenderId);
+        //    var result = await _chatService.SendMessageAsync(sendMessageRequest, aiSenderId);
             
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
+        //    if (!result.Success)
+        //    {
+        //        return BadRequest(result);
+        //    }
+        //    return Ok(result);
+        //}
 
         /// <summary>
         /// Get a specific message by ID
@@ -187,21 +187,21 @@ namespace SnapLink_API.Controllers
         /// <summary>
         /// AI deletes a message with default sender ID = 1
         /// </summary>
-        [HttpDelete("ai-messages/{messageId}")]
-        public async Task<ActionResult> DeleteAiMessage(int messageId)
-        {
-            // Use default AI sender ID = 1
-            const int aiSenderId = 1;
+        //[HttpDelete("ai-messages/{messageId}")]
+        //public async Task<ActionResult> DeleteAiMessage(int messageId)
+        //{
+        //    // Use default AI sender ID = 1
+        //    const int aiSenderId = 1;
 
-            var success = await _chatService.DeleteMessageAsync(messageId, aiSenderId);
+        //    var success = await _chatService.DeleteMessageAsync(messageId, aiSenderId);
             
-            if (!success)
-            {
-                return BadRequest("Failed to delete AI message");
-            }
+        //    if (!success)
+        //    {
+        //        return BadRequest("Failed to delete AI message");
+        //    }
 
-            return Ok(new { Success = true, Message = "AI message deleted successfully" });
-        }
+        //    return Ok(new { Success = true, Message = "AI message deleted successfully" });
+        //}
 
         #endregion
 

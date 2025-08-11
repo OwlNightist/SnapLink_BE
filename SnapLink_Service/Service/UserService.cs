@@ -57,30 +57,30 @@ namespace SnapLink_Service.Service
             await _repo.SaveChangesAsync();
             await SendVerificationEmail(dto.Email, verifyCode);
 
-            // Create AI conversation and send welcome message from system (user ID 1) to new user
-            try
-            {
-                // First, create an AI conversation
-                var createConversationRequest = new CreateConversationRequest
-                {
-                    Title = $"AI Assistant",
-                    Type = "AI", // Special type for AI conversations
-                    ParticipantIds = new List<int> { 1, user.UserId }, // System AI (ID 1) and new user
-                    Status = "Active"
-                };
+            //// Create AI conversation and send welcome message from system (user ID 1) to new user
+            //try
+            //{
+            //    // First, create an AI conversation
+            //    var createConversationRequest = new CreateConversationRequest
+            //    {
+            //        Title = $"AI Assistant",
+            //        Type = "AI", // Special type for AI conversations
+            //        ParticipantIds = new List<int> { 1, user.UserId }, // System AI (ID 1) and new user
+            //        Status = "Active"
+            //    };
                 
-                var conversationResult = await _chatService.CreateConversationAsync(createConversationRequest);
+            //    var conversationResult = await _chatService.CreateConversationAsync(createConversationRequest);
                 
-                if (conversationResult.Success && conversationResult.Conversation != null)
-                {
-                    // Send welcome message using the created conversation
-                    var welcomeMessage = new SendMessageRequest
-                    {
-                        RecipientId = user.UserId,
-                        Content = "Tôi có thể giúp bạn sửa ảnh",
-                        MessageType = "Text",
-                        ConversationId = conversationResult.Conversation.ConversationId
-                    };
+            //    if (conversationResult.Success && conversationResult.Conversation != null)
+            //    {
+            //        // Send welcome message using the created conversation
+            //        var welcomeMessage = new SendMessageRequest
+            //        {
+            //            RecipientId = user.UserId,
+            //            Content = "Tôi có thể giúp bạn sửa ảnh",
+            //            MessageType = "Text",
+            //            ConversationId = conversationResult.Conversation.ConversationId
+            //        };
                     
                     await _chatService.SendMessageAsync(welcomeMessage, 1); // System user ID 1
                 }

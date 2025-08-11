@@ -9,11 +9,15 @@ namespace SnapLink_Repository.Data
     {
         public static void Initialize(SnaplinkDbContext context)
         {
+            Console.WriteLine("=== Starting Database Initialization ===");
+            
             context.Database.EnsureCreated();
+            Console.WriteLine("Database created/ensured successfully");
 
             // Seed Roles
             if (!context.Roles.Any())
             {
+                Console.WriteLine("Seeding Roles...");
                 var roles = new[]
                 {
                     new Role { RoleName = "Admin", RoleDescription = "Administrator" },
@@ -24,11 +28,17 @@ namespace SnapLink_Repository.Data
                 };
                 context.Roles.AddRange(roles);
                 context.SaveChanges();
+                Console.WriteLine($"Roles seeded successfully: {roles.Length} roles added");
+            }
+            else
+            {
+                Console.WriteLine("Roles already exist, skipping...");
             }
 
             // Seed Users
             if (!context.Users.Any())
             {
+                Console.WriteLine("Seeding Users...");
                 var users = new[]
                 {
                     new User { UserName = "SnaplinkAI", Email = "SnaplinkAI@example.com", PasswordHash = "Snaplink", PhoneNumber = "", FullName = "Snap link", Status = "Active", IsVerified = true, CreateAt = DateTime.Now, ProfileImage ="https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/user/1/AISUPPORT.png" },
@@ -56,11 +66,17 @@ namespace SnapLink_Repository.Data
                 };
                 context.Users.AddRange(users);
                 context.SaveChanges();
+                Console.WriteLine($"Users seeded successfully: {users.Length} users added");
+            }
+            else
+            {
+                Console.WriteLine("Users already exist, skipping...");
             }
 
             // Seed UserRoles
             if (!context.UserRoles.Any())
             {
+                Console.WriteLine("Seeding UserRoles...");
                 var userRoles = new[]
                 {
                     new UserRole { UserId = context.Users.First().UserId, RoleId = context.Roles.First(r => r.RoleName == "User").RoleId },
@@ -77,11 +93,17 @@ namespace SnapLink_Repository.Data
                 };
                 context.UserRoles.AddRange(userRoles);
                 context.SaveChanges();
+                Console.WriteLine($"UserRoles seeded successfully: {userRoles.Length} user roles added");
+            }
+            else
+            {
+                Console.WriteLine("UserRoles already exist, skipping...");
             }
 
             // Seed Styles
             if (!context.Styles.Any())
             {
+                Console.WriteLine("Seeding Styles...");
                 var styles = new[]
                 {
                     new Style { Name = "Portrait", Description = "Portrait photography" },
@@ -92,12 +114,18 @@ namespace SnapLink_Repository.Data
                 };
                 context.Styles.AddRange(styles);
                 context.SaveChanges();
+                Console.WriteLine($"Styles seeded successfully: {styles.Length} styles added");
+            }
+            else
+            {
+                Console.WriteLine("Styles already exist, skipping...");
             }
 
             // Seed Photographers
             if (!context.Photographers.Any())
             {
-                var users = context.Users.Take(15).ToList();
+                Console.WriteLine("Seeding Photographers...");
+                var users = context.Users.Take(16).ToList();
                 var photographers = new[]
                 {
                     new Photographer { UserId = users[1].UserId, YearsExperience = 3, Equipment = "Iphone 19 Pro Max", HourlyRate = 5000, AvailabilityStatus = "Available", Rating = 4.5M },
@@ -113,15 +141,18 @@ namespace SnapLink_Repository.Data
                     new Photographer { UserId = users[11].UserId, YearsExperience = 2, Equipment = "Iphone 15 Pro Max", HourlyRate = 65000, AvailabilityStatus = "Available", Rating = 4.1M },
                     new Photographer { UserId = users[12].UserId, YearsExperience = 6, Equipment = "Iphone 15 Pro Max", HourlyRate = 115000, AvailabilityStatus = "Busy", Rating = 4.8M },
                     new Photographer { UserId = users[13].UserId, YearsExperience = 4, Equipment = "Iphone 15 Pro Max", HourlyRate = 80000, AvailabilityStatus = "Available", Rating = 4.3M },
-                    new Photographer { UserId = users[14].UserId, YearsExperience = 9, Equipment = "Iphone 15 Pro Max", HourlyRate = 140000, AvailabilityStatus = "Available", Rating = 4.9M }
+                    new Photographer { UserId = users[14].UserId, YearsExperience = 9, Equipment = "Iphone 15 Pro Max", HourlyRate = 140000, AvailabilityStatus = "Available", Rating = 4.9M },
+                    new Photographer { UserId = users[15].UserId, YearsExperience = 9, Equipment = "Iphone 15 Pro Max", HourlyRate = 140000, AvailabilityStatus = "Available", Rating = 4.9M }
                 };
                 context.Photographers.AddRange(photographers);
                 context.SaveChanges();
+                Console.WriteLine($"Photographers seeded successfully: {photographers.Length} photographers added");
             }
 
             // Seed PhotographerStyles
             if (!context.PhotographerStyles.Any())
             {
+                Console.WriteLine("Seeding PhotographerStyles...");
                 var photographers = context.Photographers.Take(15).ToList();
                 var styles = context.Styles.Take(5).ToList();
                 var photographerStyles = new[]
@@ -181,12 +212,14 @@ namespace SnapLink_Repository.Data
                 };
                 context.PhotographerStyles.AddRange(photographerStyles);
                 context.SaveChanges();
+                Console.WriteLine($"PhotographerStyles seeded successfully: {photographerStyles.Length} photographer styles added");
             }
 
             // Seed LocationOwners
             if (!context.LocationOwners.Any())
             {
-                var users = context.Users.Take(10).ToList(); // Take 10 users (5 original + 5 new)
+                Console.WriteLine("Seeding LocationOwners...");
+                var users = context.Users.Take(12).ToList(); // Take 10 users (5 original + 5 new)
                 var owners = new[]
                 {
                     new LocationOwner { UserId = users[1].UserId, BusinessName = "EventSpaces", BusinessAddress = "eventspaces@example.com" },
@@ -198,16 +231,20 @@ namespace SnapLink_Repository.Data
                     new LocationOwner { UserId = users[6].UserId, BusinessName = "Creative Spaces", BusinessAddress = "creativespaces@example.com" },
                     new LocationOwner { UserId = users[7].UserId, BusinessName = "Modern Venues", BusinessAddress = "modernvenues@example.com" },
                     new LocationOwner { UserId = users[8].UserId, BusinessName = "Premium Studios", BusinessAddress = "premiumstudios@example.com" },
-                    new LocationOwner { UserId = users[9].UserId, BusinessName = "Luxury Locations", BusinessAddress = "luxurylocations@example.com" }
+                    new LocationOwner { UserId = users[9].UserId, BusinessName = "Luxury Locations", BusinessAddress = "luxurylocations@example.com" },
+                    new LocationOwner { UserId = users[10].UserId, BusinessName = "Luxury Locations 2", BusinessAddress = "luxurylocations2@example.com" },
+                    new LocationOwner { UserId = users[11].UserId, BusinessName = "Luxury Locations 3", BusinessAddress = "luxurylocations3@example.com" }
                 };
                 context.LocationOwners.AddRange(owners);
                 context.SaveChanges();
+                Console.WriteLine($"LocationOwners seeded successfully: {owners.Length} location owners added");
             }
 
             // Seed Locations
             if (!context.Locations.Any())
             {
-                var owners = context.LocationOwners.Take(10).ToList(); // Take all 10 location owners
+                Console.WriteLine("Seeding Locations...");
+                var owners = context.LocationOwners.Take(13).ToList(); // Take all 10 location owners
                 var locations = new[]
                 {
                     // Original 5 registered locations with fees
@@ -398,27 +435,19 @@ namespace SnapLink_Repository.Data
                 };
                 context.Locations.AddRange(locations);
                 context.SaveChanges();
+                Console.WriteLine($"Locations seeded successfully: {locations.Length} locations added");
             }
 
             // Seed Bookings
             if (!context.Bookings.Any())
             {
-                var users = context.Users.Take(5).ToList();
+                Console.WriteLine("Seeding Bookings...");
+                var users = context.Users.Take(10).ToList();
                 var photographers = context.Photographers.Take(5).ToList();
                 var locations = context.Locations.Take(8).ToList(); // Now we have 8 locations (5 registered + 3 external)
                 var bookings = new[]
                 {
                     // Bookings with registered locations (include location fees)
-                    new Booking { 
-                        UserId = users[0].UserId, 
-                        PhotographerId = photographers[0].PhotographerId, 
-                        LocationId = locations[0].LocationId, // Central Park Studio (Registered)
-                        StartDatetime = DateTime.Now.AddDays(1), 
-                        EndDatetime = DateTime.Now.AddDays(1).AddHours(2), 
-                        Status = "Confirmed", 
-                        TotalPrice = 300, // Photographer (100/hr * 2) + Location (50/hr * 2) = 300
-                        CreatedAt = DateTime.Now 
-                    },
                     new Booking { 
                         UserId = users[1].UserId, 
                         PhotographerId = photographers[1].PhotographerId, 
@@ -463,28 +492,31 @@ namespace SnapLink_Repository.Data
                 };
                 context.Bookings.AddRange(bookings);
                 context.SaveChanges();
+                Console.WriteLine($"Bookings seeded successfully: {bookings.Length} bookings added");
             }
 
             // Seed Reviews
             if (!context.Reviews.Any())
             {
-                var bookings = context.Bookings.Take(5).ToList();
+                Console.WriteLine("Seeding Reviews...");
+                var bookings = context.Bookings.Take(4).ToList();
                 var reviews = new[]
                 {
                     new Review { BookingId = bookings[0].BookingId, Rating = 5, Comment = "Excellent!", CreatedAt = DateTime.Now },
                     new Review { BookingId = bookings[1].BookingId, Rating = 4, Comment = "Very good", CreatedAt = DateTime.Now },
                     new Review { BookingId = bookings[2].BookingId, Rating = 5, Comment = "Outstanding service", CreatedAt = DateTime.Now },
                     new Review { BookingId = bookings[3].BookingId, Rating = 3, Comment = "Average", CreatedAt = DateTime.Now },
-                    new Review { BookingId = bookings[4].BookingId, Rating = 4, Comment = "Good experience", CreatedAt = DateTime.Now }
                 };
                 context.Reviews.AddRange(reviews);
                 context.SaveChanges();
+                Console.WriteLine($"Reviews seeded successfully: {reviews.Length} reviews added");
             }
 
             // Seed Payments
             if (!context.Payments.Any())
             {
-                var bookings = context.Bookings.Take(5).ToList();
+                Console.WriteLine("Seeding Payments...");
+                var bookings = context.Bookings.Take(4).ToList();
                 var users = context.Users.Take(5).ToList();
                 var payments = new[]
                 {
@@ -531,26 +563,17 @@ namespace SnapLink_Repository.Data
                         ExternalTransactionId = "4444",
                         Note = "Payment for external location booking",
                         CreatedAt = DateTime.Now 
-                    },
-                    // Payment for external location booking (Times Square - no location fee)
-                    new Payment { 
-                        CustomerId = users[4].UserId,
-                        BookingId = bookings[4].BookingId, 
-                        TotalAmount = 180, 
-                        Status = PaymentStatus.Success, 
-                        Method = "PayOS",
-                        ExternalTransactionId = "5555",
-                        Note = "Payment for external location booking",
-                        CreatedAt = DateTime.Now 
                     }
                 };
                 context.Payments.AddRange(payments);
                 context.SaveChanges();
+                Console.WriteLine($"Payments seeded successfully: {payments.Length} payments added");
             }
 
             // Seed Notifications
             if (!context.Notifications.Any())
             {
+                Console.WriteLine("Seeding Notifications...");
                 var users = context.Users.Take(5).ToList();
                 var notifications = new[]
                 {
@@ -562,6 +585,7 @@ namespace SnapLink_Repository.Data
                 };
                 context.Notifications.AddRange(notifications);
                 context.SaveChanges();
+                Console.WriteLine($"Notifications seeded successfully: {notifications.Length} notifications added");
             }
 
             // Seed Administrators
@@ -615,6 +639,7 @@ namespace SnapLink_Repository.Data
             // Seed PremiumPackages
             if (!context.PremiumPackages.Any())
             {
+                Console.WriteLine("Seeding PremiumPackages...");
                 var packages = new[]
                 {
                     new PremiumPackage { Name = "Basic", Description = "Basic features", Price = 9.99M, DurationDays = 30, Features = "Standard support", ApplicableTo = "User" },
@@ -625,16 +650,18 @@ namespace SnapLink_Repository.Data
                 };
                 context.PremiumPackages.AddRange(packages);
                 context.SaveChanges();
+                Console.WriteLine($"PremiumPackages seeded successfully: {packages.Length} packages added");
             }
 
             // Seed PremiumSubscriptions
             if (!context.PremiumSubscriptions.Any())
             {
+                Console.WriteLine("Seeding PremiumSubscriptions...");
                 var users = context.Users.Take(5).ToList();
                 var packages = context.PremiumPackages.Take(5).ToList();
                 var subscriptions = new[]
                 {
-                    new PremiumSubscription { UserId = users[0].UserId, PackageId = packages[0].PackageId, StartDate = DateTime.Now.AddDays(-10), EndDate = DateTime.Now.AddDays(20), Status = "Active" },
+                   
                     new PremiumSubscription { UserId = users[1].UserId, PackageId = packages[1].PackageId, StartDate = DateTime.Now.AddDays(-20), EndDate = DateTime.Now.AddDays(10), Status = "Expired" },
                     new PremiumSubscription { UserId = users[2].UserId, PackageId = packages[2].PackageId, StartDate = DateTime.Now.AddDays(-5), EndDate = DateTime.Now.AddDays(25), Status = "Active" },
                     new PremiumSubscription { UserId = users[3].UserId, PackageId = packages[3].PackageId, StartDate = DateTime.Now.AddDays(-15), EndDate = DateTime.Now.AddDays(15), Status = "Active" },
@@ -642,15 +669,17 @@ namespace SnapLink_Repository.Data
                 };
                 context.PremiumSubscriptions.AddRange(subscriptions);
                 context.SaveChanges();
+                Console.WriteLine($"PremiumSubscriptions seeded successfully: {subscriptions.Length} subscriptions added");
             }
 
             // Seed Transactions
             if (!context.Transactions.Any())
             {
+                Console.WriteLine("Seeding Transactions...");
                 var users = context.Users.Take(5).ToList();
                 var transactions = new[]
                 {
-                    new Transaction { FromUserId = null, ToUserId = users[0].UserId, Amount = 100, Type = TransactionType.VenueFee, Status = TransactionStatus.Success, Note = "Initial deposit", CreatedAt = DateTime.Now },
+                 
                     new Transaction { FromUserId = users[1].UserId, ToUserId = null, Amount = 50, Type = TransactionType.Refund, Status = TransactionStatus.Success, Note = "Withdrawal", CreatedAt = DateTime.Now },
                     new Transaction { FromUserId = null, ToUserId = users[2].UserId, Amount = 75, Type = TransactionType.Refund, Status = TransactionStatus.Success, Note = "Refund for cancelled booking", CreatedAt = DateTime.Now },
                     new Transaction { FromUserId = users[3].UserId, ToUserId = null, Amount = 120, Type = TransactionType.PhotographerFee, Status = TransactionStatus.Pending, Note = "Photographer payout", CreatedAt = DateTime.Now },
@@ -658,11 +687,13 @@ namespace SnapLink_Repository.Data
                 };
                 context.Transactions.AddRange(transactions);
                 context.SaveChanges();
+                Console.WriteLine($"Transactions seeded successfully: {transactions.Length} transactions added");
             }
 
             // Seed Wallets
             if (!context.Wallets.Any())
             {
+                Console.WriteLine("Seeding Wallets...");
                 var users = context.Users.Take(20).ToList(); // Take all 20 users
                 var wallets = new[]
                 {
@@ -690,15 +721,17 @@ namespace SnapLink_Repository.Data
                 };
                 context.Wallets.AddRange(wallets);
                 context.SaveChanges();
+                Console.WriteLine($"Wallets seeded successfully: {wallets.Length} wallets added");
             }
 
             // Seed WithdrawalRequests
             if (!context.WithdrawalRequests.Any())
             {
+                Console.WriteLine("Seeding WithdrawalRequests...");
                 var wallets = context.Wallets.Take(5).ToList();
                 var requests = new[]
                 {
-                    new WithdrawalRequest { WalletId = wallets[0].WalletId, Amount = 100, BankAccountNumber = "111111", BankAccountName = "Alice Smith", BankName = "Bank A", RequestStatus = "Pending", RequestedAt = DateTime.Now },
+                  
                     new WithdrawalRequest { WalletId = wallets[1].WalletId, Amount = 200, BankAccountNumber = "222222", BankAccountName = "Bob Johnson", BankName = "Bank B", RequestStatus = "Approved", RequestedAt = DateTime.Now },
                     new WithdrawalRequest { WalletId = wallets[2].WalletId, Amount = 150, BankAccountNumber = "333333", BankAccountName = "Carol White", BankName = "Bank C", RequestStatus = "Rejected", RequestedAt = DateTime.Now },
                     new WithdrawalRequest { WalletId = wallets[3].WalletId, Amount = 120, BankAccountNumber = "444444", BankAccountName = "Dave Brown", BankName = "Bank D", RequestStatus = "Pending", RequestedAt = DateTime.Now },
@@ -706,47 +739,53 @@ namespace SnapLink_Repository.Data
                 };
                 context.WithdrawalRequests.AddRange(requests);
                 context.SaveChanges();
+                Console.WriteLine($"WithdrawalRequests seeded successfully: {requests.Length} withdrawal requests added");
             }
 
             // Seed Complaints
-            if (!context.Complaints.Any())
-            {
-                var users = context.Users.Take(5).ToList();
-                var bookings = context.Bookings.Take(5).ToList();
-                var moderators = context.Moderators.Take(5).ToList();
-                var complaints = new[]
-                {
-                    new Complaint { ReporterId = users[0].UserId, ReportedUserId = users[1].UserId, BookingId = bookings[0].BookingId, ComplaintType = "Service", Description = "Late arrival", Status = "Open", AssignedModeratorId = moderators[0].ModeratorId, CreatedAt = DateTime.Now },
-                    new Complaint { ReporterId = users[1].UserId, ReportedUserId = users[2].UserId, BookingId = bookings[1].BookingId, ComplaintType = "Payment", Description = "Overcharged", Status = "Closed", AssignedModeratorId = moderators[1].ModeratorId, CreatedAt = DateTime.Now },
-                    new Complaint { ReporterId = users[2].UserId, ReportedUserId = users[3].UserId, BookingId = bookings[2].BookingId, ComplaintType = "Behavior", Description = "Rude behavior", Status = "Open", AssignedModeratorId = moderators[2].ModeratorId, CreatedAt = DateTime.Now },
-                    new Complaint { ReporterId = users[3].UserId, ReportedUserId = users[4].UserId, BookingId = bookings[3].BookingId, ComplaintType = "Quality", Description = "Low quality photos", Status = "Closed", AssignedModeratorId = moderators[3].ModeratorId, CreatedAt = DateTime.Now },
-                    new Complaint { ReporterId = users[4].UserId, ReportedUserId = users[0].UserId, BookingId = bookings[4].BookingId, ComplaintType = "Other", Description = "Other issue", Status = "Open", AssignedModeratorId = moderators[4].ModeratorId, CreatedAt = DateTime.Now }
-                };
-                context.Complaints.AddRange(complaints);
-                context.SaveChanges();
-            }
+            // if (!context.Complaints.Any())
+            // {
+            //     Console.WriteLine("Seeding Complaints...");
+            //     var users = context.Users.Take(5).ToList();
+            //     var bookings = context.Bookings.Take(4).ToList();
+            //     var moderators = context.Moderators.Take(5).ToList();
+            //     var complaints = new[]
+            //     {
+            //         new Complaint { ReporterId = users[0].UserId, ReportedUserId = users[1].UserId, BookingId = bookings[0].BookingId, ComplaintType = "Service", Description = "Late arrival", Status = "Open", AssignedModeratorId = moderators[0].ModeratorId, CreatedAt = DateTime.Now },
+            //         new Complaint { ReporterId = users[1].UserId, ReportedUserId = users[2].UserId, BookingId = bookings[1].BookingId, ComplaintType = "Payment", Description = "Overcharged", Status = "Closed", AssignedModeratorId = moderators[1].ModeratorId, CreatedAt = DateTime.Now },
+            //         new Complaint { ReporterId = users[2].UserId, ReportedUserId = users[3].UserId, BookingId = bookings[2].BookingId, ComplaintType = "Behavior", Description = "Rude behavior", Status = "Open", AssignedModeratorId = moderators[2].ModeratorId, CreatedAt = DateTime.Now },
+            //         new Complaint { ReporterId = users[3].UserId, ReportedUserId = users[4].UserId, BookingId = bookings[3].BookingId, ComplaintType = "Quality", Description = "Low quality photos", Status = "Closed", AssignedModeratorId = moderators[3].ModeratorId, CreatedAt = DateTime.Now },
+            //         new Complaint { ReporterId = users[4].UserId, ReportedUserId = users[0].UserId, BookingId = bookings[4].BookingId, ComplaintType = "Other", Description = "Other issue", Status = "Open", AssignedModeratorId = moderators[4].ModeratorId, CreatedAt = DateTime.Now }
+            //     };
+            //     context.Complaints.AddRange(complaints);
+            //     context.SaveChanges();
+            //     Console.WriteLine($"Complaints seeded successfully: {complaints.Length} complaints added");
+            // }
 
             // Seed Advertisements
-            if (!context.Advertisements.Any())
-            {
-                var locations = context.Locations.Take(5).ToList();
-                var payments = context.Payments.Take(5).ToList();
-                var ads = new[]
-                {
-                    new Advertisement { LocationId = locations[0].LocationId, Title = "Grand Opening", Description = "Special offer for new customers", ImageUrl = "url1.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30), Status = "Active", Cost = 100, PaymentId = payments[0].PaymentId },
-                    new Advertisement { LocationId = locations[1].LocationId, Title = "Summer Sale", Description = "Discounts on bookings", ImageUrl = "url2.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(15), Status = "Active", Cost = 80, PaymentId = payments[1].PaymentId },
-                    new Advertisement { LocationId = locations[2].LocationId, Title = "Wedding Season", Description = "Book now for weddings", ImageUrl = "url3.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(45), Status = "Inactive", Cost = 120, PaymentId = payments[2].PaymentId },
-                    new Advertisement { LocationId = locations[3].LocationId, Title = "Photo Contest", Description = "Join and win prizes", ImageUrl = "url4.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(10), Status = "Active", Cost = 60, PaymentId = payments[3].PaymentId },
-                    new Advertisement { LocationId = locations[4].LocationId, Title = "Holiday Shoots", Description = "Special holiday packages", ImageUrl = "url5.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(20), Status = "Active", Cost = 90, PaymentId = payments[4].PaymentId }
-                };
-                context.Advertisements.AddRange(ads);
-                context.SaveChanges();
-            }
+            //if (!context.Advertisements.Any())
+            //{
+            //    Console.WriteLine("Seeding Advertisements...");
+            //    var locations = context.Locations.Take(5).ToList();
+            //    var payments = context.Payments.Take(5).ToList();
+            //    var ads = new[]
+            //    {
+            //        new Advertisement { LocationId = locations[0].LocationId, Title = "Grand Opening", Description = "Special offer for new customers", ImageUrl = "url1.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30), Status = "Active", Cost = 100, PaymentId = payments[0].PaymentId },
+            //        new Advertisement { LocationId = locations[1].LocationId, Title = "Summer Sale", Description = "Discounts on bookings", ImageUrl = "url2.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(15), Status = "Active", Cost = 80, PaymentId = payments[1].PaymentId },
+            //        new Advertisement { LocationId = locations[2].LocationId, Title = "Wedding Season", Description = "Book now for weddings", ImageUrl = "url3.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(45), Status = "Inactive", Cost = 120, PaymentId = payments[2].PaymentId },
+            //        new Advertisement { LocationId = locations[3].LocationId, Title = "Photo Contest", Description = "Join and win prizes", ImageUrl = "url4.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(10), Status = "Active", Cost = 60, PaymentId = payments[3].PaymentId },
+            //        new Advertisement { LocationId = locations[4].LocationId, Title = "Holiday Shoots", Description = "Special holiday packages", ImageUrl = "url5.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(20), Status = "Active", Cost = 90, PaymentId = payments[4].PaymentId }
+            //    };
+            //    context.Advertisements.AddRange(ads);
+            //    context.SaveChanges();
+            //    Console.WriteLine($"Advertisements seeded successfully: {ads.Length} advertisements added");
+            //}
 
             // Seed PhotographerEvents
             // Seed Images
             if (!context.Images.Any())
             {
+                Console.WriteLine("Seeding Images...");
                 var photographers = context.Photographers.Take(5).ToList();
                 var locations = context.Locations.Take(5).ToList();
                 var images = new[]
@@ -771,11 +810,13 @@ namespace SnapLink_Repository.Data
                 };
                 context.Images.AddRange(images);
                 context.SaveChanges();
+                Console.WriteLine($"Images seeded successfully: {images.Length} images added");
             }
 
             // Seed UserStyles
             if (!context.UserStyles.Any())
             {
+                Console.WriteLine("Seeding UserStyles...");
                 var users = context.Users.Take(5).ToList();
                 var styles = context.Styles.Take(5).ToList();
                 var userStyles = new[]
@@ -788,11 +829,13 @@ namespace SnapLink_Repository.Data
                 };
                 context.UserStyles.AddRange(userStyles);
                 context.SaveChanges();
+                Console.WriteLine($"UserStyles seeded successfully: {userStyles.Length} user styles added");
             }
 
             // Seed Availability
             if (!context.Availabilities.Any())
             {
+                Console.WriteLine("Seeding Availabilities...");
                 var photographers = context.Photographers.Take(15).ToList();
                 var availabilities = new List<Availability>();
 
@@ -1132,11 +1175,13 @@ namespace SnapLink_Repository.Data
 
                 context.Availabilities.AddRange(availabilities);
                 context.SaveChanges();
+                Console.WriteLine($"Availabilities seeded successfully: {availabilities.Count} availabilities added");
             }
 
             // Seed DeviceInfo
             if (!context.DeviceInfos.Any())
             {
+                Console.WriteLine("Seeding DeviceInfos...");
                 var photographers = context.Photographers.Take(15).ToList();
                 var deviceInfos = new List<DeviceInfo>();
 
@@ -1441,12 +1486,14 @@ namespace SnapLink_Repository.Data
                 });
                 context.DeviceInfos.AddRange(deviceInfos);
                 context.SaveChanges();
+                Console.WriteLine($"DeviceInfos seeded successfully: {deviceInfos.Count} device infos added");
             }
 
             // Seed PhotoDeliveries
             if (!context.PhotoDeliveries.Any())
             {
-                var bookings = context.Bookings.Take(5).ToList();
+                Console.WriteLine("Seeding PhotoDeliveries...");
+                var bookings = context.Bookings.Take(4).ToList();
                 var photoDeliveries = new[]
                 {
                     // PhotoDelivery 1 - Completed delivery via Google Drive
@@ -1511,27 +1558,18 @@ namespace SnapLink_Repository.Data
                         Notes = "Customer used their own device for photos", 
                         CreatedAt = DateTime.Now.AddDays(-1), 
                         UpdatedAt = DateTime.Now.AddDays(-1) 
-                    },
-                    
-                    // PhotoDelivery 5 - Delivered with short expiration
-                    new PhotoDelivery { 
-                        BookingId = bookings[4].BookingId, 
-                        DeliveryMethod = "PhotographerDevice", 
-                        DriveLink = "https://drive.google.com/drive/folders/3MNO456PQR789STU012VWX", 
-                        DriveFolderName = "Eve_Black_Fashion_Shoot", 
-                        PhotoCount = 78, 
-                        Status = "Delivered", 
-                        UploadedAt = DateTime.Now.AddDays(-3), 
-                        DeliveredAt = DateTime.Now.AddDays(-2), 
-                        ExpiresAt = DateTime.Now.AddDays(7), // Short expiration for fashion shoot
-                        Notes = "Fashion photography session - 78 photos with 7-day access", 
-                        CreatedAt = DateTime.Now.AddDays(-4), 
-                        UpdatedAt = DateTime.Now.AddDays(-2) 
                     }
                 };
                 context.PhotoDeliveries.AddRange(photoDeliveries);
                 context.SaveChanges();
+                Console.WriteLine($"PhotoDeliveries seeded successfully: {photoDeliveries.Length} photo deliveries added");
             }
+            else
+            {
+                Console.WriteLine("PhotoDeliveries already exist, skipping...");
+            }
+
+            Console.WriteLine("=== Database Initialization Completed Successfully ===");
         }
     }
 }
