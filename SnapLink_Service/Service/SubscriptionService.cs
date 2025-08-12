@@ -44,7 +44,6 @@ namespace SnapLink_Service.Service
             var applicable = (pkg.ApplicableTo ?? "").Trim();
             var now = DateTime.UtcNow;
 
-            // Mở transaction bao toàn bộ
             await using var tx = await _db.Database.BeginTransactionAsync();
 
             int userIdForWallet;
@@ -60,7 +59,7 @@ namespace SnapLink_Service.Service
 
                 userIdForWallet = p.UserId;
 
-                // Trừ ví
+
                 var wallet = await _wallets.GetByUserIdAsync(userIdForWallet)
                              ?? throw new Exception("Wallet không tồn tại.");
                 if ((wallet.Balance ?? 0) < pkg.Price)
@@ -69,7 +68,6 @@ namespace SnapLink_Service.Service
                 wallet.UpdatedAt = now;
                 await _wallets.UpdateAsync(wallet);
 
-                // Tính thời gian hiệu lực
                 var active = await _subs.GetActiveForPhotographerAsync(p.PhotographerId);
                 DateTime start = (active?.EndDate.HasValue == true && active.EndDate!.Value > now)
                     ? active.EndDate!.Value.AddSeconds(1)
@@ -88,7 +86,7 @@ namespace SnapLink_Service.Service
 
                 await _subs.AddAsync(sub);
 
-                // Log transaction
+               
                 await _txRepo.AddAsync(new Transaction
                 {
                     FromUserId = userIdForWallet,                  // người trả tiền
@@ -102,7 +100,7 @@ namespace SnapLink_Service.Service
                     UpdatedAt = now
                 });
 
-                // save
+           
                 await _wallets.SaveChangesAsync();
                 await _subs.SaveChangesAsync();
                 await _txRepo.SaveChangesAsync();
@@ -115,7 +113,7 @@ namespace SnapLink_Service.Service
                 if (!dto.LocationId.HasValue || dto.PhotographerId.HasValue)
                     throw new Exception("Gói này dành cho Location. Chỉ truyền LocationId.");
 
-                // GetLocationAsync phải Include(LocationOwner) để có UserId
+               
                 var l = await _subs.GetLocationAsync(dto.LocationId.Value)
                         ?? throw new Exception("Location không tồn tại.");
 
@@ -224,5 +222,23 @@ namespace SnapLink_Service.Service
             PackageName = pkg.Name!,
             ApplicableTo = pkg.ApplicableTo!
         };
+
+        public async Task<IEnumerable<SubscriptionDto>> GetAllSubscribersAsync(string? status = "Active")
+        {
+            var list = await _subs.GetAllAsync(status);
+            return list.Select(s => Map(s, s.Package!));
+        }
+
+        public async Task<IEnumerable<SubscriptionDto>> GetAllPhotographerSubscribersAsync(string? status = "Active")
+        {
+            var list = await _subs.GetAllPhotographerAsync(status);
+            return list.Select(s => Map(s, s.Package!));
+        }
+
+        public async Task<IEnumerable<SubscriptionDto>> GetAllLocationSubscribersAsync(string? status = "Active")
+        {
+            var list = await _subs.GetAllLocationAsync(status);
+            return list.Select(s => Map(s, s.Package!));
+        }
     }
 }

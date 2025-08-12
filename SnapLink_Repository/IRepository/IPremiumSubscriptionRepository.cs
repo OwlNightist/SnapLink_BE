@@ -22,5 +22,8 @@ namespace SnapLink_Repository.IRepository
         Task<PremiumPackage?> GetPackageAsync(int packageId);
         Task<PremiumSubscription?> GetByIdAsync(int subscriptionId);
         Task<IEnumerable<PremiumSubscription>> GetToExpireAsync(DateTime asOfUtc);
+        Task<IList<PremiumSubscription>> GetAllAsync(string? status = "Active");
+        Task<IList<PremiumSubscription>> GetAllPhotographerAsync(string? status = "Active");
+        Task<IList<PremiumSubscription>> GetAllLocationAsync(string? status = "Active");
     }
 }

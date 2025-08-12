@@ -49,14 +49,14 @@ namespace SnapLink_Repository.Repository
             await _ctx.Photographers.FirstOrDefaultAsync(p => p.PhotographerId == photographerId);
 
         public async Task<Location?> GetLocationAsync(int locationId) =>
-    await _ctx.Locations
+            await _ctx.Locations
         .Include(l => l.LocationOwner) // <<< để có l.LocationOwner.UserId
         .FirstOrDefaultAsync(l => l.LocationId == locationId);
 
         public async Task<PremiumPackage?> GetPackageAsync(int packageId) =>
             await _ctx.PremiumPackages.FirstOrDefaultAsync(p => p.PackageId == packageId);
         public async Task<PremiumSubscription?> GetByIdAsync(int subscriptionId) =>
-    await _ctx.PremiumSubscriptions
+            await _ctx.PremiumSubscriptions
         .Include(s => s.Package)
         .FirstOrDefaultAsync(s => s.PremiumSubscriptionId == subscriptionId);
 
@@ -64,5 +64,44 @@ namespace SnapLink_Repository.Repository
             await _ctx.PremiumSubscriptions
                 .Where(s => s.Status == "Active" && s.EndDate < asOfUtc)
                 .ToListAsync();
+        public async Task<IList<PremiumSubscription>> GetAllAsync(string? status = "Active")
+        {
+            var q = _ctx.PremiumSubscriptions
+                .Include(s => s.Package)
+                .Include(s => s.Photographer).ThenInclude(p => p.User)
+                .Include(s => s.Location).ThenInclude(l => l.LocationOwner).ThenInclude(o => o.User)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(status))
+                q = q.Where(s => s.Status == status);
+
+            return await q.OrderByDescending(s => s.StartDate).ToListAsync();
+        }
+
+        public async Task<IList<PremiumSubscription>> GetAllPhotographerAsync(string? status = "Active")
+        {
+            var q = _ctx.PremiumSubscriptions
+                .Include(s => s.Package)
+                .Include(s => s.Photographer).ThenInclude(p => p.User)
+                .Where(s => s.PhotographerId != null);
+
+            if (!string.IsNullOrWhiteSpace(status))
+                q = q.Where(s => s.Status == status);
+
+            return await q.OrderByDescending(s => s.StartDate).ToListAsync();
+        }
+
+        public async Task<IList<PremiumSubscription>> GetAllLocationAsync(string? status = "Active")
+        {
+            var q = _ctx.PremiumSubscriptions
+                .Include(s => s.Package)
+                .Include(s => s.Location).ThenInclude(l => l.LocationOwner).ThenInclude(o => o.User)
+                .Where(s => s.LocationId != null);
+
+            if (!string.IsNullOrWhiteSpace(status))
+                q = q.Where(s => s.Status == status);
+
+            return await q.OrderByDescending(s => s.StartDate).ToListAsync();
+        }
     }
 }
