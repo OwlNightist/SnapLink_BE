@@ -141,7 +141,7 @@ namespace SnapLink_API.Controllers
             }
         }
 
-        // DELETE: api/image/{id}
+        // DELETE: api/image/{id} (Soft Delete)
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
@@ -150,6 +150,36 @@ namespace SnapLink_API.Controllers
                 return NotFound($"Image with ID {id} not found");
             
             return NoContent();
+        }
+
+        // DELETE: api/image/{id}/hard (Hard Delete - Permanent)
+        [HttpDelete("{id}/hard")]
+        public async Task<ActionResult> HardDelete(int id)
+        {
+            var result = await _imageService.HardDeleteAsync(id);
+            if (!result)
+                return NotFound($"Image with ID {id} not found");
+            
+            return NoContent();
+        }
+
+        // PUT: api/image/{id}/restore
+        [HttpPut("{id}/restore")]
+        public async Task<ActionResult> Restore(int id)
+        {
+            var result = await _imageService.RestoreAsync(id);
+            if (!result)
+                return NotFound($"Image with ID {id} not found");
+            
+            return NoContent();
+        }
+
+        // GET: api/image/deleted (Admin only)
+        [HttpGet("deleted")]
+        public async Task<ActionResult<IEnumerable<ImageResponse>>> GetDeletedImages()
+        {
+            var deletedImages = await _imageService.GetDeletedImagesAsync();
+            return Ok(deletedImages);
         }
 
         // PUT: api/image/{id}/set-primary

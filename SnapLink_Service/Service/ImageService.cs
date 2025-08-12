@@ -27,7 +27,7 @@ namespace SnapLink_Service.Service
         public async Task<ImageResponse> GetByIdAsync(int id)
         {
             var image = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.Id == id
+                filter: img => img.Id == id && !img.IsDelete
             );
             
             var imageEntity = image.FirstOrDefault();
@@ -40,7 +40,7 @@ namespace SnapLink_Service.Service
         public async Task<IEnumerable<ImageResponse>> GetByUserIdAsync(int userId)
         {
             var images = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.UserId == userId,
+                filter: img => img.UserId == userId && !img.IsDelete,
                 orderBy: q => q.OrderByDescending(img => img.IsPrimary).ThenBy(img => img.CreatedAt)
             );
             return _mapper.Map<IEnumerable<ImageResponse>>(images);
@@ -49,7 +49,7 @@ namespace SnapLink_Service.Service
         public async Task<IEnumerable<ImageResponse>> GetByPhotographerIdAsync(int photographerId)
         {
             var images = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.PhotographerId == photographerId,
+                filter: img => img.PhotographerId == photographerId && !img.IsDelete,
                 orderBy: q => q.OrderByDescending(img => img.IsPrimary).ThenBy(img => img.CreatedAt)
             );
             return _mapper.Map<IEnumerable<ImageResponse>>(images);
@@ -58,7 +58,7 @@ namespace SnapLink_Service.Service
         public async Task<IEnumerable<ImageResponse>> GetByLocationIdAsync(int locationId)
         {
             var images = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.LocationId == locationId,
+                filter: img => img.LocationId == locationId && !img.IsDelete,
                 orderBy: q => q.OrderByDescending(img => img.IsPrimary).ThenBy(img => img.CreatedAt)
             );
             return _mapper.Map<IEnumerable<ImageResponse>>(images);
@@ -67,7 +67,7 @@ namespace SnapLink_Service.Service
         public async Task<IEnumerable<ImageResponse>> GetByEventIdAsync(int eventId)
         {
             var images = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.EventId == eventId,
+                filter: img => img.EventId == eventId && !img.IsDelete,
                 orderBy: q => q.OrderByDescending(img => img.IsPrimary).ThenBy(img => img.CreatedAt)
             );
             return _mapper.Map<IEnumerable<ImageResponse>>(images);
@@ -76,7 +76,7 @@ namespace SnapLink_Service.Service
         public async Task<ImageResponse?> GetPrimaryByUserIdAsync(int userId)
         {
             var primaryImage = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.UserId == userId && img.IsPrimary
+                filter: img => img.UserId == userId && img.IsPrimary && !img.IsDelete
             );
             var imageEntity = primaryImage.FirstOrDefault();
             return imageEntity != null ? _mapper.Map<ImageResponse>(imageEntity) : null;
@@ -85,7 +85,7 @@ namespace SnapLink_Service.Service
         public async Task<ImageResponse?> GetPrimaryByPhotographerIdAsync(int photographerId)
         {
             var primaryImage = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.PhotographerId == photographerId && img.IsPrimary
+                filter: img => img.PhotographerId == photographerId && img.IsPrimary && !img.IsDelete
             );
             var imageEntity = primaryImage.FirstOrDefault();
             return imageEntity != null ? _mapper.Map<ImageResponse>(imageEntity) : null;
@@ -94,7 +94,7 @@ namespace SnapLink_Service.Service
         public async Task<ImageResponse?> GetPrimaryByLocationIdAsync(int locationId)
         {
             var primaryImage = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.LocationId == locationId && img.IsPrimary
+                filter: img => img.LocationId == locationId && img.IsPrimary && !img.IsDelete
             );
             var imageEntity = primaryImage.FirstOrDefault();
             return imageEntity != null ? _mapper.Map<ImageResponse>(imageEntity) : null;
@@ -103,7 +103,7 @@ namespace SnapLink_Service.Service
         public async Task<ImageResponse?> GetPrimaryByEventIdAsync(int eventId)
         {
             var primaryImage = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.EventId == eventId && img.IsPrimary
+                filter: img => img.EventId == eventId && img.IsPrimary && !img.IsDelete
             );
             var imageEntity = primaryImage.FirstOrDefault();
             return imageEntity != null ? _mapper.Map<ImageResponse>(imageEntity) : null;
@@ -133,7 +133,8 @@ namespace SnapLink_Service.Service
                 EventId = request.EventId,
                 IsPrimary = request.IsPrimary,
                 Caption = request.Caption,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                IsDelete = false
             };
             await _unitOfWork.ImageRepository.AddAsync(image);
             await _unitOfWork.SaveChangesAsync();
@@ -144,7 +145,7 @@ namespace SnapLink_Service.Service
         public async Task<ImageResponse> UpdateAsync(UpdateImageRequest request)
         {
             var image = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.Id == request.Id
+                filter: img => img.Id == request.Id && !img.IsDelete
             );
             var imageEntity = image.FirstOrDefault();
             if (imageEntity == null)
@@ -174,7 +175,8 @@ namespace SnapLink_Service.Service
                              (img.EventId != null && img.EventId == imageEntity.EventId)
                             ) &&
                             img.Id != request.Id &&
-                            img.IsPrimary
+                            img.IsPrimary &&
+                            !img.IsDelete
                     );
                     foreach (var existingImage in existingPrimaryImages)
                     {
@@ -191,6 +193,59 @@ namespace SnapLink_Service.Service
         }
 
         public async Task<bool> DeleteAsync(int id)
+        {
+            var image = await _unitOfWork.ImageRepository.GetAsync(
+                filter: img => img.Id == id && !img.IsDelete
+            );
+            
+            var imageEntity = image.FirstOrDefault();
+            if (imageEntity == null)
+                return false;
+
+            // Soft delete - mark as deleted instead of removing from database
+            imageEntity.IsDelete = true;
+            _unitOfWork.ImageRepository.Update(imageEntity);
+            await _unitOfWork.SaveChangesAsync();
+            
+            return true;
+        }
+
+        public async Task<bool> SetAsPrimaryAsync(int imageId)
+        {
+            var image = await _unitOfWork.ImageRepository.GetAsync(
+                filter: img => img.Id == imageId && !img.IsDelete
+            );
+            var imageEntity = image.FirstOrDefault();
+            if (imageEntity == null)
+                return false;
+
+            // Unset all other primary images for the same entity
+            var existingPrimaryImages = await _unitOfWork.ImageRepository.GetAsync(
+                filter: img =>
+                    ((img.UserId != null && img.UserId == imageEntity.UserId) ||
+                     (img.PhotographerId != null && img.PhotographerId == imageEntity.PhotographerId) ||
+                     (img.LocationId != null && img.LocationId == imageEntity.LocationId) ||
+                     (img.EventId != null && img.EventId == imageEntity.EventId)
+                     ) &&
+                    img.Id != imageId &&
+                    img.IsPrimary &&
+                    !img.IsDelete
+            );
+            foreach (var existingImage in existingPrimaryImages)
+            {
+                existingImage.IsPrimary = false;
+                _unitOfWork.ImageRepository.Update(existingImage);
+            }
+
+            // Set this image as primary
+            imageEntity.IsPrimary = true;
+            _unitOfWork.ImageRepository.Update(imageEntity);
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> HardDeleteAsync(int id)
         {
             var image = await _unitOfWork.ImageRepository.GetAsync(
                 filter: img => img.Id == id
@@ -221,38 +276,31 @@ namespace SnapLink_Service.Service
             return true;
         }
 
-        public async Task<bool> SetAsPrimaryAsync(int imageId)
+        public async Task<bool> RestoreAsync(int id)
         {
             var image = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img => img.Id == imageId
+                filter: img => img.Id == id && img.IsDelete
             );
+            
             var imageEntity = image.FirstOrDefault();
             if (imageEntity == null)
                 return false;
 
-            // Unset all other primary images for the same entity
-            var existingPrimaryImages = await _unitOfWork.ImageRepository.GetAsync(
-                filter: img =>
-                    ((img.UserId != null && img.UserId == imageEntity.UserId) ||
-                     (img.PhotographerId != null && img.PhotographerId == imageEntity.PhotographerId) ||
-                     (img.LocationId != null && img.LocationId == imageEntity.LocationId) ||
-                     (img.EventId != null && img.EventId == imageEntity.EventId)
-                     ) &&
-                    img.Id != imageId &&
-                    img.IsPrimary
-            );
-            foreach (var existingImage in existingPrimaryImages)
-            {
-                existingImage.IsPrimary = false;
-                _unitOfWork.ImageRepository.Update(existingImage);
-            }
-
-            // Set this image as primary
-            imageEntity.IsPrimary = true;
+            // Restore the image by setting IsDelete to false
+            imageEntity.IsDelete = false;
             _unitOfWork.ImageRepository.Update(imageEntity);
             await _unitOfWork.SaveChangesAsync();
-
+            
             return true;
+        }
+
+        public async Task<IEnumerable<ImageResponse>> GetDeletedImagesAsync()
+        {
+            var deletedImages = await _unitOfWork.ImageRepository.GetAsync(
+                filter: img => img.IsDelete,
+                orderBy: q => q.OrderByDescending(img => img.CreatedAt)
+            );
+            return _mapper.Map<IEnumerable<ImageResponse>>(deletedImages);
         }
     }
 } 

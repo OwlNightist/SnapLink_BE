@@ -23,5 +23,8 @@ namespace SnapLink_Service.IService
         Task<ImageResponse> UpdateAsync(UpdateImageRequest request);
         Task<bool> DeleteAsync(int id);
         Task<bool> SetAsPrimaryAsync(int imageId);
+        Task<bool> HardDeleteAsync(int id);
+        Task<bool> RestoreAsync(int id);
+        Task<IEnumerable<ImageResponse>> GetDeletedImagesAsync();
     }
 } 

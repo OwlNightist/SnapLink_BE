@@ -9,6 +9,7 @@ namespace SnapLink_Repository.Entity
         public bool IsPrimary { get; set; }
         public string? Caption { get; set; }
         public DateTime CreatedAt { get; set; }
+        public bool IsDelete { get; set; } = false;
 
         public int? UserId { get; set; }
         public User? User { get; set; }
