@@ -14,5 +14,8 @@ namespace SnapLink_Service.IService
         Task<IEnumerable<SubscriptionDto>> GetByLocationAsync(int locationId);
         Task<string> CancelAsync(int subscriptionId, string? reason = null);
         Task<int> ExpireOverduesAsync();
+        Task<IEnumerable<SubscriptionDto>> GetAllSubscribersAsync(string? status = "Active");
+        Task<IEnumerable<SubscriptionDto>> GetAllPhotographerSubscribersAsync(string? status = "Active");
+        Task<IEnumerable<SubscriptionDto>> GetAllLocationSubscribersAsync(string? status = "Active");
     }
 }

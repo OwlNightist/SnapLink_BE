@@ -26,6 +26,25 @@ namespace SnapLink_API.Controllers
         [HttpGet("Location/{locationId:int}")]
         public async Task<IActionResult> GetByLocation(int locationId) =>
             Ok(await _svc.GetByLocationAsync(locationId));
+
+        [HttpGet("subscribers")]
+        public async Task<IActionResult> GetAllSubscribers([FromQuery] string? status = "Active")
+        {
+            var data = await _svc.GetAllSubscribersAsync(status);
+            return Ok(data);
+        }
+        [HttpGet("subscribers/photographers")]
+        public async Task<IActionResult> GetAllPhotographerSubscribers([FromQuery] string? status = "Active")
+        {
+            var data = await _svc.GetAllPhotographerSubscribersAsync(status);
+            return Ok(data);
+        }
+        [HttpGet("subscribers/locations")]
+        public async Task<IActionResult> GetAllLocationSubscribers([FromQuery] string? status = "Active")
+        {
+            var data = await _svc.GetAllLocationSubscribersAsync(status);
+            return Ok(data);
+        }
         [HttpPut("{subscriptionId:int}/cancel")]
         public async Task<IActionResult> Cancel(int subscriptionId, [FromQuery] string? reason = null)
         {
