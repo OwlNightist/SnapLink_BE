@@ -9,4 +9,5 @@ public interface IWalletService
     Task<bool> DeductFundsFromWalletAsync(int userId, decimal amount);
     Task<bool> TransferFundsAsync(int fromUserId, int toUserId, decimal amount);
     Task<bool> CreateWalletIfNotExistsAsync(int userId);
+
 } 
