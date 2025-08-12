@@ -30,5 +30,10 @@ namespace SnapLink_Service.IService
         // Business logic
         Task<bool> UpdateAvailabilityStatusAsync(int availabilityId, string status);
         Task<IEnumerable<AvailabilityResponse>> GetAvailablePhotographersByTimeAsync(DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime);
+        
+        /// <summary>
+        /// Get available time slots for a photographer on a specific day, considering existing bookings
+        /// </summary>
+        Task<IEnumerable<AvailableTimeSlotResponse>> GetAvailableTimeSlotsAsync(int photographerId, DateTime date);
     }
 } 

@@ -414,5 +414,55 @@ namespace SnapLink_API.Controllers
                 });
             }
         }
+
+        /// <summary>
+        /// Get available time slots for a photographer on a specific date
+        /// This considers their registered availability and existing bookings
+        /// </summary>
+        [HttpGet("photographer/{photographerId}/available-slots")]
+        public async Task<IActionResult> GetAvailableTimeSlots(int photographerId, [FromQuery] DateTime date)
+        {
+            try
+            {
+                // Validate photographer ID
+                if (photographerId <= 0)
+                {
+                    return BadRequest(new
+                    {
+                        Error = 1,
+                        Message = "Invalid photographer ID",
+                        Data = (object?)null
+                    });
+                }
+
+                // Validate date (should not be in the past for future bookings)
+                if (date.Date < DateTime.Today)
+                {
+                    return BadRequest(new
+                    {
+                        Error = 2,
+                        Message = "Date cannot be in the past",
+                        Data = (object?)null
+                    });
+                }
+
+                var availableSlots = await _availabilityService.GetAvailableTimeSlotsAsync(photographerId, date);
+                return Ok(new
+                {
+                    Error = 0,
+                    Message = "Available time slots retrieved successfully",
+                    Data = availableSlots
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    Error = -1,
+                    Message = "Internal server error",
+                    Data = (object?)null
+                });
+            }
+        }
     }
 } 

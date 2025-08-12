@@ -1139,40 +1139,6 @@ namespace SnapLink_Repository.Data
                     });
                 }
 
-                // Add some unavailable time slots for variety
-                // Photographer 1 - Monday afternoon unavailable
-                availabilities.Add(new Availability
-                {
-                    PhotographerId = photographers[0].PhotographerId,
-                    DayOfWeek = DayOfWeek.Monday,
-                    StartTime = new TimeSpan(13, 0, 0), // 1:00 PM
-                    EndTime = new TimeSpan(15, 0, 0),   // 3:00 PM
-                    Status = "Unavailable",
-                    CreatedAt = DateTime.Now
-                });
-
-                // Photographer 3 - Wednesday morning unavailable
-                availabilities.Add(new Availability
-                {
-                    PhotographerId = photographers[2].PhotographerId,
-                    DayOfWeek = DayOfWeek.Wednesday,
-                    StartTime = new TimeSpan(8, 0, 0),
-                    EndTime = new TimeSpan(12, 0, 0),
-                    Status = "Unavailable",
-                    CreatedAt = DateTime.Now
-                });
-
-                // Photographer 7 - Friday evening unavailable
-                availabilities.Add(new Availability
-                {
-                    PhotographerId = photographers[6].PhotographerId,
-                    DayOfWeek = DayOfWeek.Friday,
-                    StartTime = new TimeSpan(17, 0, 0),
-                    EndTime = new TimeSpan(21, 0, 0),
-                    Status = "Unavailable",
-                    CreatedAt = DateTime.Now
-                });
-
                 context.Availabilities.AddRange(availabilities);
                 context.SaveChanges();
                 Console.WriteLine($"Availabilities seeded successfully: {availabilities.Count} availabilities added");

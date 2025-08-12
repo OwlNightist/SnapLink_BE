@@ -314,5 +314,148 @@ namespace SnapLink_Service.Service
             
             return _mapper.Map<IEnumerable<AvailabilityResponse>>(availabilities);
         }
+
+        public async Task<IEnumerable<AvailableTimeSlotResponse>> GetAvailableTimeSlotsAsync(int photographerId, DateTime date)
+        {
+            var dayOfWeek = date.DayOfWeek;
+            var result = new AvailableTimeSlotResponse
+            {
+                PhotographerId = photographerId,
+                Date = date.Date,
+                DayOfWeek = dayOfWeek
+            };
+
+            // Get registered availability for this day
+            var registeredAvailabilities = await _unitOfWork.AvailabilityRepository.GetAsync(
+                filter: a => a.PhotographerId == photographerId && 
+                           a.DayOfWeek == dayOfWeek && 
+                           a.Status == "Available",
+                orderBy: q => q.OrderBy(a => a.StartTime));
+
+            if (!registeredAvailabilities.Any())
+            {
+                return new List<AvailableTimeSlotResponse> { result };
+            }
+
+            // Get existing bookings for this photographer on this date
+            var existingBookings = await _unitOfWork.BookingRepository.GetAsync(
+                filter: b => b.PhotographerId == photographerId &&
+                           b.StartDatetime.HasValue &&
+                           b.EndDatetime.HasValue &&
+                           b.StartDatetime.Value.Date == date.Date &&
+                           b.Status != "Cancelled" &&
+                           b.Status != "Completed",
+                orderBy: q => q.OrderBy(b => b.StartDatetime.Value),
+                includeProperties: "User");
+
+            // Process each registered availability slot
+            foreach (var availability in registeredAvailabilities)
+            {
+                var registeredSlot = new TimeSlot
+                {
+                    StartTime = availability.StartTime,
+                    EndTime = availability.EndTime,
+                    Status = "Registered"
+                };
+                result.RegisteredAvailability.Add(registeredSlot);
+
+                // Find overlapping bookings for this availability slot
+                var overlappingBookings = existingBookings.Where(b => 
+                    b.StartDatetime.HasValue &&
+                    b.EndDatetime.HasValue &&
+                    b.StartDatetime.Value.TimeOfDay < availability.EndTime &&
+                    b.EndDatetime.Value.TimeOfDay > availability.StartTime).ToList();
+
+                if (!overlappingBookings.Any())
+                {
+                    // No conflicts - entire slot is available
+                    result.AvailableSlots.Add(new TimeSlot
+                    {
+                        StartTime = availability.StartTime,
+                        EndTime = availability.EndTime,
+                        Status = "Available"
+                    });
+                }
+                else
+                {
+                    // Process conflicts and find available sub-slots
+                    var availableSlots = CalculateAvailableSubSlots(
+                        availability.StartTime, 
+                        availability.EndTime, 
+                        overlappingBookings);
+
+                    foreach (var slot in availableSlots)
+                    {
+                        result.AvailableSlots.Add(slot);
+                    }
+
+                    // Add booked slots for display
+                    foreach (var booking in overlappingBookings)
+                    {
+                        if (!booking.StartDatetime.HasValue || !booking.EndDatetime.HasValue)
+                            continue;
+                            
+                        var bookedSlot = new TimeSlot
+                        {
+                            StartTime = TimeSpan.FromTicks(Math.Max(availability.StartTime.Ticks, booking.StartDatetime.Value.TimeOfDay.Ticks)),
+                            EndTime = TimeSpan.FromTicks(Math.Min(availability.EndTime.Ticks, booking.EndDatetime.Value.TimeOfDay.Ticks)),
+                            Status = "Booked",
+                            BookingInfo = $"Booking #{booking.BookingId} - {booking.User?.FullName ?? "Unknown"}"
+                        };
+                        result.BookedSlots.Add(bookedSlot);
+                    }
+                }
+            }
+
+            return new List<AvailableTimeSlotResponse> { result };
+        }
+
+        private List<TimeSlot> CalculateAvailableSubSlots(TimeSpan availabilityStart, TimeSpan availabilityEnd, List<Booking> overlappingBookings)
+        {
+            var availableSlots = new List<TimeSlot>();
+            var currentTime = availabilityStart;
+
+            // Sort bookings by start time
+            var sortedBookings = overlappingBookings
+                .Where(b => b.StartDatetime.HasValue)
+                .OrderBy(b => b.StartDatetime.Value.TimeOfDay)
+                .ToList();
+
+            foreach (var booking in sortedBookings)
+            {
+                if (!booking.StartDatetime.HasValue || !booking.EndDatetime.HasValue)
+                    continue;
+                    
+                var bookingStart = booking.StartDatetime.Value.TimeOfDay;
+                var bookingEnd = booking.EndDatetime.Value.TimeOfDay;
+
+                // If there's a gap between current time and booking start, it's available
+                if (currentTime < bookingStart)
+                {
+                    availableSlots.Add(new TimeSlot
+                    {
+                        StartTime = currentTime,
+                        EndTime = bookingStart,
+                        Status = "Available"
+                    });
+                }
+
+                // Move current time to after this booking
+                currentTime = TimeSpan.FromTicks(Math.Max(currentTime.Ticks, bookingEnd.Ticks));
+            }
+
+            // If there's remaining time after all bookings, it's available
+            if (currentTime < availabilityEnd)
+            {
+                availableSlots.Add(new TimeSlot
+                {
+                    StartTime = currentTime,
+                    EndTime = availabilityEnd,
+                    Status = "Available"
+                });
+            }
+
+            return availableSlots;
+        }
     }
 } 

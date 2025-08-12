@@ -36,4 +36,22 @@ namespace SnapLink_Model.DTO.Response
         public string? Message { get; set; }
         public List<AvailabilityResponse> ConflictingAvailabilities { get; set; } = new List<AvailabilityResponse>();
     }
+
+    public class AvailableTimeSlotResponse
+    {
+        public int PhotographerId { get; set; }
+        public DateTime Date { get; set; }
+        public DayOfWeek DayOfWeek { get; set; }
+        public List<TimeSlot> AvailableSlots { get; set; } = new List<TimeSlot>();
+        public List<TimeSlot> BookedSlots { get; set; } = new List<TimeSlot>();
+        public List<TimeSlot> RegisteredAvailability { get; set; } = new List<TimeSlot>();
+    }
+
+    public class TimeSlot
+    {
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
+        public string Status { get; set; } = string.Empty; // "Available", "Booked", "Registered"
+        public string? BookingInfo { get; set; } // Additional info for booked slots
+    }
 } 
