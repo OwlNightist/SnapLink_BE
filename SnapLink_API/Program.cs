@@ -177,7 +177,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IImageGenerationService, ImageGenerationService>();
-builder.Services.AddHostedService<SubscriptionExpiryJob>();
+
 builder.Services.AddScoped<IPremiumSubscriptionRepository, PremiumSubscriptionRepository>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
@@ -185,7 +185,7 @@ builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 
 // Add Background Services
 // builder.Services.AddHostedService<BookingTimeoutService>(); 
-
+//builder.Services.AddHostedService<SubscriptionExpiryJob>();
 
 builder.Services.AddCors(opts =>
 {
