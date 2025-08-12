@@ -178,6 +178,10 @@ builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IImageGenerationService, ImageGenerationService>();
 builder.Services.AddHostedService<SubscriptionExpiryJob>();
+builder.Services.AddScoped<IPremiumSubscriptionRepository, PremiumSubscriptionRepository>();
+builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+
 
 // Add Background Services
 // builder.Services.AddHostedService<BookingTimeoutService>(); 
@@ -238,6 +242,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Map SignalR Hub
- app.MapHub<SnapLink_API.Hubs.ChatHub>("/chatHub"); 
+app.MapHub<SnapLink_API.Hubs.ChatHub>("/chatHub"); 
 
 app.Run(); 
