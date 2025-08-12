@@ -14,6 +14,7 @@ using SnapLink_Service.IService;
 using SnapLink_Service.Service;
 using System.Text;
 using Microsoft.Extensions.Options;
+using SnapLink_API.Jobs;
 
 var builder = WebApplication.CreateBuilder(args);
 // Cấu hình JwtSettings
@@ -94,6 +95,10 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IAzureStorageService, AzureStorageService>();
+builder.Services.AddScoped<IPremiumPackageRepository, PremiumPackageRepository>();
+builder.Services.AddScoped<IPremiumSubscriptionRepository, PremiumSubscriptionRepository>();
+builder.Services.AddScoped<IPackageService, PackageService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -172,7 +177,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IImageGenerationService, ImageGenerationService>();
-
+builder.Services.AddHostedService<SubscriptionExpiryJob>();
 
 // Add Background Services
 // builder.Services.AddHostedService<BookingTimeoutService>(); 
@@ -233,6 +238,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Map SignalR Hub
-app.MapHub<SnapLink_API.Hubs.ChatHub>("/chatHub");
+/*app.MapHub<SnapLink_API.Hubs.ChatHub>("/chatHub");*/
 
 app.Run();
