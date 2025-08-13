@@ -94,7 +94,7 @@ builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IImageService, ImageService>();
-builder.Services.AddScoped<IAzureStorageService, AzureStorageService>();
+builder.Services.AddSingleton<IAzureStorageService, AzureStorageService>();
 builder.Services.AddScoped<IPremiumPackageRepository, PremiumPackageRepository>();
 builder.Services.AddScoped<IPremiumSubscriptionRepository, PremiumSubscriptionRepository>();
 builder.Services.AddScoped<IPackageService, PackageService>();
