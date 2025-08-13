@@ -589,8 +589,8 @@ public class PaymentService : IPaymentService
                     FromUserId = payment.CustomerId,
                     ToUserId = null, // System holds the funds
                     Amount = payment.TotalAmount,
-                    Type = TransactionType.EscrowHold,
-                    Status = TransactionStatus.Held,
+                    Type = TransactionType.Deposit,          
+                    Status = TransactionStatus.Success,
                     Note = $"Top up to Wallet ",
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
