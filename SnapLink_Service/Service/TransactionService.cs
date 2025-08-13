@@ -51,7 +51,6 @@ namespace SnapLink_Service.Service
                     CreatedAt = t.CreatedAt,
                     UpdatedAt = t.UpdatedAt,
                     PaymentMethod = t.ReferencePayment != null ? t.ReferencePayment.Method : null,
-                    PaymentAmount = t.ReferencePayment != null ? t.ReferencePayment.TotalAmount : null,
                     PaymentStatus = t.ReferencePayment != null ? t.ReferencePayment.Status.ToString() : null
                 })
                 .ToListAsync();
@@ -102,7 +101,6 @@ namespace SnapLink_Service.Service
                     CreatedAt = t.CreatedAt,
                     UpdatedAt = t.UpdatedAt,
                     PaymentMethod = t.ReferencePayment != null ? t.ReferencePayment.Method : null,
-                    PaymentAmount = t.ReferencePayment != null ? t.ReferencePayment.TotalAmount : null,
                     PaymentStatus = t.ReferencePayment != null ? t.ReferencePayment.Status.ToString() : null
                 })
                 .ToListAsync();
@@ -153,7 +151,6 @@ namespace SnapLink_Service.Service
                     CreatedAt = t.CreatedAt,
                     UpdatedAt = t.UpdatedAt,
                     PaymentMethod = t.ReferencePayment != null ? t.ReferencePayment.Method : null,
-                    PaymentAmount = t.ReferencePayment != null ? t.ReferencePayment.TotalAmount : null,
                     PaymentStatus = t.ReferencePayment != null ? t.ReferencePayment.Status.ToString() : null
                 })
                 .ToListAsync();
@@ -188,7 +185,6 @@ namespace SnapLink_Service.Service
                 CreatedAt = transaction.CreatedAt,
                 UpdatedAt = transaction.UpdatedAt,
                 PaymentMethod = transaction.ReferencePayment != null ? transaction.ReferencePayment.Method : null,
-                PaymentAmount = transaction.ReferencePayment != null ? transaction.ReferencePayment.TotalAmount : null,
                 PaymentStatus = transaction.ReferencePayment != null ? transaction.ReferencePayment.Status.ToString() : null
             };
         }
@@ -436,7 +432,6 @@ namespace SnapLink_Service.Service
                         CreatedAt = t.CreatedAt,
                         UpdatedAt = t.UpdatedAt,
                         PaymentMethod = t.ReferencePayment != null ? t.ReferencePayment.Method : null,
-                        PaymentAmount = t.ReferencePayment != null ? t.ReferencePayment.TotalAmount : null,
                         PaymentStatus = t.ReferencePayment != null ? t.ReferencePayment.Status.ToString() : null
                     })
                     .ToList();

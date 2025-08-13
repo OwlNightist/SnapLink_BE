@@ -583,6 +583,21 @@ public class PaymentService : IPaymentService
                 await _walletService.AddFundsToWalletAsync(payment.CustomerId, payment.TotalAmount);
 
                 await _unitOfWork.SaveChangesAsync();
+                var WallTransaction = new SnapLink_Repository.Entity.Transaction
+                {
+                    ReferencePaymentId = payment.PaymentId,
+                    FromUserId = payment.CustomerId,
+                    ToUserId = null, // System holds the funds
+                    Amount = payment.TotalAmount,
+                    Type = TransactionType.EscrowHold,
+                    Status = TransactionStatus.Held,
+                    Note = $"Top up to Wallet ",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                await _context.Transactions.AddAsync(WallTransaction);
+                await _unitOfWork.SaveChangesAsync();
             }
             else
             {

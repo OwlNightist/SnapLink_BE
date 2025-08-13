@@ -21,7 +21,6 @@ namespace SnapLink_Model.DTO.Response
         
         // Related payment info
         public string? PaymentMethod { get; set; }
-        public decimal? PaymentAmount { get; set; }
         public string? PaymentStatus { get; set; }
     }
 
