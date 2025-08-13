@@ -69,10 +69,10 @@ namespace SnapLink_Service.Service
             );
             response.ApprovedPhotographersCount = approvedPhotographers.Count();
 
-            var totalBookings = await _unitOfWork.EventBookingRepository.GetAsync(
-                filter: eb => eb.EventId == eventId
+            var confirmedBookings = await _unitOfWork.EventBookingRepository.GetAsync(
+                filter: eb => eb.EventId == eventId && eb.Booking.Status == "Confirmed"
             );
-            response.TotalBookingsCount = totalBookings.Count();
+            response.TotalBookingsCount = confirmedBookings.Count();
 
             return response;
         }
@@ -96,7 +96,27 @@ namespace SnapLink_Service.Service
             var events = await _unitOfWork.LocationEventRepository.GetAsync(
                 includeProperties: "Location,Images"
             );
-            return _mapper.Map<IEnumerable<LocationEventResponse>>(events);
+            
+            var responses = new List<LocationEventResponse>();
+            foreach (var evt in events)
+            {
+                var response = _mapper.Map<LocationEventResponse>(evt);
+                
+                // Get counts
+                var approvedPhotographers = await _unitOfWork.EventPhotographerRepository.GetAsync(
+                    filter: ep => ep.EventId == evt.EventId && ep.Status == "Approved"
+                );
+                response.ApprovedPhotographersCount = approvedPhotographers.Count();
+
+                var confirmedBookings = await _unitOfWork.EventBookingRepository.GetAsync(
+                    filter: eb => eb.EventId == evt.EventId && eb.Booking.Status == "Confirmed"
+                );
+                response.TotalBookingsCount = confirmedBookings.Count();
+
+                responses.Add(response);
+            }
+
+            return responses;
         }
 
         public async Task<IEnumerable<LocationEventResponse>> GetEventsByLocationAsync(int locationId)
@@ -509,10 +529,10 @@ namespace SnapLink_Service.Service
                 );
                 response.ApprovedPhotographersCount = approvedPhotographers.Count();
 
-                var totalBookings = await _unitOfWork.EventBookingRepository.GetAsync(
-                    filter: eb => eb.EventId == evt.EventId
+                var confirmedBookings = await _unitOfWork.EventBookingRepository.GetAsync(
+                    filter: eb => eb.EventId == evt.EventId && eb.Booking.Status == "Confirmed"
                 );
-                response.TotalBookingsCount = totalBookings.Count();
+                response.TotalBookingsCount = confirmedBookings.Count();
 
                 responses.Add(response);
             }
