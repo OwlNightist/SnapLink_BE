@@ -4,6 +4,8 @@ namespace SnapLink_Service.IService
 {
     public interface ITransactionService
     {
+        Task<IEnumerable<TransactionResponse>> GetAllTransactionsAsync(int page = 1, int pageSize = 10, int? year = null, int? month = null);
+        Task<int> GetAllTransactionCountAsync(int? year = null, int? month = null);
         Task<IEnumerable<TransactionResponse>> GetUserTransactionHistoryAsync(int userId, int page = 1, int pageSize = 10, int? year = null, int? month = null);
         Task<IEnumerable<TransactionResponse>> GetPhotographerTransactionHistoryAsync(int photographerId, int page = 1, int pageSize = 10, int? year = null, int? month = null);
         Task<IEnumerable<TransactionResponse>> GetLocationOwnerTransactionHistoryAsync(int locationOwnerId, int page = 1, int pageSize = 10, int? year = null, int? month = null);

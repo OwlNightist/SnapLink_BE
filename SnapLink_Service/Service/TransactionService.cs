@@ -15,6 +15,62 @@ namespace SnapLink_Service.Service
             _context = context;
         }
 
+        public async Task<IEnumerable<TransactionResponse>> GetAllTransactionsAsync(int page = 1, int pageSize = 10, int? year = null, int? month = null)
+        {
+            var query = _context.Transactions
+                .Include(t => t.FromUser)
+                .Include(t => t.ToUser)
+                .Include(t => t.ReferencePayment)
+                .AsQueryable();
+
+            if (year.HasValue && month.HasValue)
+            {
+                var startDate = new DateTime(year.Value, month.Value, 1);
+                var endDate = startDate.AddMonths(1).AddDays(-1);
+                query = query.Where(t => t.CreatedAt >= startDate && t.CreatedAt <= endDate);
+            }
+
+            var transactions = await query
+                .OrderByDescending(t => t.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(t => new TransactionResponse
+                {
+                    TransactionId = t.TransactionId,
+                    ReferencePaymentId = t.ReferencePaymentId,
+                    FromUserId = t.FromUserId,
+                    FromUserName = t.FromUser != null ? t.FromUser.FullName ?? "" : "System",
+                    ToUserId = t.ToUserId,
+                    ToUserName = t.ToUser != null ? t.ToUser.FullName ?? "" : "System",
+                    Amount = t.Amount,
+                    Currency = t.Currency,
+                    Type = t.Type.ToString(),
+                    Status = t.Status.ToString(),
+                    Note = t.Note,
+                    CreatedAt = t.CreatedAt,
+                    UpdatedAt = t.UpdatedAt,
+                    PaymentMethod = t.ReferencePayment != null ? t.ReferencePayment.Method : null,
+                    PaymentStatus = t.ReferencePayment != null ? t.ReferencePayment.Status.ToString() : null
+                })
+                .ToListAsync();
+
+            return transactions;
+        }
+
+        public async Task<int> GetAllTransactionCountAsync(int? year = null, int? month = null)
+        {
+            var query = _context.Transactions.AsQueryable();
+
+            if (year.HasValue && month.HasValue)
+            {
+                var startDate = new DateTime(year.Value, month.Value, 1);
+                var endDate = startDate.AddMonths(1).AddDays(-1);
+                query = query.Where(t => t.CreatedAt >= startDate && t.CreatedAt <= endDate);
+            }
+
+            return await query.CountAsync();
+        }
+
         public async Task<IEnumerable<TransactionResponse>> GetUserTransactionHistoryAsync(int userId, int page = 1, int pageSize = 10, int? year = null, int? month = null)
         {
             var query = _context.Transactions

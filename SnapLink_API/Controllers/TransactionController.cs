@@ -14,6 +14,42 @@ public class TransactionController : ControllerBase
         _transactionService = transactionService;
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] int? year = null, [FromQuery] int? month = null)
+    {
+        try
+        {
+            var transactions = await _transactionService.GetAllTransactionsAsync(page, pageSize, year, month);
+            var totalCount = await _transactionService.GetAllTransactionCountAsync(year, month);
+
+            return Ok(new
+            {
+                Error = 0,
+                Message = "Transactions retrieved successfully",
+                Data = new
+                {
+                    Transactions = transactions,
+                    TotalCount = totalCount,
+                    Page = page,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling((double)totalCount / pageSize),
+                    Year = year,
+                    Month = month
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in GetAll: {ex.Message}");
+            return StatusCode(500, new
+            {
+                Error = -1,
+                Message = "Internal server error",
+                Data = (object?)null
+            });
+        }
+    }
+
     [HttpGet("history/user/{userId}")]
     public async Task<IActionResult> GetTransactionHistoryByUser(int userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] int? year = null, [FromQuery] int? month = null)
     {
