@@ -136,7 +136,7 @@ namespace SnapLink_Service.Service
                 var truePrice = await CalculateBookingPriceAsync(request.PhotographerId, locationId, request.StartDatetime, request.EndDatetime);
                 
                 // Get display price (capped for testing)
-                var displayPrice = GetDisplayPrice(truePrice);
+                
 
                 // Create booking with true price stored in database
                 var booking = new Booking
@@ -156,7 +156,7 @@ namespace SnapLink_Service.Service
                 await _unitOfWork.SaveChangesAsync();
 
                 // Return booking data with display price
-                var bookingData = await MapBookingToResponseAsync(booking, displayPrice);
+                var bookingData = await MapBookingToResponseAsync(booking);
                 
                 return new BookingResponse
                 {
@@ -798,18 +798,11 @@ namespace SnapLink_Service.Service
             }
         }
 
-        private decimal GetDisplayPrice(decimal truePrice)
-        {
-            // For testing: hard-code display price at 5000, but keep true price in database
-            return 5000m;
-        }
-
-        private async Task<BookingData> MapBookingToResponseAsync(Booking booking, decimal? displayPrice = null)
+        private async Task<BookingData> MapBookingToResponseAsync(Booking booking)
         {
             var duration = (booking.EndDatetime - booking.StartDatetime)?.TotalHours ?? 0;
             var truePrice = booking.TotalPrice ?? 0;
-            var priceToDisplay = displayPrice ?? GetDisplayPrice(truePrice);
-            var pricePerHour = duration > 0 ? priceToDisplay / (decimal)duration : 0;
+            var pricePerHour = duration > 0 ? truePrice / (decimal)duration : 0;
 
             // Get escrow balance for confirmed bookings
             decimal escrowBalance = 0;
@@ -836,12 +829,11 @@ namespace SnapLink_Service.Service
                 EndDatetime = booking.EndDatetime ?? DateTime.UtcNow,
                 Status = booking.Status ?? "",
                 SpecialRequests = booking.SpecialRequests,
-                TotalPrice = priceToDisplay, // Use display price for response
+                TotalPrice = truePrice, // Use display price for response
                 CreatedAt = booking.CreatedAt ?? DateTime.UtcNow,
                 UpdatedAt = booking.UpdatedAt,
                 HasPayment = booking.Payment != null,
                 PaymentStatus = booking.Payment?.Status.ToString() ?? "",
-                PaymentAmount = booking.Payment?.TotalAmount,
                 EscrowBalance = escrowBalance,
                 HasEscrowFunds = hasEscrowFunds,
                 DurationHours = (int)duration,

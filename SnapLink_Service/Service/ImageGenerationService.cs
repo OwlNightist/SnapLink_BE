@@ -47,7 +47,7 @@ public class ImageGenerationService : IImageGenerationService
             // Prepare content with both text and image
             var generateRequest = new GenerateContentRequest(request.Prompt);
             await generateRequest.AddMedia(request.ImageBase64, request.MimeType);
-
+            Console.WriteLine("vai cut mode ne "+ modelName);
             // Set generation config with both TEXT and IMAGE modalities
             generateRequest.GenerationConfig = new GenerationConfig
             {

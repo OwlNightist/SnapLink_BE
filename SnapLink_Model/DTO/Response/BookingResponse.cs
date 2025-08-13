@@ -30,7 +30,6 @@ public class BookingData
     // Payment information
     public bool HasPayment { get; set; }
     public string PaymentStatus { get; set; } = string.Empty;
-    public decimal? PaymentAmount { get; set; }
     
     // Escrow information
     public decimal EscrowBalance { get; set; }
