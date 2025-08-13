@@ -31,31 +31,14 @@ namespace SnapLink_Service.Service
         {
             try
             {
-                // Validate photographer exists
-                var photographer = await _context.Photographers
-                    .Include(p => p.User)
-                    .FirstOrDefaultAsync(p => p.PhotographerId == request.PhotographerId);
-                
-                if (photographer == null)
+                // Validate booking request
+                var validationResult = await ValidateBookingRequestAsync(request, userId);
+                if (!validationResult.IsValid)
                 {
                     return new BookingResponse
                     {
                         Error = -1,
-                        Message = "Photographer not found",
-                        Data = null
-                    };
-                }
-
-                // Validate user exists
-                var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.UserId == userId);
-                
-                if (user == null)
-                {
-                    return new BookingResponse
-                    {
-                        Error = -1,
-                        Message = "User not found",
+                        Message = validationResult.ErrorMessage,
                         Data = null
                     };
                 }
@@ -121,17 +104,6 @@ namespace SnapLink_Service.Service
                     locationId = externalLocation.LocationId;
                 }
 
-                // Check photographer availability
-                if (!await IsPhotographerAvailableAsync(request.PhotographerId, request.StartDatetime, request.EndDatetime))
-                {
-                    return new BookingResponse
-                    {
-                        Error = -1,
-                        Message = "Photographer is not available for the selected time",
-                        Data = null
-                    };
-                }
-
                 // Calculate true price automatically
                 var truePrice = await CalculateBookingPriceAsync(request.PhotographerId, locationId, request.StartDatetime, request.EndDatetime);
                 
@@ -174,6 +146,65 @@ namespace SnapLink_Service.Service
                     Data = null
                 };
             }
+        }
+
+        /// <summary>
+        /// Validates a booking request for both regular bookings and event bookings
+        /// </summary>
+        /// <param name="request">The booking request to validate</param>
+        /// <param name="userId">The user ID making the request</param>
+        /// <returns>Validation result with success status and error message if applicable</returns>
+        public async Task<(bool IsValid, string ErrorMessage)> ValidateBookingRequestAsync(CreateBookingRequest request, int userId)
+        {
+            // Validate photographer exists
+            var photographer = await _context.Photographers
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.PhotographerId == request.PhotographerId);
+            
+            if (photographer == null)
+            {
+                return (false, "Photographer not found");
+            }
+
+            // Validate user exists
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+            
+            if (user == null)
+            {
+                return (false, "User not found");
+            }
+
+            // Check photographer availability
+            if (!await IsPhotographerAvailableAsync(request.PhotographerId, request.StartDatetime, request.EndDatetime))
+            {
+                return (false, "Photographer is not available for the selected time");
+            }
+
+            // Validate datetime logic
+            if (request.StartDatetime >= request.EndDatetime)
+            {
+                return (false, "Start time must be before end time");
+            }
+
+            if (request.StartDatetime <= DateTime.UtcNow)
+            {
+                return (false, "Start time must be in the future");
+            }
+
+            // Validate duration (optional - can be configured)
+            var duration = (request.EndDatetime - request.StartDatetime).TotalHours;
+            if (duration < 0.5) // Minimum 30 minutes
+            {
+                return (false, "Booking duration must be at least 30 minutes");
+            }
+
+            if (duration > 24) // Maximum 24 hours
+            {
+                return (false, "Booking duration cannot exceed 24 hours");
+            }
+
+            return (true, string.Empty);
         }
 
 

@@ -170,6 +170,12 @@ namespace SnapLink_Model.DTO
                 .ForMember(dest => dest.EventPhotographer, opt => opt.MapFrom(src => src.EventPhotographer))
                 .ForMember(dest => dest.Event, opt => opt.MapFrom(src => src.Event));
 
+            // Booking mappings
+            CreateMap<Booking, BookingDto>()
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
+                .ForMember(dest => dest.Photographer, opt => opt.MapFrom(src => src.Photographer))
+                .ForMember(dest => dest.Location, opt => opt.MapFrom(src => src.Location));
+
         }
     }
 }

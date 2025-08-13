@@ -20,4 +20,5 @@ public interface IBookingService
     Task<int> CancelExpiredPendingBookingsAsync();
     Task<int> CancelAllPendingBookingsAsync();
     Task<BookingResponse> ConfirmBookingAsync(int bookingId, int userId);
+    Task<(bool IsValid, string ErrorMessage)> ValidateBookingRequestAsync(CreateBookingRequest request, int userId);
 } 

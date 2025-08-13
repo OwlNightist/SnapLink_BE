@@ -61,9 +61,29 @@ namespace SnapLink_Model.DTO.Response
         public DateTime CreatedAt { get; set; }
         
         // Navigation properties
-        public BookingResponse? Booking { get; set; }
+        public BookingDto? Booking { get; set; }
         public EventPhotographerResponse? EventPhotographer { get; set; }
         public LocationEventResponse? Event { get; set; }
+    }
+
+    public class BookingDto
+    {
+        public int BookingId { get; set; }
+        public int UserId { get; set; }
+        public int PhotographerId { get; set; }
+        public int LocationId { get; set; }
+        public DateTime? StartDatetime { get; set; }
+        public DateTime? EndDatetime { get; set; }
+        public string? Status { get; set; }
+        public string? SpecialRequests { get; set; }
+        public decimal? TotalPrice { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        
+        // Navigation properties
+        public UserDto? User { get; set; }
+        public PhotographerResponse? Photographer { get; set; }
+        public LocationDto? Location { get; set; }
     }
 
     public class EventApplicationResponse

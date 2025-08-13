@@ -15,11 +15,13 @@ namespace SnapLink_Service.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IBookingService _bookingService;
 
-        public LocationEventService(IUnitOfWork unitOfWork, IMapper mapper)
+        public LocationEventService(IUnitOfWork unitOfWork, IMapper mapper, IBookingService bookingService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _bookingService = bookingService;
         }
 
         // Event Management
@@ -324,12 +326,12 @@ namespace SnapLink_Service.Service
         public async Task<EventBookingResponse> CreateEventBookingAsync(EventBookingRequest request)
         {
             // Validate event exists and is active
-            var locationEvent = await _unitOfWork.LocationEventRepository.GetByIdAsync(request.EventId);
-            if (locationEvent == null)
+            var locationEventEntity = await _unitOfWork.LocationEventRepository.GetByIdAsync(request.EventId);
+            if (locationEventEntity == null)
                 throw new ArgumentException($"Event with ID {request.EventId} not found");
 
-            if (locationEvent.Status != "Active")
-                throw new InvalidOperationException("Event is not active for bookings");
+            if (locationEventEntity.Status != "Active" && locationEventEntity.Status != "Open")
+                throw new InvalidOperationException("Event is not active or open for bookings");
 
             // Validate event photographer exists and is approved
             var eventPhotographer = await _unitOfWork.EventPhotographerRepository.GetAsync(
@@ -339,22 +341,43 @@ namespace SnapLink_Service.Service
             if (approvedPhotographer == null || approvedPhotographer.Status != "Approved")
                 throw new ArgumentException("Invalid event photographer or not approved");
 
+            // Create a CreateBookingRequest to use BookingService validation
+            var createBookingRequest = new CreateBookingRequest
+            {
+                PhotographerId = approvedPhotographer.PhotographerId,
+                LocationId = locationEventEntity.LocationId,
+                StartDatetime = request.StartDatetime,
+                EndDatetime = request.EndDatetime,
+                SpecialRequests = request.SpecialRequests
+            };
+
+            // Use BookingService validation
+            var validationResult = await _bookingService.ValidateBookingRequestAsync(createBookingRequest, request.UserId);
+            if (!validationResult.IsValid)
+            {
+                throw new ArgumentException(validationResult.ErrorMessage);
+            }
+
             // Validate user exists
             var user = await _unitOfWork.UserRepository.GetByIdAsync(request.UserId);
             if (user == null)
                 throw new ArgumentException($"User with ID {request.UserId} not found");
+            var duration = (request.EndDatetime - request.StartDatetime).TotalHours;
+            // Calculate price using event pricing or fallback to regular calculation
+            decimal totalPrice = (approvedPhotographer.SpecialRate.Value + locationEventEntity.DiscountedPrice.Value) * (decimal)duration;
+
 
             // Create regular booking first
             var booking = new Booking
             {
                 UserId = request.UserId,
                 PhotographerId = approvedPhotographer.PhotographerId,
-                LocationId = locationEvent.LocationId,
+                LocationId = locationEventEntity.LocationId,
                 StartDatetime = request.StartDatetime,
-                EndDatetime = request.EndDatetime,
                 SpecialRequests = request.SpecialRequests,
+                EndDatetime = request.EndDatetime,
                 Status = "Pending",
-                TotalPrice = locationEvent.DiscountedPrice ?? approvedPhotographer.SpecialRate ?? 0,
+                TotalPrice = totalPrice,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -368,7 +391,7 @@ namespace SnapLink_Service.Service
                 EventId = request.EventId,
                 BookingId = booking.BookingId,
                 EventPhotographerId = request.EventPhotographerId,
-                EventPrice = booking.TotalPrice ?? 0,
+                EventPrice = totalPrice,
                 CreatedAt = DateTime.UtcNow
             };
 
