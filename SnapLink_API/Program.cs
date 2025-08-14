@@ -181,7 +181,7 @@ builder.Services.AddScoped<IImageGenerationService, ImageGenerationService>();
 builder.Services.AddScoped<IPremiumSubscriptionRepository, PremiumSubscriptionRepository>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
-
+builder.Services.AddScoped<IGooglePlacesService,GooglePlacesService>();
 
 // Add Background Services
 // builder.Services.AddHostedService<BookingTimeoutService>(); 

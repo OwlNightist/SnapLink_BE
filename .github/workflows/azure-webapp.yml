@@ -36,6 +36,7 @@ jobs:
         $content.AzureStorage.ConnectionString = "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}"
         $content.SignalR.ConnectionString = "${{ secrets.SIGNALR_CONNECTION_STRING }}"
         $content.GOOGLE_API_KEY = "${{ secrets.GEMINI_API_AI_KEY }}"
+        $content.GooglePlaces.ApiKey = "${{ secrets.GOOGLE_PLACES_API_KEY }}"
         $content | ConvertTo-Json -Depth 10 | Set-Content ./publish/appsettings.json
 
     - name: Deploy to Azure Web App
