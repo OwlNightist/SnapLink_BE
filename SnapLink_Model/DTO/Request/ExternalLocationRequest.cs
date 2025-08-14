@@ -19,7 +19,6 @@ public class ExternalLocationRequest
     
     public double? Longitude { get; set; }
     
-    public string? PhotoReference { get; set; } // Google Places photo reference
     
     public string? Types { get; set; } // Comma-separated place types from Google
 } 

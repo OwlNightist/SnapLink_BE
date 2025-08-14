@@ -55,6 +55,7 @@ namespace SnapLink_Service.Service
                 AvailabilityStatus = dto.AvailabilityStatus,
                 FeaturedStatus = dto.FeaturedStatus,
                 VerificationStatus = dto.VerificationStatus,
+                LocationType = "Registered",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };

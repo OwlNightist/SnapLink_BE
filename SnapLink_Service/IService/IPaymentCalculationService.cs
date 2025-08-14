@@ -4,10 +4,10 @@ namespace SnapLink_Service.IService
 {
     public interface IPaymentCalculationService
     {
-        Task<PaymentCalculationResult> CalculatePaymentDistributionAsync(decimal totalAmount, int? locationId);
-        Task<PaymentCalculationResult> CalculatePaymentDistributionAsync(decimal totalAmount, Location location);
+        Task<PaymentCalculationResult> CalculatePaymentDistributionAsync(decimal totalAmount, int? locationId, int bookingid);
+        Task<PaymentCalculationResult> CalculatePaymentDistributionAsync(decimal totalAmount, Location? location, int bookingid);
         decimal CalculatePlatformFee(decimal totalAmount);
-        decimal CalculateLocationFee(Location location);
+        decimal CalculateLocationFee(Location? location, EventBooking? eventBooking = null);
         decimal CalculatePhotographerPayout(decimal totalAmount, decimal platformFee, decimal locationFee);
     }
 

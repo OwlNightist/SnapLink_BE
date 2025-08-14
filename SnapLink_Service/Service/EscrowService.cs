@@ -81,7 +81,7 @@ namespace SnapLink_Service.Service
                 }
 
                 // Calculate payment distribution
-                var calculationResult = await _paymentCalculationService.CalculatePaymentDistributionAsync(booking.TotalPrice ?? 0, booking.Location);
+                var calculationResult = await _paymentCalculationService.CalculatePaymentDistributionAsync(booking.TotalPrice ?? 0, booking.Location, booking.BookingId);
 
                 // Create escrow release transaction
                 var escrowReleaseTransaction = new Transaction

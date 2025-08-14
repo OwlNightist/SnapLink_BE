@@ -17,7 +17,7 @@ namespace SnapLink_Service.Service
             _configuration = configuration;
         }
 
-        public async Task<PaymentCalculationResult> CalculatePaymentDistributionAsync(decimal totalAmount, int? locationId)
+        public async Task<PaymentCalculationResult> CalculatePaymentDistributionAsync(decimal totalAmount, int? locationId,int bookingid)
         {
             Location? location = null;
             
@@ -27,18 +27,24 @@ namespace SnapLink_Service.Service
                     .FirstOrDefaultAsync(l => l.LocationId == locationId.Value);
             }
 
-            return await CalculatePaymentDistributionAsync(totalAmount, location);
+            return await CalculatePaymentDistributionAsync(totalAmount, location, bookingid);
         }
 
-        public async Task<PaymentCalculationResult> CalculatePaymentDistributionAsync(decimal totalAmount, Location? location)
+        public async Task<PaymentCalculationResult> CalculatePaymentDistributionAsync(decimal totalAmount, Location? location, int bookingid)
         {
             var platformFeePercentage = _configuration.GetValue<decimal>("PaymentSettings:PlatformFeePercentage", 10);
             var platformFee = CalculatePlatformFee(totalAmount);
-            var locationFee = CalculateLocationFee(location);
+            
+            // Check if this is an event booking
+            var eventBooking = await _context.EventBookings
+                .Include(eb => eb.EventPhotographer)
+                .FirstOrDefaultAsync(eb => eb.BookingId == bookingid);
+            
+            var locationFee = CalculateLocationFee(location, eventBooking);
             var photographerPayout = CalculatePhotographerPayout(totalAmount, platformFee, locationFee);
 
             var locationType = location?.LocationType ?? "External";
-            var calculationNote = GenerateCalculationNote(totalAmount, platformFee, locationFee, photographerPayout, locationType);
+            var calculationNote = GenerateCalculationNote(totalAmount, platformFee, locationFee, photographerPayout, locationType, eventBooking);
 
             return new PaymentCalculationResult
             {
@@ -58,8 +64,14 @@ namespace SnapLink_Service.Service
             return totalAmount * (platformFeePercentage / 100m);
         }
 
-        public decimal CalculateLocationFee(Location? location)
+        public decimal CalculateLocationFee(Location? location, EventBooking? eventBooking = null)
         {
+            // If this is an event booking, use EventPrice instead of Location.HourlyRate
+            if (eventBooking != null)
+            {
+                return eventBooking.EventPrice;
+            }
+
             if (location == null)
                 return 0m;
 
@@ -78,13 +90,17 @@ namespace SnapLink_Service.Service
             return totalAmount - platformFee - locationFee;
         }
 
-        private string GenerateCalculationNote(decimal totalAmount, decimal platformFee, decimal locationFee, decimal photographerPayout, string locationType)
+        private string GenerateCalculationNote(decimal totalAmount, decimal platformFee, decimal locationFee, decimal photographerPayout, string locationType, EventBooking? eventBooking = null)
         {
             var platformFeePercentage = _configuration.GetValue<decimal>("PaymentSettings:PlatformFeePercentage", 10);
             
             var note = $"Payment breakdown: Total=${totalAmount}, Platform Fee (${platformFeePercentage}%)=${platformFee}";
             
-            if (locationFee > 0)
+            if (eventBooking != null)
+            {
+                note += $", Event Price=${locationFee}";
+            }
+            else if (locationFee > 0)
             {
                 note += $", Location Fee (${locationType})=${locationFee}";
             }

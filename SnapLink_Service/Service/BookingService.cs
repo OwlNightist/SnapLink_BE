@@ -86,22 +86,36 @@ namespace SnapLink_Service.Service
                         };
                     }
 
-                    // Create external location record
-                    var externalLocation = new Location
-                    {
-                        LocationType = "External",
-                        ExternalPlaceId = request.ExternalLocation.PlaceId,
-                        Name = request.ExternalLocation.Name,
-                        Address = request.ExternalLocation.Address,
-                        Description = request.ExternalLocation.Description,
-                        HourlyRate = 0, // External locations have no fee
-                        CreatedAt = DateTime.UtcNow
-                    };
+                    // Check if external location already exists
+                    var existingExternalLocation = await _context.Locations
+                        .FirstOrDefaultAsync(l => l.ExternalPlaceId == request.ExternalLocation.PlaceId && l.LocationType == "External");
 
-                    await _unitOfWork.LocationRepository.AddAsync(externalLocation);
-                    await _unitOfWork.SaveChangesAsync();
-                    
-                    locationId = externalLocation.LocationId;
+                    if (existingExternalLocation != null)
+                    {
+                        // Use existing external location
+                        locationId = existingExternalLocation.LocationId;
+                    }
+                    else
+                    {
+                        // Create new external location record
+                        var externalLocation = new Location
+                        {
+                            LocationType = "External",
+                            ExternalPlaceId = request.ExternalLocation.PlaceId,
+                            Name = request.ExternalLocation.Name,
+                            Address = request.ExternalLocation.Address,
+                            Description = request.ExternalLocation.Description,
+                            HourlyRate = 0, // External locations have no fee
+                            Latitude = request.ExternalLocation.Latitude,
+                            Longitude = request.ExternalLocation.Longitude,
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        await _unitOfWork.LocationRepository.AddAsync(externalLocation);
+                        await _unitOfWork.SaveChangesAsync();
+                        
+                        locationId = externalLocation.LocationId;
+                    }
                 }
 
                 // Calculate true price automatically
