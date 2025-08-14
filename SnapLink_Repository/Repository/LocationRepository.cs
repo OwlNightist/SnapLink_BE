@@ -23,7 +23,11 @@ namespace SnapLink_Repository.Repository
             await _context.Locations.Include(l => l.LocationOwner).ToListAsync();
 
         public async Task<Location?> GetByIdAsync(int id) =>
-            await _context.Locations.Include(l => l.LocationOwner).FirstOrDefaultAsync(l => l.LocationId == id);
+            await _context.Locations
+        .Include(l => l.LocationOwner)
+        .Include(l => l.PremiumSubscriptions)    
+            .ThenInclude(s => s.Package)         
+        .FirstOrDefaultAsync(l => l.LocationId == id);
 
         public async Task AddAsync(Location location) => await _context.Locations.AddAsync(location);
 
@@ -45,10 +49,7 @@ namespace SnapLink_Repository.Repository
                 .ToListAsync();
         }
 
-        /* public async Task<List<Location>> GetAllAsyncc() =>
-        await _context.Locations
-                   .Where(l => l.Latitude != null && l.Longitude != null)
-                   .ToListAsync();*/
+        
         public async Task<List<Location>> GetAllAsyncc()
      => await _context.Locations.ToListAsync();
         public async Task<Location?> GetByIdAsyncc(int id) =>
