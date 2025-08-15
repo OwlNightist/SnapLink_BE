@@ -500,6 +500,9 @@ namespace SnapLink_API.Migrations
                     b.Property<int?>("EventId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsPrimary")
                         .HasColumnType("bit");
 
@@ -507,6 +510,9 @@ namespace SnapLink_API.Migrations
                         .HasColumnType("int");
 
                     b.Property<int?>("PhotographerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<string>("Url")

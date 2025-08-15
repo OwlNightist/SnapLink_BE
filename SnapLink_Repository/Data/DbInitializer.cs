@@ -45,24 +45,24 @@ namespace SnapLink_Repository.Data
                     new User { UserName = "linkka", Email = "linkka@example.com", PasswordHash = "hash2", PhoneNumber = "1234567891", FullName = "linhka", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/20250715052645_linggka109_3670740457001717233_s2025-7-15-12.25.361_story.jpg" },
                     new User { UserName = "alice", Email = "alice@example.com", PasswordHash = "hash1", PhoneNumber = "1234567890", FullName = "Linh", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2933653585994336284's2025-7-27-20.14.485%20story.jpg" },
                     new User { UserName = "carol", Email = "carol@example.com", PasswordHash = "hash3", PhoneNumber = "1234567892", FullName = "Chu Diệu Linh", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_3691773221381401224's2025-8-9-3.40.579%20story.jpg" },
-                    new User { UserName = "dave", Email = "dave@example.com", PasswordHash = "hash4", PhoneNumber = "1234567893", FullName = "Dave Brown", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
-                    new User { UserName = "eve", Email = "eve@example.com", PasswordHash = "hash5", PhoneNumber = "1234567894", FullName = "Eve Black", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
-                    new User { UserName = "frank", Email = "frank@example.com", PasswordHash = "hash6", PhoneNumber = "1234567895", FullName = "Frank Miller", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
-                    new User { UserName = "grace", Email = "grace@example.com", PasswordHash = "hash7", PhoneNumber = "1234567896", FullName = "Grace Lee", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
-                    new User { UserName = "henry", Email = "henry@example.com", PasswordHash = "hash8", PhoneNumber = "1234567897", FullName = "Henry Wilson", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
-                    new User { UserName = "iris", Email = "iris@example.com", PasswordHash = "hash9", PhoneNumber = "1234567898", FullName = "Iris Davis", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
-                    new User { UserName = "jack", Email = "jack@example.com", PasswordHash = "hash10", PhoneNumber = "1234567899", FullName = "Jack Taylor", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="" },
-                    new User { UserName = "kate", Email = "kate@example.com", PasswordHash = "hash11", PhoneNumber = "1234567900", FullName = "Kate Anderson", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "leo", Email = "leo@example.com", PasswordHash = "hash12", PhoneNumber = "1234567901", FullName = "Leo Martinez", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "maya", Email = "maya@example.com", PasswordHash = "hash13", PhoneNumber = "1234567902", FullName = "Maya Rodriguez", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "nina", Email = "nina@example.com", PasswordHash = "hash14", PhoneNumber = "1234567903", FullName = "Nina Thompson", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "oscar", Email = "oscar@example.com", PasswordHash = "hash15", PhoneNumber = "1234567904", FullName = "Oscar Garcia", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
+                    new User { UserName = "dave", Email = "dave@example.com", PasswordHash = "hash4", PhoneNumber = "1234567893", FullName = "Dave Brown", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://picsum.photos/200/300?random=1" },
+                    new User { UserName = "eve", Email = "eve@example.com", PasswordHash = "hash5", PhoneNumber = "1234567894", FullName = "Eve Black", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://picsum.photos/200/300?random=2" },
+                    new User { UserName = "frank", Email = "frank@example.com", PasswordHash = "hash6", PhoneNumber = "1234567895", FullName = "Frank Miller", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://picsum.photos/200/300?random=3" },
+                    new User { UserName = "grace", Email = "grace@example.com", PasswordHash = "hash7", PhoneNumber = "1234567896", FullName = "Grace Lee", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://picsum.photos/200/300?random=4" },
+                    new User { UserName = "henry", Email = "henry@example.com", PasswordHash = "hash8", PhoneNumber = "1234567897", FullName = "Henry Wilson", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://picsum.photos/200/300?random=5" },
+                    new User { UserName = "iris", Email = "iris@example.com", PasswordHash = "hash9", PhoneNumber = "1234567898", FullName = "Iris Davis", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://picsum.photos/200/300?random=6" },
+                    new User { UserName = "jack", Email = "jack@example.com", PasswordHash = "hash10", PhoneNumber = "1234567899", FullName = "Jack Taylor", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://picsum.photos/200/300?random=7" },
+                    new User { UserName = "kate", Email = "kate@example.com", PasswordHash = "hash11", PhoneNumber = "1234567900", FullName = "Kate Anderson", Status = "Active", IsVerified = true, CreateAt = DateTime.Now ,ProfileImage ="https://picsum.photos/200/300?random=8"},
+                    new User { UserName = "leo", Email = "leo@example.com", PasswordHash = "hash12", PhoneNumber = "1234567901", FullName = "Leo Martinez", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://picsum.photos/200/300?random=9" },
+                    new User { UserName = "maya", Email = "maya@example.com", PasswordHash = "hash13", PhoneNumber = "1234567902", FullName = "Maya Rodriguez", Status = "Active", IsVerified = true, CreateAt = DateTime.Now ,ProfileImage ="https://picsum.photos/200/300?random=10"},
+                    new User { UserName = "nina", Email = "nina@example.com", PasswordHash = "hash14", PhoneNumber = "1234567903", FullName = "Nina Thompson", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://picsum.photos/200/300?random=11" },
+                    new User { UserName = "oscar", Email = "oscar@example.com", PasswordHash = "hash15", PhoneNumber = "1234567904", FullName = "Oscar Garcia", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://picsum.photos/200/300?random=12" },
                     // Additional users for location owners
-                    new User { UserName = "peter", Email = "peter@example.com", PasswordHash = "hash16", PhoneNumber = "1234567905", FullName = "Peter Chen", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "sarah", Email = "sarah@example.com", PasswordHash = "hash17", PhoneNumber = "1234567906", FullName = "Sarah Kim", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "mike", Email = "mike@example.com", PasswordHash = "hash18", PhoneNumber = "1234567907", FullName = "Mike Johnson", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "lisa", Email = "lisa@example.com", PasswordHash = "hash19", PhoneNumber = "1234567908", FullName = "Lisa Wang", Status = "Active", IsVerified = true, CreateAt = DateTime.Now },
-                    new User { UserName = "david", Email = "david@example.com", PasswordHash = "hash20", PhoneNumber = "1234567909", FullName = "David Park", Status = "Active", IsVerified = true, CreateAt = DateTime.Now }
+                    new User { UserName = "peter", Email = "peter@example.com", PasswordHash = "hash16", PhoneNumber = "1234567905", FullName = "Peter Chen", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://picsum.photos/200/300?random=13" },
+                    new User { UserName = "sarah", Email = "sarah@example.com", PasswordHash = "hash17", PhoneNumber = "1234567906", FullName = "Sarah Kim", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://picsum.photos/200/300?random=14" },
+                    new User { UserName = "mike", Email = "mike@example.com", PasswordHash = "hash18", PhoneNumber = "1234567907", FullName = "Mike Johnson", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://picsum.photos/200/300?random=15" },
+                    new User { UserName = "lisa", Email = "lisa@example.com", PasswordHash = "hash19", PhoneNumber = "1234567908", FullName = "Lisa Wang", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://picsum.photos/200/300?random=16" },
+                    new User { UserName = "david", Email = "david@example.com", PasswordHash = "hash20", PhoneNumber = "1234567909", FullName = "David Park", Status = "Active", IsVerified = true, CreateAt = DateTime.Now,ProfileImage ="https://picsum.photos/200/300?random=17" }
                 };
                 context.Users.AddRange(users);
                 context.SaveChanges();
@@ -77,23 +77,42 @@ namespace SnapLink_Repository.Data
             if (!context.UserRoles.Any())
             {
                 Console.WriteLine("Seeding UserRoles...");
-                var userRoles = new[]
+                var userRoles = new List<UserRole>();
+                
+                // Get role IDs once to avoid repeated database queries
+                var userRoleId = context.Roles.First(r => r.RoleName == "User").RoleId;
+                var ownerRoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId;
+                var PhotographerRoleId = context.Roles.First(r => r.RoleName == "Photographer").RoleId;
+                // Add User role for first 20 users (0-19)
+                for (int i = 0; i < 20; i++)
                 {
-                    new UserRole { UserId = context.Users.First().UserId, RoleId = context.Roles.First(r => r.RoleName == "User").RoleId },
-                    new UserRole { UserId = context.Users.Skip(1).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "User").RoleId },
-                    new UserRole { UserId = context.Users.Skip(2).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "User").RoleId },
-                    new UserRole { UserId = context.Users.Skip(3).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "User").RoleId },
-                    new UserRole { UserId = context.Users.Skip(4).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "User").RoleId },
-                    // Additional user roles for new location owners
-                    new UserRole { UserId = context.Users.Skip(15).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId }, // Peter
-                    new UserRole { UserId = context.Users.Skip(16).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId }, // Sarah
-                    new UserRole { UserId = context.Users.Skip(17).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId }, // Mike
-                    new UserRole { UserId = context.Users.Skip(18).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId }, // Lisa
-                    new UserRole { UserId = context.Users.Skip(19).First().UserId, RoleId = context.Roles.First(r => r.RoleName == "Owner").RoleId }  // David
-                };
+                    userRoles.Add(new UserRole 
+                    { 
+                        UserId = context.Users.Skip(i).First().UserId, 
+                        RoleId = userRoleId 
+                    });
+                }
+                for (int i = 1; i < 15; i++)
+                {
+                    userRoles.Add(new UserRole
+                    {
+                        UserId = context.Users.Skip(i).First().UserId,
+                        RoleId = PhotographerRoleId
+                    });
+                }
+                // Add Owner role for users 15-19 (Peter, Sarah, Mike, Lisa, David)
+                for (int i = 1; i < 20; i++)
+                {
+                    userRoles.Add(new UserRole 
+                    { 
+                        UserId = context.Users.Skip(i).First().UserId, 
+                        RoleId = ownerRoleId 
+                    });
+                }
+                
                 context.UserRoles.AddRange(userRoles);
                 context.SaveChanges();
-                Console.WriteLine($"UserRoles seeded successfully: {userRoles.Length} user roles added");
+                Console.WriteLine($"UserRoles seeded successfully: {userRoles.Count} user roles added");
             }
             else
             {
@@ -787,26 +806,35 @@ namespace SnapLink_Repository.Data
             {
                 Console.WriteLine("Seeding Images...");
                 var photographers = context.Photographers.Take(5).ToList();
-                var locations = context.Locations.Take(5).ToList();
+                var locations = context.Locations.Take(8).ToList();
                 var images = new[]
                 {
                     //photographer 1
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479659561498's2025-8-11-11.11.433%20story.jpg", PhotographerId = photographers[0].PhotographerId, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479626133367's2025-8-11-11.12.861%20story.jpg", PhotographerId = photographers[0].PhotographerId, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479491924526's2025-8-11-11.12.433%20story.jpg", PhotographerId = photographers[0].PhotographerId, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479491869661's2025-8-11-11.12.171%20story.jpg", PhotographerId = photographers[0].PhotographerId, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479483441064's2025-8-11-11.12.953%20story.jpg", PhotographerId = photographers[0].PhotographerId, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479634527198's2025-8-11-11.14.746%20story.jpg", PhotographerId = photographers[0].PhotographerId, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479659561498's2025-8-11-11.11.433%20story.jpg", PhotographerId = photographers[0].PhotographerId, IsPrimary = false, Caption = null,Status =ImageStatus.Safe, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479626133367's2025-8-11-11.12.861%20story.jpg", PhotographerId = photographers[0].PhotographerId, IsPrimary = false, Caption = null,Status =ImageStatus.Safe, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479491924526's2025-8-11-11.12.433%20story.jpg", PhotographerId = photographers[0].PhotographerId, IsPrimary = false, Caption = null,Status =ImageStatus.Safe, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479491869661's2025-8-11-11.12.171%20story.jpg", PhotographerId = photographers[0].PhotographerId, IsPrimary = false, Caption = null,Status =ImageStatus.Safe, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479483441064's2025-8-11-11.12.953%20story.jpg", PhotographerId = photographers[0].PhotographerId, IsPrimary = false, Caption = null,Status =ImageStatus.Safe, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/1/linggka109_3693931479634527198's2025-8-11-11.14.746%20story.jpg", PhotographerId = photographers[0].PhotographerId, IsPrimary = false, Caption = null,Status =ImageStatus.Safe, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
                     //photographer 2
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423449716041.png", PhotographerId = photographers[1].PhotographerId, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423458271940.png", PhotographerId = photographers[1].PhotographerId, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 03:13:35.237") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423575690541.png", PhotographerId = photographers[1].PhotographerId, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 05:26:45.567") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423583882606.png", PhotographerId = photographers[1].PhotographerId, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 05:39:02.590") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423584006215.png", PhotographerId = photographers[1].PhotographerId, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 05:39:02.590") },
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423609250785.png", PhotographerId = photographers[1].PhotographerId, IsPrimary = false, Caption = null, CreatedAt = DateTime.Parse("2025-07-15 05:39:02.590") },
-                    //location 1
-                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/location/1/118493381_725239154721936_7128225189019907505_n.jpg", LocationId = locations[0].LocationId, IsPrimary = true, Caption = "Location 1", CreatedAt = DateTime.Now },
-
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423449716041.png", PhotographerId = photographers[1].PhotographerId, IsPrimary = false, Caption = null,Status =ImageStatus.Safe, CreatedAt = DateTime.Parse("2025-07-15 03:10:01.043") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423458271940.png", PhotographerId = photographers[1].PhotographerId, IsPrimary = false, Caption = null,Status =ImageStatus.Safe, CreatedAt = DateTime.Parse("2025-07-15 03:13:35.237") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423575690541.png", PhotographerId = photographers[1].PhotographerId, IsPrimary = false, Caption = null,Status =ImageStatus.Safe, CreatedAt = DateTime.Parse("2025-07-15 05:26:45.567") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423583882606.png", PhotographerId = photographers[1].PhotographerId, IsPrimary = false, Caption = null,Status =ImageStatus.Safe, CreatedAt = DateTime.Parse("2025-07-15 05:39:02.590") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423584006215.png", PhotographerId = photographers[1].PhotographerId, IsPrimary = false, Caption = null,Status =ImageStatus.Safe, CreatedAt = DateTime.Parse("2025-07-15 05:39:02.590") },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/photographer/2/linggka109_2864048423609250785.png", PhotographerId = photographers[1].PhotographerId, IsPrimary = false, Caption = null,Status =ImageStatus.Safe, CreatedAt = DateTime.Parse("2025-07-15 05:39:02.590") },
+                    //location 
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/location/1/118493381_725239154721936_7128225189019907505_n.jpg", LocationId = locations[0].LocationId, IsPrimary = true, Caption = "Location 1",Status =ImageStatus.Safe, CreatedAt = DateTime.Now },
+                    new Image { Url = "https://picsum.photos/200/300?random=18", LocationId = locations[0].LocationId, IsPrimary = true, Caption = "Location 1",Status =ImageStatus.Safe, CreatedAt = DateTime.Now },
+                    new Image { Url = "https://picsum.photos/200/300?random=19", LocationId = locations[0].LocationId, IsPrimary = true, Caption = "Location 1",Status =ImageStatus.Safe, CreatedAt = DateTime.Now },
+                    new Image { Url = "https://picsum.photos/200/300?random=20", LocationId = locations[0].LocationId, IsPrimary = true, Caption = "Location 1",Status =ImageStatus.Safe, CreatedAt = DateTime.Now },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/location/2/Halleyparknovember_b.jpg", LocationId = locations[1].LocationId, IsPrimary = true, Caption = "Location 2",Status =ImageStatus.Safe, CreatedAt = DateTime.Now },
+                    new Image { Url = "https://snaplinkstorage.blob.core.windows.net/snaplinkstorageblob/location/3/seafood-buffet-at-mezz.jpg", LocationId = locations[2].LocationId, IsPrimary = true, Caption = "Location 3",Status =ImageStatus.Safe, CreatedAt = DateTime.Now },
+                    new Image { Url = "https://picsum.photos/200/300?random=21", LocationId = locations[3].LocationId, IsPrimary = true, Caption = "Location 4",Status =ImageStatus.Safe, CreatedAt = DateTime.Now },
+                    new Image { Url = "https://picsum.photos/200/300?random=22", LocationId = locations[4].LocationId, IsPrimary = true, Caption = "Location 5", Status = ImageStatus.Safe, CreatedAt = DateTime.Now },
+                    new Image { Url = "https://picsum.photos/200/300?random=23", LocationId = locations[5].LocationId, IsPrimary = true, Caption = "Location 6",Status =ImageStatus.Safe, CreatedAt = DateTime.Now },
+                    new Image { Url = "https://picsum.photos/200/300?random=24", LocationId = locations[6].LocationId, IsPrimary = true, Caption = "Location 7",Status =ImageStatus.Safe, CreatedAt = DateTime.Now },
+                    new Image { Url = "https://picsum.photos/200/300?random=25", LocationId = locations[7].LocationId, IsPrimary = true, Caption = "Location 8",Status =ImageStatus.Safe, CreatedAt = DateTime.Now }
                 };
                 context.Images.AddRange(images);
                 context.SaveChanges();

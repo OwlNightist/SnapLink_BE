@@ -12,7 +12,7 @@ using SnapLink_Repository.DBContext;
 namespace SnapLink_API.Migrations
 {
     [DbContext(typeof(SnaplinkDbContext))]
-    [Migration("20250811155414_InitialCreate")]
+    [Migration("20250815045644_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -503,6 +503,9 @@ namespace SnapLink_API.Migrations
                     b.Property<int?>("EventId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsPrimary")
                         .HasColumnType("bit");
 
@@ -510,6 +513,9 @@ namespace SnapLink_API.Migrations
                         .HasColumnType("int");
 
                     b.Property<int?>("PhotographerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<string>("Url")

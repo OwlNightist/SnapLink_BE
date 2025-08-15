@@ -289,6 +289,7 @@ public partial class SnaplinkDbContext : DbContext
             entity.Property(e => e.Caption).HasMaxLength(500);
             entity.Property(e => e.IsPrimary).IsRequired();
             entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.Status).IsRequired();
             
             entity.HasOne(e => e.User)
                 .WithMany(u => u.Images)

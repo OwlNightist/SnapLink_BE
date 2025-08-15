@@ -4,6 +4,8 @@ using SnapLink_Repository.DBContext;
 using SnapLink_Repository.Entity;
 using SnapLink_Repository.Repository;
 using SnapLink_Service.IService;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace SnapLink_Service.Service
 {
@@ -82,6 +84,7 @@ namespace SnapLink_Service.Service
 
                 // Calculate payment distribution
                 var calculationResult = await _paymentCalculationService.CalculatePaymentDistributionAsync(booking.TotalPrice ?? 0, booking.Location, booking.BookingId);
+                var vnCulture = CultureInfo.GetCultureInfo("vi-VN");
 
                 // Create escrow release transaction
                 var escrowReleaseTransaction = new Transaction
@@ -91,7 +94,7 @@ namespace SnapLink_Service.Service
                     Amount = booking.TotalPrice ?? 0,
                     Type = TransactionType.EscrowRelease,
                     Status = TransactionStatus.Released,
-                    Note = $"Funds released from escrow for booking {bookingId}",
+                    Note = $"Funds released from escrow for booking {Regex.Replace(calculationResult.CalculationNote, @"\$(\d+(?:\.\d+)?)", m => string.Format(vnCulture, "{0:N0} VND", decimal.Parse(m.Groups[1].Value)))}",
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };

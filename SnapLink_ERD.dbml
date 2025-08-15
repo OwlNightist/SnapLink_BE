@@ -1,0 +1,467 @@
+// SnapLink Database ERD
+// Generated for dbdiagram.io
+
+Table Users {
+  UserId int [pk, increment]
+  UserName varchar(100) [unique]
+  Email varchar(255) [unique]
+  PasswordHash text
+  PhoneNumber varchar(20)
+  FullName varchar(200)
+  ProfileImage varchar(500)
+  Bio varchar(1000)
+  CreateAt datetime
+  UpdateAt datetime
+  Status varchar(50)
+  VerificationCode varchar(10)
+  IsVerified boolean [default: false]
+  PasswordResetCode varchar(10)
+  PasswordResetExpiry datetime
+  PasswordResetAttempts int
+}
+
+Table Roles {
+  RoleId int [pk, increment]
+  RoleName varchar(100) [unique]
+  RoleDescription varchar(500)
+}
+
+Table UserRoles {
+  UserRoleId int [pk, increment]
+  UserId int
+  RoleId int
+  AssignedAt datetime
+}
+
+Table Photographers {
+  PhotographerId int [pk, increment]
+  UserId int
+  YearsExperience int
+  Equipment varchar(1000)
+  HourlyRate decimal(10,2)
+  AvailabilityStatus varchar(50)
+  Rating decimal(3,2)
+  RatingSum decimal(10,2)
+  RatingCount int
+  FeaturedStatus boolean
+  VerificationStatus varchar(50)
+  Address varchar(500)
+  GoogleMapsAddress varchar(500)
+  Latitude decimal(10,8)
+  Longitude decimal(11,8)
+}
+
+Table LocationOwners {
+  LocationOwnerId int [pk, increment]
+  UserId int
+  BusinessName varchar(200)
+  BusinessAddress varchar(500)
+  BusinessRegistrationNumber varchar(100)
+  VerificationStatus varchar(50)
+}
+
+Table Locations {
+  LocationId int [pk, increment]
+  LocationOwnerId int
+  Name varchar(200)
+  Address varchar(500)
+  Description varchar(2000)
+  Amenities varchar(1000)
+  HourlyRate decimal(10,2)
+  Capacity int
+  Indoor boolean
+  Outdoor boolean
+  AvailabilityStatus varchar(50)
+  FeaturedStatus boolean
+  VerificationStatus varchar(50)
+  LocationType varchar(50)
+  ExternalPlaceId varchar(100)
+  CreatedAt datetime
+  UpdatedAt datetime
+  Latitude double
+  Longitude double
+}
+
+Table Bookings {
+  BookingId int [pk, increment]
+  UserId int
+  PhotographerId int
+  LocationId int
+  StartDatetime datetime
+  EndDatetime datetime
+  Status varchar(50)
+  SpecialRequests varchar(1000)
+  TotalPrice decimal(10,2)
+  CreatedAt datetime
+  UpdatedAt datetime
+}
+
+Table Payments {
+  PaymentId int [pk, increment]
+  CustomerId int
+  BookingId int
+  TotalAmount decimal(18,2)
+  Currency varchar(3) [default: 'VND']
+  Status varchar(50) [default: 'Pending']
+  ExternalTransactionId varchar(100)
+  Method varchar(50) [default: 'PayOS']
+  Note varchar(500)
+  CreatedAt datetime
+  UpdatedAt datetime
+}
+
+Table Transactions {
+  TransactionId int [pk, increment]
+  ReferencePaymentId int
+  FromUserId int
+  ToUserId int
+  Amount decimal(18,2)
+  Currency varchar(3) [default: 'VND']
+  Type varchar(50)
+  Status varchar(50) [default: 'Success']
+  Note varchar(500)
+  CreatedAt datetime
+  UpdatedAt datetime
+}
+
+Table Wallets {
+  WalletId int [pk, increment]
+  UserId int
+  Balance decimal(18,2)
+  UpdatedAt datetime
+}
+
+Table WithdrawalRequests {
+  Id int [pk, increment]
+  WalletId int
+  Amount decimal(10,2)
+  BankAccountNumber varchar(100)
+  BankAccountName varchar(100)
+  BankName varchar(100)
+  RequestStatus varchar(50)
+  RequestedAt datetime
+  ProcessedAt datetime
+  ProcessedByModeratorId int
+  RejectionReason varchar(500)
+}
+
+Table Styles {
+  StyleId int [pk, increment]
+  Name varchar(100) [unique]
+  Description varchar(500)
+}
+
+Table UserStyles {
+  UserStyleId int [pk, increment]
+  UserId int
+  StyleId int
+  CreatedAt datetime
+}
+
+Table PhotographerStyles {
+  PhotographerStyleId int [pk, increment]
+  PhotographerId int
+  StyleId int
+}
+
+Table Availabilities {
+  AvailabilityId int [pk, increment]
+  PhotographerId int
+  DayOfWeek int
+  StartTime time
+  EndTime time
+  Status varchar(20) [default: 'Available']
+  CreatedAt datetime
+  UpdatedAt datetime
+}
+
+Table Images {
+  Id int [pk, increment]
+  Url varchar(500)
+  IsPrimary boolean
+  Caption varchar(500)
+  CreatedAt datetime
+  IsDelete boolean [default: false]
+  UserId int
+  PhotographerId int
+  LocationId int
+  EventId int
+}
+
+Table LocationEvents {
+  EventId int [pk, increment]
+  LocationId int
+  Name varchar(255)
+  Description varchar(1000)
+  StartDate datetime
+  EndDate datetime
+  DiscountedPrice decimal(10,2)
+  OriginalPrice decimal(10,2)
+  MaxPhotographers int [default: 10]
+  MaxBookingsPerSlot int [default: 5]
+  Status varchar(30) [default: 'Draft']
+  CreatedAt datetime
+  UpdatedAt datetime
+}
+
+Table EventPhotographers {
+  EventPhotographerId int [pk, increment]
+  EventId int
+  PhotographerId int
+  Status varchar(30) [default: 'Applied']
+  AppliedAt datetime
+  ApprovedAt datetime
+  RejectionReason varchar(500)
+  SpecialRate decimal(10,2)
+}
+
+Table EventBookings {
+  EventBookingId int [pk, increment]
+  EventId int
+  BookingId int
+  EventPhotographerId int
+  EventPrice decimal(10,2)
+  CreatedAt datetime
+}
+
+Table PhotoDeliveries {
+  PhotoDeliveryId int [pk, increment]
+  BookingId int
+  DeliveryMethod varchar(50)
+  DriveLink varchar(500)
+  DriveFolderName varchar(100)
+  PhotoCount int
+  Status varchar(20) [default: 'Pending']
+  UploadedAt datetime
+  DeliveredAt datetime
+  ExpiresAt datetime
+  Notes varchar(500)
+  CreatedAt datetime
+  UpdatedAt datetime
+}
+
+Table DeviceInfos {
+  DeviceInfoId int [pk, increment]
+  PhotographerId int
+  DeviceType varchar(100)
+  Brand varchar(100)
+  Model varchar(100)
+  OperatingSystem varchar(20)
+  OsVersion varchar(20)
+  ScreenResolution varchar(50)
+  CameraResolution varchar(20)
+  StorageCapacity varchar(100)
+  BatteryCapacity varchar(100)
+  Features varchar(500)
+  Status varchar(20) [default: 'Active']
+  Notes varchar(500)
+  LastUsedAt datetime
+  CreatedAt datetime
+  UpdatedAt datetime
+}
+
+Table Ratings {
+  RatingId int [pk, increment]
+  BookingId int
+  ReviewerUserId int
+  PhotographerId int
+  LocationId int
+  Score int
+  Comment varchar(1000)
+  CreatedAt datetime
+  UpdatedAt datetime
+}
+
+Table Reviews {
+  ReviewId int [pk, increment]
+  BookingId int
+  ReviewerId int
+  RevieweeType varchar(50)
+  RevieweeId int
+  Rating int
+  Comment varchar(1000)
+  CreatedAt datetime
+  UpdatedAt datetime
+}
+
+Table Notifications {
+  MotificationId int [pk, increment]
+  UserId int
+  Title varchar(200)
+  Content varchar(1000)
+  NotificationType varchar(50)
+  ReferenceId int
+  ReadStatus boolean
+  CreatedAt datetime
+}
+
+Table Conversations {
+  ConversationId int [pk, increment]
+  Title varchar(200)
+  CreatedAt datetime
+  UpdatedAt datetime
+  Status varchar(50)
+  Type varchar(50)
+}
+
+Table ConversationParticipants {
+  ConversationParticipantId int [pk, increment]
+  ConversationId int
+  UserId int
+  JoinedAt datetime
+  LeftAt datetime
+  Role varchar(50)
+  IsActive boolean [default: true]
+}
+
+Table Messages {
+  MessageId int [pk, increment]
+  SenderId int
+  RecipientId int
+  ConversationId int
+  Content varchar(2000)
+  CreatedAt datetime
+  MessageType varchar(50)
+  Status varchar(50)
+  ReadAt datetime
+}
+
+Table Complaints {
+  ComplaintId int [pk, increment]
+  ReporterId int
+  ReportedUserId int
+  BookingId int
+  ComplaintType varchar(100)
+  Description varchar(2000)
+  Status varchar(50)
+  AssignedModeratorId int
+  ResolutionNotes varchar(1000)
+  CreatedAt datetime
+  UpdatedAt datetime
+}
+
+Table Administrators {
+  AdminId int [pk, increment]
+  UserId int
+  AccessLevel varchar(50)
+  Department varchar(100)
+}
+
+Table Moderators {
+  ModeratorId int [pk, increment]
+  UserId int
+  AreasOfFocus varchar(200)
+}
+
+Table Advertisements {
+  AdvertisementId int [pk, increment]
+  LocationId int
+  Title varchar(200)
+  Description varchar(1000)
+  ImageUrl varchar(500)
+  StartDate datetime
+  EndDate datetime
+  Status varchar(50)
+  Cost decimal(10,2)
+  PaymentId int
+}
+
+Table PremiumPackages {
+  PackageId int [pk, increment]
+  Name varchar(100)
+  Description varchar(500)
+  Price decimal(18,2)
+  DurationDays int
+  Features varchar(1000)
+  ApplicableTo varchar(100)
+}
+
+Table PremiumSubscriptions {
+  PremiumSubscriptionId int [pk, increment]
+  UserId int
+  PackageId int
+  StartDate datetime
+  EndDate datetime
+  Status varchar(50)
+  PaymentId int
+  PhotographerId int
+  LocationId int
+}
+
+// User Relationships
+Ref: UserRoles.UserId > Users.UserId [delete: cascade]
+Ref: UserRoles.RoleId > Roles.RoleId [delete: cascade]
+Ref: Photographers.UserId > Users.UserId [delete: cascade]
+Ref: LocationOwners.UserId > Users.UserId [delete: cascade]
+Ref: Administrators.UserId > Users.UserId [delete: cascade]
+Ref: Moderators.UserId > Users.UserId [delete: cascade]
+Ref: Wallets.UserId > Users.UserId [delete: cascade]
+Ref: UserStyles.UserId > Users.UserId [delete: cascade]
+Ref: UserStyles.StyleId > Styles.StyleId [delete: cascade]
+Ref: ConversationParticipants.UserId > Users.UserId
+Ref: Notifications.UserId > Users.UserId
+
+// Location Relationships
+Ref: Locations.LocationOwnerId > LocationOwners.LocationOwnerId
+Ref: LocationEvents.LocationId > Locations.LocationId
+Ref: Advertisements.LocationId > Locations.LocationId
+
+// Photographer Relationships
+Ref: PhotographerStyles.PhotographerId > Photographers.PhotographerId [delete: cascade]
+Ref: PhotographerStyles.StyleId > Styles.StyleId [delete: cascade]
+Ref: Availabilities.PhotographerId > Photographers.PhotographerId [delete: cascade]
+Ref: DeviceInfos.PhotographerId > Photographers.PhotographerId [delete: cascade]
+Ref: EventPhotographers.PhotographerId > Photographers.PhotographerId
+
+// Booking Relationships
+Ref: Bookings.UserId > Users.UserId
+Ref: Bookings.PhotographerId > Photographers.PhotographerId [delete: cascade]
+Ref: Bookings.LocationId > Locations.LocationId [delete: cascade]
+Ref: EventBookings.BookingId > Bookings.BookingId
+Ref: EventBookings.EventId > LocationEvents.EventId
+Ref: EventBookings.EventPhotographerId > EventPhotographers.EventPhotographerId
+Ref: PhotoDeliveries.BookingId > Bookings.BookingId
+
+// Payment & Transaction Relationships
+Ref: Payments.CustomerId > Users.UserId
+Ref: Payments.BookingId > Bookings.BookingId
+Ref: Transactions.ReferencePaymentId > Payments.PaymentId
+Ref: Transactions.FromUserId > Users.UserId
+Ref: Transactions.ToUserId > Users.UserId
+Ref: WithdrawalRequests.WalletId > Wallets.WalletId
+
+// Rating & Review Relationships
+Ref: Ratings.BookingId > Bookings.BookingId
+Ref: Ratings.ReviewerUserId > Users.UserId
+Ref: Ratings.PhotographerId > Photographers.PhotographerId
+Ref: Ratings.LocationId > Locations.LocationId
+Ref: Reviews.BookingId > Bookings.BookingId
+
+// Image Relationships
+Ref: Images.UserId > Users.UserId
+Ref: Images.PhotographerId > Photographers.PhotographerId
+Ref: Images.LocationId > Locations.LocationId
+Ref: Images.EventId > LocationEvents.EventId
+
+// Event Relationships
+Ref: EventPhotographers.EventId > LocationEvents.EventId
+
+// Communication Relationships
+Ref: Messages.SenderId > Users.UserId
+Ref: Messages.RecipientId > Users.UserId
+Ref: Messages.ConversationId > Conversations.ConversationId
+Ref: ConversationParticipants.ConversationId > Conversations.ConversationId
+
+// Complaint Relationships
+Ref: Complaints.ReporterId > Users.UserId
+Ref: Complaints.ReportedUserId > Users.UserId
+Ref: Complaints.BookingId > Bookings.BookingId
+Ref: Complaints.AssignedModeratorId > Moderators.ModeratorId
+
+// Premium & Advertisement Relationships
+Ref: PremiumSubscriptions.UserId > Users.UserId
+Ref: PremiumSubscriptions.PackageId > PremiumPackages.PackageId
+Ref: PremiumSubscriptions.PaymentId > Payments.PaymentId
+Ref: PremiumSubscriptions.PhotographerId > Photographers.PhotographerId
+Ref: PremiumSubscriptions.LocationId > Locations.LocationId
+Ref: Advertisements.PaymentId > Payments.PaymentId

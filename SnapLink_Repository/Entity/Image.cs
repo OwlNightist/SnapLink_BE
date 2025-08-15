@@ -2,6 +2,14 @@ using System;
 
 namespace SnapLink_Repository.Entity
 {
+    public enum ImageStatus
+    {
+        Safe = 1,
+        Nudity = 2,
+        Violent = 3,
+        Medical = 4
+    }
+
     public class Image
     {
         public int Id { get; set; }
@@ -10,6 +18,7 @@ namespace SnapLink_Repository.Entity
         public string? Caption { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsDelete { get; set; } = false;
+        public ImageStatus Status { get; set; } = ImageStatus.Safe;
 
         public int? UserId { get; set; }
         public User? User { get; set; }

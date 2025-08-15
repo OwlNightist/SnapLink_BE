@@ -41,16 +41,17 @@ namespace SnapLink_Service.Service
                 .FirstOrDefaultAsync(eb => eb.BookingId == bookingid);
             
             var locationFee = CalculateLocationFee(location, eventBooking);
-            var photographerPayout = CalculatePhotographerPayout(totalAmount, platformFee, locationFee);
+            var truelocationFewithplatformFee = locationFee - locationFee * (platformFeePercentage / 100m);
+            var photographerPayout = CalculatePhotographerPayout(totalAmount, platformFee, truelocationFewithplatformFee);
 
             var locationType = location?.LocationType ?? "External";
-            var calculationNote = GenerateCalculationNote(totalAmount, platformFee, locationFee, photographerPayout, locationType, eventBooking);
+            var calculationNote = GenerateCalculationNote(totalAmount, platformFee, truelocationFewithplatformFee, photographerPayout, locationType, eventBooking);
 
             return new PaymentCalculationResult
             {
                 TotalAmount = totalAmount,
                 PlatformFee = platformFee,
-                LocationFee = locationFee,
+                LocationFee = truelocationFewithplatformFee,
                 PhotographerPayout = photographerPayout,
                 PlatformFeePercentage = platformFeePercentage,
                 LocationType = locationType,
