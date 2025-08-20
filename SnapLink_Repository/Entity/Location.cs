@@ -7,7 +7,7 @@ public partial class Location
 {
     public int LocationId { get; set; }
 
-    public int LocationOwnerId { get; set; }
+    public int? LocationOwnerId { get; set; }
 
     public string? Name { get; set; }
 
@@ -45,7 +45,7 @@ public partial class Location
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
-    public virtual LocationOwner LocationOwner { get; set; } = null!;
+    public virtual LocationOwner? LocationOwner { get; set; }
     
     public virtual ICollection<Image> Images { get; set; } = new List<Image>();
     

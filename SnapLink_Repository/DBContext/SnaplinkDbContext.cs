@@ -171,7 +171,7 @@ public partial class SnaplinkDbContext : DbContext
         {
             entity.HasKey(e => e.LocationId);
             entity.Property(e => e.LocationId).ValueGeneratedOnAdd();
-            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Name).HasMaxLength(200);
             entity.Property(e => e.Address).HasMaxLength(500);
             entity.Property(e => e.Description).HasMaxLength(2000);
             entity.Property(e => e.Amenities).HasMaxLength(1000);
@@ -186,7 +186,8 @@ public partial class SnaplinkDbContext : DbContext
             entity.HasOne(e => e.LocationOwner)
                 .WithMany(lo => lo.Locations)
                 .HasForeignKey(e => e.LocationOwnerId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         // LocationOwner entity configuration

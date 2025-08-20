@@ -8,7 +8,7 @@ namespace SnapLink_Model.DTO
 {
     public class LocationDto
     {
-        public int LocationOwnerId { get; set; }
+        public int? LocationOwnerId { get; set; }
         public string? Name { get; set; }
         public string? Address { get; set; }
         public string? Description { get; set; }

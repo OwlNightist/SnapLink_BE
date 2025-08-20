@@ -35,7 +35,11 @@ namespace SnapLink_Service.Service
             _poi = poi;
         }
 
-        public async Task<IEnumerable<Location>> GetAllAsync() => await _repo.GetAllAsync();
+        public async Task<IEnumerable<Location>> GetAllAsync()
+        {
+            var allLocations = await _repo.GetAllAsync();
+            return allLocations.Where(l => l.LocationType == "Registered");
+        }
 
         public async Task<Location?> GetByIdAsync(int id) => await _repo.GetByIdAsync(id);
 
@@ -69,6 +73,7 @@ namespace SnapLink_Service.Service
             var location = await _repo.GetByIdAsync(id);
             if (location == null) throw new Exception("Location not found");
 
+            location.LocationOwnerId = dto.LocationOwnerId; // Allow updating LocationOwnerId
             location.Name = dto.Name;
             location.Address = dto.Address;
             location.Description = dto.Description;

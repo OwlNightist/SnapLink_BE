@@ -104,10 +104,7 @@ namespace SnapLink_Service.Service
                             ExternalPlaceId = request.ExternalLocation.PlaceId,
                             Name = request.ExternalLocation.Name,
                             Address = request.ExternalLocation.Address,
-                            Description = request.ExternalLocation.Description,
                             HourlyRate = 0, // External locations have no fee
-                            Latitude = request.ExternalLocation.Latitude,
-                            Longitude = request.ExternalLocation.Longitude,
                             CreatedAt = DateTime.UtcNow
                         };
 
