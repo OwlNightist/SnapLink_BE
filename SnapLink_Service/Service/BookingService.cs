@@ -800,9 +800,7 @@ namespace SnapLink_Service.Service
                 .Where(b => b.LocationId == locationId &&
                            b.Status != "Cancelled" &&
                            b.Status != "Completed" &&
-                           ((b.StartDatetime <= startTime && b.EndDatetime > startTime) ||
-                            (b.StartDatetime < endTime && b.EndDatetime >= endTime) ||
-                            (b.StartDatetime >= startTime && b.EndDatetime <= endTime)))
+                           b.StartDatetime < endTime && b.EndDatetime > startTime)
                 .CountAsync();
 
             return count;
