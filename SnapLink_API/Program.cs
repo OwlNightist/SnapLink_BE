@@ -191,6 +191,7 @@ builder.Services.AddScoped<IWithdrawalRequestService, WithdrawalRequestService>(
 // Add Background Services
 // builder.Services.AddHostedService<BookingTimeoutService>(); 
 //builder.Services.AddHostedService<SubscriptionExpiryJob>();
+//builder.Services.AddHostedService<SnapLink_API.Jobs.BookingExpiryJob>();
 
 builder.Services.AddCors(opts =>
 {
