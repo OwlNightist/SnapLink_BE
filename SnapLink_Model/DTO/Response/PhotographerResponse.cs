@@ -62,6 +62,7 @@ namespace SnapLink_Model.DTO.Response
         public string? GoogleMapsAddress { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
+        public double? DistanceKm { get; set; }
 
         // Styles information
         public List<string> Styles { get; set; } = new List<string>();

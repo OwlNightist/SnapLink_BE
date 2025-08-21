@@ -39,11 +39,12 @@ namespace SnapLink_Service.Service
                 if (distance <= radiusKm)
                 {
                     var response = _mapper.Map<PhotographerListResponse>(photographer);
+                    response.DistanceKm = distance;
                     nearbyPhotographers.Add(response);
                 }
             }
 
-            return nearbyPhotographers.OrderBy(p => CalculateDistance(latitude, longitude, p.Latitude ?? 0, p.Longitude ?? 0));
+            return nearbyPhotographers.OrderBy(p => p.DistanceKm);
         }
 
         public async Task<IEnumerable<PhotographerListResponse>> GetPhotographersByCityAsync(string city)
