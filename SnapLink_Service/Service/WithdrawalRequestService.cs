@@ -406,7 +406,7 @@ namespace SnapLink_Service.Service
         public async Task<decimal> GetMinimumWithdrawalAmountAsync()
         {
             // You can configure this from appsettings or database
-            return 100000; // 100,000 VND minimum
+            return 10000; // 10000 VND minimum
         }
 
         public async Task<decimal> GetMaximumWithdrawalAmountAsync(int userId)
