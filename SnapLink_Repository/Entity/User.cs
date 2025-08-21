@@ -66,4 +66,5 @@ public partial class User
 
     public virtual ICollection<Image> Images { get; set; } = new List<Image>();
     public virtual ICollection<Rating> RatingsAuthored { get; set; } = new List<Rating>();
+    public virtual ICollection<Device> Devices { get; set; } = new List<Device>();
 }

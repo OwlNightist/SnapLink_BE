@@ -16,8 +16,9 @@ namespace SnapLink_Service.Service
         private readonly IWalletService _walletService;
         private readonly IPaymentCalculationService _paymentCalculationService;
         private readonly IEscrowService _escrowService;
+        private readonly IPushNotificationService _pushNotificationService;
 
-        public BookingService(SnaplinkDbContext context, IUnitOfWork unitOfWork, IAvailabilityService availabilityService, IWalletService walletService, IPaymentCalculationService paymentCalculationService, IEscrowService escrowService)
+        public BookingService(SnaplinkDbContext context, IUnitOfWork unitOfWork, IAvailabilityService availabilityService, IWalletService walletService, IPaymentCalculationService paymentCalculationService, IEscrowService escrowService, IPushNotificationService pushNotificationService)
         {
             _context = context;
             _unitOfWork = unitOfWork;
@@ -25,6 +26,7 @@ namespace SnapLink_Service.Service
             _walletService = walletService;
             _paymentCalculationService = paymentCalculationService;
             _escrowService = escrowService;
+            _pushNotificationService = pushNotificationService;
         }
 
         public async Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request, int userId)
@@ -137,6 +139,25 @@ namespace SnapLink_Service.Service
 
                 await _unitOfWork.BookingRepository.AddAsync(booking);
                 await _unitOfWork.SaveChangesAsync();
+
+                // Send push notification to photographer
+                //try
+                //{
+                //    var customer = await _context.Users.FindAsync(userId);
+                //    if (customer != null)
+                //    {
+                //        await _pushNotificationService.SendBookingNotificationAsync(
+                //            request.PhotographerId,
+                //            customer.FullName ?? customer.UserName ?? "Unknown Customer",
+                //            booking.BookingId
+                //        );
+                //    }
+                //}
+                //catch (Exception ex)
+                //{
+                //    // Log notification error but don't fail the booking
+                //    Console.WriteLine($"Failed to send booking notification: {ex.Message}");
+                //}
 
                 // Return booking data with display price
                 var bookingData = await MapBookingToResponseAsync(booking);
@@ -544,6 +565,20 @@ namespace SnapLink_Service.Service
 
                 await _unitOfWork.SaveChangesAsync();
 
+                // Send push notification to customer about completion
+                try
+                {
+                    await _pushNotificationService.SendBookingStatusNotificationAsync(
+                        booking.UserId,
+                        "completed",
+                        booking.BookingId
+                    );
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to send booking completion notification: {ex.Message}");
+                }
+
                 var bookingData = await MapBookingToResponseAsync(booking);
                 
                 return new BookingResponse
@@ -639,6 +674,21 @@ namespace SnapLink_Service.Service
                 booking.Status = "Confirmed";
                 booking.UpdatedAt = DateTime.UtcNow;
                 await _unitOfWork.SaveChangesAsync();
+
+                // Send push notification to customer about confirmation
+                try
+                {
+                    await _pushNotificationService.SendBookingStatusNotificationAsync(
+                        booking.UserId,
+                        "confirmed",
+                        booking.BookingId
+                    );
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to send booking confirmation notification: {ex.Message}");
+                }
+
                 var bookingData = await MapBookingToResponseAsync(booking);
                 return new BookingResponse
                 {

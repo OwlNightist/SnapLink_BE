@@ -40,6 +40,7 @@ namespace SnapLink_Repository.Repository
         private IGenericRepository<LocationEvent> _locationEventRepository;
         private IGenericRepository<EventPhotographer> _eventPhotographerRepository;
         private IGenericRepository<EventBooking> _eventBookingRepository;
+        private IGenericRepository<Device> _deviceRepository;
 
         public UnitOfWork(SnaplinkDbContext context)
         {
@@ -130,6 +131,9 @@ namespace SnapLink_Repository.Repository
 
         public IGenericRepository<EventBooking> EventBookingRepository =>
             _eventBookingRepository ??= new GenericRepository<EventBooking>(_context);
+
+        public IGenericRepository<Device> DeviceRepository =>
+            _deviceRepository ??= new GenericRepository<Device>(_context);
 
         // Transaction methods
         public async Task<int> SaveChangesAsync()

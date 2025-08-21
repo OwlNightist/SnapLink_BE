@@ -75,6 +75,8 @@ public partial class SnaplinkDbContext : DbContext
 
     public virtual DbSet<DeviceInfo> DeviceInfos { get; set; }
 
+    public virtual DbSet<Device> Devices { get; set; }
+
     public virtual DbSet<LocationEvent> LocationEvents { get; set; }
 
     public virtual DbSet<EventPhotographer> EventPhotographers { get; set; }
@@ -758,6 +760,33 @@ public partial class SnaplinkDbContext : DbContext
                 .WithMany(p => p.DeviceInfos)
                 .HasForeignKey(e => e.PhotographerId)
                 .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Device entity configuration (for push notifications)
+        modelBuilder.Entity<Device>(entity =>
+        {
+            entity.HasKey(e => e.DeviceId);
+            entity.Property(e => e.DeviceId).ValueGeneratedOnAdd();
+            entity.Property(e => e.ExpoPushToken).HasMaxLength(255).IsRequired();
+            entity.Property(e => e.DeviceType).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.DeviceId_External).HasMaxLength(255);
+            entity.Property(e => e.DeviceName).HasMaxLength(100);
+            entity.Property(e => e.AppVersion).HasMaxLength(50);
+            entity.Property(e => e.OsVersion).HasMaxLength(50);
+            entity.Property(e => e.IsActive).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.UpdatedAt).IsRequired();
+            entity.Property(e => e.LastUsedAt);
+            
+            entity.HasOne(e => e.User)
+                .WithMany(p => p.Devices)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Indexes for performance
+            entity.HasIndex(e => e.UserId).HasDatabaseName("IX_Devices_UserId");
+            entity.HasIndex(e => e.ExpoPushToken).HasDatabaseName("IX_Devices_ExpoPushToken");
+            entity.HasIndex(e => e.IsActive).HasDatabaseName("IX_Devices_IsActive");
         });
 
         // WithdrawalRequest entity configuration

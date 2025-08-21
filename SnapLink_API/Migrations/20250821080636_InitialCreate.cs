@@ -150,6 +150,35 @@ namespace SnapLink_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Devices",
+                columns: table => new
+                {
+                    DeviceId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    ExpoPushToken = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    DeviceType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    DeviceId_External = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    DeviceName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    AppVersion = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    OsVersion = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastUsedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Devices", x => x.DeviceId);
+                    table.ForeignKey(
+                        name: "FK_Devices_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "LocationOwners",
                 columns: table => new
                 {
@@ -358,8 +387,8 @@ namespace SnapLink_API.Migrations
                 {
                     LocationId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    LocationOwnerId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    LocationOwnerId = table.Column<int>(type: "int", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     Address = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
                     Amenities = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
@@ -384,7 +413,8 @@ namespace SnapLink_API.Migrations
                         name: "FK_Locations_LocationOwners_LocationOwnerId",
                         column: x => x.LocationOwnerId,
                         principalTable: "LocationOwners",
-                        principalColumn: "LocationOwnerId");
+                        principalColumn: "LocationOwnerId",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -1048,6 +1078,21 @@ namespace SnapLink_API.Migrations
                 column: "PhotographerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Devices_ExpoPushToken",
+                table: "Devices",
+                column: "ExpoPushToken");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Devices_IsActive",
+                table: "Devices",
+                column: "IsActive");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Devices_UserId",
+                table: "Devices",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_EventBookings_BookingId",
                 table: "EventBookings",
                 column: "BookingId",
@@ -1326,6 +1371,9 @@ namespace SnapLink_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "DeviceInfos");
+
+            migrationBuilder.DropTable(
+                name: "Devices");
 
             migrationBuilder.DropTable(
                 name: "EventBookings");

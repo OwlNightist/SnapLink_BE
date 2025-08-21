@@ -12,11 +12,13 @@ namespace SnapLink_Service.Service
     {
         private readonly SnaplinkDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IPushNotificationService _pushNotificationService;
 
-        public ChatService(SnaplinkDbContext context, IUnitOfWork unitOfWork)
+        public ChatService(SnaplinkDbContext context, IUnitOfWork unitOfWork, IPushNotificationService pushNotificationService)
         {
             _context = context;
             _unitOfWork = unitOfWork;
+            _pushNotificationService = pushNotificationService;
         }
 
         #region Message Operations
@@ -145,6 +147,22 @@ namespace SnapLink_Service.Service
 
                 _context.Messagesses.Add(message);
                 await _context.SaveChangesAsync();
+
+                // Send push notification to recipient
+                try
+                {
+                    await _pushNotificationService.SendMessageNotificationAsync(
+                        request.RecipientId,
+                        sender.FullName ?? sender.UserName ?? "Unknown User",
+                        request.Content,
+                        conversationId
+                    );
+                }
+                catch (Exception ex)
+                {
+                    // Log notification error but don't fail the message
+                    Console.WriteLine($"Failed to send message notification: {ex.Message}");
+                }
 
                 // Update conversation's UpdatedAt
                 var conversationToUpdate = await _context.Conversations.FindAsync(conversationId);

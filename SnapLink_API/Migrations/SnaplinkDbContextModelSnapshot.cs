@@ -315,6 +315,69 @@ namespace SnapLink_API.Migrations
                     b.ToTable("ConversationParticipants");
                 });
 
+            modelBuilder.Entity("SnapLink_Repository.Entity.Device", b =>
+                {
+                    b.Property<int>("DeviceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DeviceId"));
+
+                    b.Property<string>("AppVersion")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeviceId_External")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("DeviceName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("DeviceType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ExpoPushToken")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastUsedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OsVersion")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("DeviceId");
+
+                    b.HasIndex("ExpoPushToken")
+                        .HasDatabaseName("IX_Devices_ExpoPushToken");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_Devices_IsActive");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_Devices_UserId");
+
+                    b.ToTable("Devices");
+                });
+
             modelBuilder.Entity("SnapLink_Repository.Entity.DeviceInfo", b =>
                 {
                     b.Property<int>("DeviceInfoId")
@@ -584,7 +647,7 @@ namespace SnapLink_API.Migrations
                         .HasPrecision(10, 8)
                         .HasColumnType("float(10)");
 
-                    b.Property<int>("LocationOwnerId")
+                    b.Property<int?>("LocationOwnerId")
                         .HasColumnType("int");
 
                     b.Property<string>("LocationType")
@@ -596,7 +659,6 @@ namespace SnapLink_API.Migrations
                         .HasColumnType("float(11)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
@@ -1631,6 +1693,17 @@ namespace SnapLink_API.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SnapLink_Repository.Entity.Device", b =>
+                {
+                    b.HasOne("SnapLink_Repository.Entity.User", "User")
+                        .WithMany("Devices")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SnapLink_Repository.Entity.DeviceInfo", b =>
                 {
                     b.HasOne("SnapLink_Repository.Entity.Photographer", "Photographer")
@@ -1732,8 +1805,7 @@ namespace SnapLink_API.Migrations
                     b.HasOne("SnapLink_Repository.Entity.LocationOwner", "LocationOwner")
                         .WithMany("Locations")
                         .HasForeignKey("LocationOwnerId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("LocationOwner");
                 });
@@ -2147,6 +2219,8 @@ namespace SnapLink_API.Migrations
                     b.Navigation("ComplaintReporters");
 
                     b.Navigation("ConversationParticipants");
+
+                    b.Navigation("Devices");
 
                     b.Navigation("FromTransactions");
 

@@ -178,6 +178,10 @@ builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IImageGenerationService, ImageGenerationService>();
 
+// Add Push Notification Services
+builder.Services.AddHttpClient<IPushNotificationService, PushNotificationService>();
+builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
+
 builder.Services.AddScoped<IPremiumSubscriptionRepository, PremiumSubscriptionRepository>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();

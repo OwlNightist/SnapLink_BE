@@ -25,8 +25,9 @@ public class PaymentService : IPaymentService
     private readonly IConfiguration _configuration;
     private readonly ITransactionService _transactionService;
     private readonly IPaymentCalculationService _paymentCalculationService;
+    private readonly IPushNotificationService _pushNotificationService;
 
-    public PaymentService(PayOS payOS, IUnitOfWork unitOfWork, SnaplinkDbContext context, IWalletService walletService, IConfiguration configuration, ITransactionService transactionService, IPaymentCalculationService paymentCalculationService)
+    public PaymentService(PayOS payOS, IUnitOfWork unitOfWork, SnaplinkDbContext context, IWalletService walletService, IConfiguration configuration, ITransactionService transactionService, IPaymentCalculationService paymentCalculationService, IPushNotificationService pushNotificationService)
     {
         _payOS = payOS;
         _unitOfWork = unitOfWork;
@@ -35,6 +36,7 @@ public class PaymentService : IPaymentService
         _configuration = configuration;
         _transactionService = transactionService;
         _paymentCalculationService = paymentCalculationService;
+        _pushNotificationService = pushNotificationService;
     }
         // need userid for now , add to jwt token later
         private async Task<long> GenerateUniquePaymentCodeAsync()
@@ -598,6 +600,21 @@ public class PaymentService : IPaymentService
 
                 await _context.Transactions.AddAsync(WallTransaction);
                 await _unitOfWork.SaveChangesAsync();
+
+                // Send push notification about successful payment
+                try
+                {
+                    await _pushNotificationService.SendPaymentNotificationAsync(
+                        payment.CustomerId,
+                        "success",
+                        payment.TotalAmount,
+                        payment.PaymentId
+                    );
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to send payment success notification: {ex.Message}");
+                }
             }
             else
             {
