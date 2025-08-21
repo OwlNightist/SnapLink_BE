@@ -437,6 +437,37 @@ public class BookingController : ControllerBase
         }
     }
 
+    [HttpGet("count/location/{locationId}")]
+    public async Task<IActionResult> CountBookingsAtLocation(int locationId, [FromQuery] DateTime startTime, [FromQuery] DateTime endTime)
+    {
+        try
+        {
+            var count = await _bookingService.CountBookingsAtLocationAsync(locationId, startTime, endTime);
+            return Ok(new
+            {
+                Error = 0,
+                Message = "Booking count retrieved successfully",
+                Data = new
+                {
+                    LocationId = locationId,
+                    StartTime = startTime,
+                    EndTime = endTime,
+                    BookingCount = count
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in CountBookingsAtLocation: {ex.Message}");
+            return StatusCode(500, new
+            {
+                Error = -1,
+                Message = "Internal server error",
+                Data = (object?)null
+            });
+        }
+    }
+
     [HttpPost("cleanup-expired")]
     public async Task<IActionResult> CleanupExpiredBookings()
     {

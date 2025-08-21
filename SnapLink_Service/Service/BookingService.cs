@@ -791,6 +791,23 @@ namespace SnapLink_Service.Service
             return bookingDataList;
         }
 
+        /// <summary>
+        /// Count bookings at a location overlapping the specified time range
+        /// </summary>
+        public async Task<int> CountBookingsAtLocationAsync(int locationId, DateTime startTime, DateTime endTime)
+        {
+            var count = await _context.Bookings
+                .Where(b => b.LocationId == locationId &&
+                           b.Status != "Cancelled" &&
+                           b.Status != "Completed" &&
+                           ((b.StartDatetime <= startTime && b.EndDatetime > startTime) ||
+                            (b.StartDatetime < endTime && b.EndDatetime >= endTime) ||
+                            (b.StartDatetime >= startTime && b.EndDatetime <= endTime)))
+                .CountAsync();
+
+            return count;
+        }
+
         public async Task<decimal> CalculateBookingPriceAsync(int photographerId, int? locationId, DateTime startTime, DateTime endTime)
         {
             var photographer = await _context.Photographers
