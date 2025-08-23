@@ -47,17 +47,6 @@ namespace SnapLink_Service.Service
             return nearbyPhotographers.OrderBy(p => p.DistanceKm);
         }
 
-        public async Task<IEnumerable<PhotographerListResponse>> GetPhotographersByCityAsync(string city)
-        {
-            var photographers = await _context.Photographers
-                .Include(p => p.User)
-                .Include(p => p.PhotographerStyles)
-                .ThenInclude(ps => ps.Style)
-                .Where(p => p.Address != null && p.Address.Contains(city, StringComparison.OrdinalIgnoreCase))
-                .ToListAsync();
-
-            return _mapper.Map<IEnumerable<PhotographerListResponse>>(photographers);
-        }
 
         public async Task<double> CalculateDistanceToPhotographerAsync(double userLat, double userLon, int photographerId)
         {

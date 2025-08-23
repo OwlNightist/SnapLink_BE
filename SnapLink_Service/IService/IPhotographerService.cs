@@ -20,12 +20,6 @@ namespace SnapLink_Service.IService
         // Get photographers by style
         Task<IEnumerable<PhotographerListResponse>> GetPhotographersByStyleAsync(string styleName);
         
-        // Get available photographers
-        Task<IEnumerable<PhotographerListResponse>> GetAvailablePhotographersAsync();
-        
-        // Get featured photographers
-        Task<IEnumerable<PhotographerListResponse>> GetFeaturedPhotographersAsync();
-        
         // Create new photographer
         Task<PhotographerResponse> CreatePhotographerAsync(CreatePhotographerRequest request);
         

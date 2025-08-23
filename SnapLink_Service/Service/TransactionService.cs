@@ -400,9 +400,6 @@ namespace SnapLink_Service.Service
 
                 await _context.SaveChangesAsync();
 
-                Console.WriteLine($"Created payment distribution transactions for payment {paymentId}:");
-                Console.WriteLine($"- Purchase transaction: {purchaseTransaction.TransactionId} (${payment.TotalAmount})");
-                Console.WriteLine($"- Platform fee: {platformFeeTransaction.TransactionId} (${platformFee})");
                 if (photographerPayout > 0)
                 {
                     Console.WriteLine($"- Photographer fee: (${photographerPayout})");

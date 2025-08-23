@@ -20,5 +20,7 @@ namespace SnapLink_Model.DTO
         public string? AvailabilityStatus { get; set; }
         public bool? FeaturedStatus { get; set; }
         public string? VerificationStatus { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
     }
 }

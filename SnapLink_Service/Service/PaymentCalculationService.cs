@@ -95,7 +95,7 @@ namespace SnapLink_Service.Service
         {
             var platformFeePercentage = _configuration.GetValue<decimal>("PaymentSettings:PlatformFeePercentage", 10);
             
-            var note = $"Payment breakdown: Total=${totalAmount}, Platform Fee (${platformFeePercentage}%)=${platformFee}";
+            var note = $"Payment breakdown: Total=${totalAmount}, Platform Fee =${platformFee}";
             
             if (eventBooking != null)
             {
@@ -103,11 +103,11 @@ namespace SnapLink_Service.Service
             }
             else if (locationFee > 0)
             {
-                note += $", Location Fee (${locationType})=${locationFee}";
+                note += $", Location Fee =${locationFee}";
             }
             else
             {
-                note += $", Location Fee (${locationType})=$0";
+                note += $", Location Fee =$0";
             }
             
             note += $", Photographer Payout=${photographerPayout}";

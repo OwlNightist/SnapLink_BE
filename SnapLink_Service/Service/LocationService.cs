@@ -61,7 +61,9 @@ namespace SnapLink_Service.Service
                 VerificationStatus = dto.VerificationStatus,
                 LocationType = "Registered",
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                Latitude = dto.Latitude,
+                Longitude = dto.Longitude
             };
 
             await _repo.AddAsync(location);

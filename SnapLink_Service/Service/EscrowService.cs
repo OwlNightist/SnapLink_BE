@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SnapLink_Model.DTO.Response;
 using SnapLink_Repository.DBContext;
 using SnapLink_Repository.Entity;
@@ -111,7 +111,7 @@ namespace SnapLink_Service.Service
                         Amount = calculationResult.PhotographerPayout,
                         Type = TransactionType.PhotographerFee,
                         Status = TransactionStatus.Success,
-                        Note = $"Photographer fee released from escrow for booking {bookingId}",
+                        Note = $"phí cho thợ chụp từ dịch vụ: book {bookingId}",
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
                     };
@@ -131,7 +131,7 @@ namespace SnapLink_Service.Service
                         Amount = calculationResult.LocationFee,
                         Type = TransactionType.VenueFee,
                         Status = TransactionStatus.Success,
-                        Note = $"Venue fee released from escrow for booking {bookingId}",
+                        Note = $"phí cho địa điểm từ dịch vụ: book {bookingId}",
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
                     };

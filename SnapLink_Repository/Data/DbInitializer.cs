@@ -125,11 +125,13 @@ namespace SnapLink_Repository.Data
                 Console.WriteLine("Seeding Styles...");
                 var styles = new[]
                 {
-                    new Style { Name = "Portrait", Description = "Portrait photography" },
-                    new Style { Name = "Landscape", Description = "Landscape photography" },
-                    new Style { Name = "Wedding", Description = "Wedding photography" },
-                    new Style { Name = "Event", Description = "Event photography" },
-                    new Style { Name = "Fashion", Description = "Fashion photography" }
+                    new Style { Name = "Nàng thơ", Description = "Nhẹ nhàng, lãng mạn, bay bổng" },
+                    new Style { Name = "Dễ thương", Description = "Ngọt ngào, vui tươi, đáng yêu" },
+                    new Style { Name = "Mạnh mẽ", Description = "Cá tính, tự tin, quyết đoán" },
+                    new Style { Name = "Cổ điển", Description = "Thanh lịch, sang trọng, hoài niệm" },
+                    new Style { Name = "Hiện đại", Description = "Năng động, trẻ trung, tinh tế" },
+                    new Style { Name = "Tối giản", Description = "Đơn giản, tinh gọn, tinh tế" },
+                    new Style { Name = "Quý phái", Description = "Quý phái, đẳng cấp, thu hút" }
                 };
                 context.Styles.AddRange(styles);
                 context.SaveChanges();
