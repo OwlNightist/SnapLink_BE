@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SnapLink_Model.DTO.Request;
 using SnapLink_Service.IService;
+using System.Security.Claims;
 
 namespace SnapLink_API.Controllers
 {
@@ -91,20 +93,6 @@ namespace SnapLink_API.Controllers
             }
         }
 
-
-        [HttpGet("style/{styleName}")]
-        public async Task<IActionResult> GetPhotographersByStyle(string styleName)
-        {
-            try
-            {
-                var photographers = await _photographerService.GetPhotographersByStyleAsync(styleName);
-                return Ok(photographers);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
-            }
-        }
 
 
         [HttpPost]
@@ -235,13 +223,37 @@ namespace SnapLink_API.Controllers
         }
 
 
-        [HttpGet("{id}/styles")]
-        public async Task<IActionResult> GetPhotographerStyles(int id)
+
+        [HttpGet("by-user-styles")]
+        [Authorize]
+        public async Task<IActionResult> GetPhotographersByUserStyles([FromQuery] double latitude, [FromQuery] double longitude)
         {
             try
             {
-                var styles = await _photographerService.GetPhotographerStylesAsync(id);
-                return Ok(styles);
+                // Extract user ID from JWT token
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    return Unauthorized(new { message = "Invalid token or user not found" });
+                }
+
+                // Validate latitude and longitude
+                if (latitude < -90 || latitude > 90)
+                {
+                    return BadRequest(new { message = "Latitude must be between -90 and 90" });
+                }
+
+                if (longitude < -180 || longitude > 180)
+                {
+                    return BadRequest(new { message = "Longitude must be between -180 and 180" });
+                }
+
+                var photographers = await _locationService.GetPhotographersByUserStylesAsync(userId, latitude, longitude);
+                return Ok(new { 
+                    message = "Photographers retrieved successfully", 
+                    data = photographers,
+                    count = photographers.Count()
+                });
             }
             catch (Exception ex)
             {
@@ -297,6 +309,54 @@ namespace SnapLink_API.Controllers
 
                 var photographers = await _locationService.GetPhotographersWithinRadiusAsync(latitude, longitude, radiusKm);
                 return Ok(photographers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
+        [HttpGet("recommend")]
+        [Authorize]
+        public async Task<IActionResult> GetRecommendedPhotographers([FromQuery] double latitude, [FromQuery] double longitude, [FromQuery] int? locationId = null, [FromQuery] double radiusKm = 10.0, [FromQuery] int maxResults = 20)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                // Extract user ID from JWT token
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    return Unauthorized(new { message = "Invalid token or user not found" });
+                }
+
+                if (radiusKm <= 0 || radiusKm > 100)
+                {
+                    return BadRequest(new { message = "Radius must be between 0 and 100 kilometers" });
+                }
+
+                if (maxResults <= 0 || maxResults > 50)
+                {
+                    return BadRequest(new { message = "MaxResults must be between 1 and 50" });
+                }
+
+                var recommendedPhotographers = await _locationService.GetRecommendedPhotographersAsync(
+                    latitude, 
+                    longitude, 
+                    userId, 
+                    locationId, 
+                    radiusKm, 
+                    maxResults);
+
+                return Ok(new { 
+                    message = "Photographers recommended successfully", 
+                    data = recommendedPhotographers,
+                    count = recommendedPhotographers.Count()
+                });
             }
             catch (Exception ex)
             {

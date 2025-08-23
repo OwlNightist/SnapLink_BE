@@ -63,7 +63,7 @@ namespace SnapLink_Model.DTO.Response
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
         public double? DistanceKm { get; set; }
-
+        public bool? Isbookedhere { get; set; }
         // Styles information
         public List<string> Styles { get; set; } = new List<string>();
     }

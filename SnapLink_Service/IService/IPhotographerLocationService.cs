@@ -8,5 +8,7 @@ namespace SnapLink_Service.IService
         Task<double> CalculateDistanceToPhotographerAsync(double userLat, double userLon, int photographerId);
         Task<bool> ValidatePhotographerLocationAsync(int photographerId, double latitude, double longitude);
         Task UpdatePhotographerLocationAsync(int photographerId, string address, string googleMapsAddress, double? latitude, double? longitude);
+        Task<IEnumerable<PhotographerListResponse>> GetRecommendedPhotographersAsync(double latitude, double longitude, int userId, int? locationId = null, double radiusKm = 10.0, int maxResults = 20);
+        Task<IEnumerable<PhotographerListResponse>> GetPhotographersByUserStylesAsync(int userId, double userLatitude, double userLongitude);
     }
 } 
