@@ -149,21 +149,21 @@ namespace SnapLink_Repository.Data
                 var users = context.Users.Take(16).ToList();
                 var photographers = new[]
                 {
-            new Photographer { UserId = users[1].UserId, YearsExperience = 3, Equipment = "Iphone 19 Pro Max", HourlyRate = 5000, AvailabilityStatus = "Available", Rating = 4.67M, RatingCount = 12, RatingSum = 56 },
-            new Photographer { UserId = users[2].UserId, YearsExperience = 7, Equipment = "Iphone 18 Pro Max", HourlyRate = 120000, AvailabilityStatus = "Busy", Rating = 3.28M, RatingCount = 25, RatingSum = 82 },
-            new Photographer { UserId = users[3].UserId, YearsExperience = 2, Equipment = "Iphone 17 Pro Max", HourlyRate = 70000, AvailabilityStatus = "Available", Rating = 4.05M, RatingCount = 37, RatingSum = 150 },
-            new Photographer { UserId = users[4].UserId, YearsExperience = 4, Equipment = "Iphone 6 Pro Max", HourlyRate = 90000, AvailabilityStatus = "Available", Rating = 3.00M, RatingCount = 9, RatingSum = 27 },
-            new Photographer { UserId = users[5].UserId, YearsExperience = 6, Equipment = "Iphone 15 Pro Max", HourlyRate = 110000, AvailabilityStatus = "Available", Rating = 4.80M, RatingCount = 44, RatingSum = 211 },
-            new Photographer { UserId = users[6].UserId, YearsExperience = 4, Equipment = "Iphone 15 Pro Max", HourlyRate = 85000, AvailabilityStatus = "Available", Rating = 3.44M, RatingCount = 18, RatingSum = 62 },
-            new Photographer { UserId = users[7].UserId, YearsExperience = 8, Equipment = "Iphone 15 Pro Max", HourlyRate = 130000, AvailabilityStatus = "Busy", Rating = 4.38M, RatingCount = 21, RatingSum = 92 },
-            new Photographer { UserId = users[8].UserId, YearsExperience = 3, Equipment = "Iphone 15 Pro Max", HourlyRate = 75000, AvailabilityStatus = "Available", Rating = 3.00M, RatingCount = 15, RatingSum = 45 },
-            new Photographer { UserId = users[9].UserId, YearsExperience = 5, Equipment = "Iphone 15 Pro Max", HourlyRate = 95000, AvailabilityStatus = "Available", Rating = 3.88M, RatingCount = 33, RatingSum = 128 },
-            new Photographer { UserId = users[10].UserId, YearsExperience = 7, Equipment = "Iphone 15 Pro Max", HourlyRate = 105000, AvailabilityStatus = "Available", Rating = 4.79M, RatingCount = 28, RatingSum = 134 },
-            new Photographer { UserId = users[11].UserId, YearsExperience = 2, Equipment = "Iphone 15 Pro Max", HourlyRate = 65000, AvailabilityStatus = "Available", Rating = 3.64M, RatingCount = 11, RatingSum = 40 },
-            new Photographer { UserId = users[12].UserId, YearsExperience = 6, Equipment = "Iphone 15 Pro Max", HourlyRate = 115000, AvailabilityStatus = "Busy", Rating = 4.68M, RatingCount = 19, RatingSum = 89 },
-            new Photographer { UserId = users[13].UserId, YearsExperience = 4, Equipment = "Iphone 15 Pro Max", HourlyRate = 80000, AvailabilityStatus = "Available", Rating = 4.21M, RatingCount = 47, RatingSum = 198 },
-            new Photographer { UserId = users[14].UserId, YearsExperience = 9, Equipment = "Iphone 15 Pro Max", HourlyRate = 140000, AvailabilityStatus = "Available", Rating = 3.00M, RatingCount = 23, RatingSum = 69 },
-            new Photographer { UserId = users[15].UserId, YearsExperience = 9, Equipment = "Iphone 15 Pro Max", HourlyRate = 140000, AvailabilityStatus = "Available", Rating = 3.94M, RatingCount = 31, RatingSum = 122 },
+            new Photographer { UserId = users[1].UserId, YearsExperience = 3, Equipment = "Iphone 19 Pro Max", HourlyRate = 5000, AvailabilityStatus = "Available", Rating = 4.67M, RatingCount = 12, RatingSum = 56,Latitude = 10.865958 ,Longitude =106.802917 },
+            new Photographer { UserId = users[2].UserId, YearsExperience = 7, Equipment = "Iphone 18 Pro Max", HourlyRate = 120000, AvailabilityStatus = "Busy", Rating = 3.28M, RatingCount = 25, RatingSum = 82,Latitude = 10.780432, Longitude = 106.730128 },
+            new Photographer { UserId = users[3].UserId, YearsExperience = 2, Equipment = "Iphone 17 Pro Max", HourlyRate = 70000, AvailabilityStatus = "Available", Rating = 4.05M, RatingCount = 37, RatingSum = 150,Latitude = 10.860129, Longitude = 106.789432 },
+            new Photographer { UserId = users[4].UserId, YearsExperience = 4, Equipment = "Iphone 6 Pro Max", HourlyRate = 90000, AvailabilityStatus = "Available", Rating = 3.00M, RatingCount = 9, RatingSum = 27,Latitude = 10.950876, Longitude = 106.843219 },
+            new Photographer { UserId = users[5].UserId, YearsExperience = 6, Equipment = "Iphone 15 Pro Max", HourlyRate = 110000, AvailabilityStatus = "Available", Rating = 4.80M, RatingCount = 44, RatingSum = 211,Latitude = 10.820567, Longitude = 106.990321 },
+            new Photographer { UserId = users[6].UserId, YearsExperience = 4, Equipment = "Iphone 15 Pro Max", HourlyRate = 85000, AvailabilityStatus = "Available", Rating = 3.44M, RatingCount = 18, RatingSum = 62,Latitude = 10.915678, Longitude = 106.920543},
+            new Photographer { UserId = users[7].UserId, YearsExperience = 8, Equipment = "Iphone 15 Pro Max", HourlyRate = 130000, AvailabilityStatus = "Busy", Rating = 4.38M, RatingCount = 21, RatingSum = 92,Latitude = 10.720345, Longitude = 106.850456 },
+            new Photographer { UserId = users[8].UserId, YearsExperience = 3, Equipment = "Iphone 15 Pro Max", HourlyRate = 75000, AvailabilityStatus = "Available", Rating = 3.00M, RatingCount = 15, RatingSum = 45,Latitude = 10.910876, Longitude = 106.700987 },
+            new Photographer { UserId = users[9].UserId, YearsExperience = 5, Equipment = "Iphone 15 Pro Max", HourlyRate = 95000, AvailabilityStatus = "Available", Rating = 3.88M, RatingCount = 33, RatingSum = 128,Latitude = 10.770654, Longitude = 106.810543 },
+            new Photographer { UserId = users[10].UserId, YearsExperience = 7, Equipment = "Iphone 15 Pro Max", HourlyRate = 105000, AvailabilityStatus = "Available", Rating = 4.79M, RatingCount = 28, RatingSum = 134,Latitude = 10.895432, Longitude = 106.765432},
+            new Photographer { UserId = users[11].UserId, YearsExperience = 2, Equipment = "Iphone 15 Pro Max", HourlyRate = 65000, AvailabilityStatus = "Available", Rating = 3.64M, RatingCount = 11, RatingSum = 40,Latitude = 10.730987, Longitude = 106.925678},
+            new Photographer { UserId = users[12].UserId, YearsExperience = 6, Equipment = "Iphone 15 Pro Max", HourlyRate = 115000, AvailabilityStatus = "Busy", Rating = 4.68M, RatingCount = 19, RatingSum = 89,Latitude = 10.960432, Longitude = 106.780321 },
+            new Photographer { UserId = users[13].UserId, YearsExperience = 4, Equipment = "Iphone 15 Pro Max", HourlyRate = 80000, AvailabilityStatus = "Available", Rating = 4.21M, RatingCount = 47, RatingSum = 198,Latitude = 10.805678, Longitude = 106.880987 },
+            new Photographer { UserId = users[14].UserId, YearsExperience = 9, Equipment = "Iphone 15 Pro Max", HourlyRate = 140000, AvailabilityStatus = "Available", Rating = 3.00M, RatingCount = 23, RatingSum = 69 ,Latitude = 10.875321, Longitude = 106.950432 },
+            new Photographer { UserId = users[15].UserId, YearsExperience = 9, Equipment = "Iphone 15 Pro Max", HourlyRate = 140000, AvailabilityStatus = "Available", Rating = 3.94M, RatingCount = 31, RatingSum = 122,Latitude = 10.741234, Longitude = 106.845678  },
 
                 };
                 context.Photographers.AddRange(photographers);
@@ -271,7 +271,6 @@ namespace SnapLink_Repository.Data
                 {
                     // Original 5 registered locations with fees
                     new Location { 
-                        LocationOwnerId = owners[0].LocationOwnerId, 
                         Name = "Quảng Trường Sáng Tạo - ĐHQG TPHCM", 
                         Address = "Đ. Quảng Trường Sáng Tạo, Đông Hoà, Dĩ An, Bình Dương 75306, Việt Nam", 
                         Description = "Quảng Trường Sáng Tạo", 
@@ -281,8 +280,11 @@ namespace SnapLink_Repository.Data
                         Outdoor = true, 
                         AvailabilityStatus = "Available", 
                         LocationType = "Registered",
-                        ExternalPlaceId = "10.8748517,106.8026875", // Example Google Places ID
-                        CreatedAt = DateTime.Now 
+                        ExternalPlaceId = "ChIJaXQRs6lZwokRY6EFpJnhNNE", // Example Google Places ID
+                        CreatedAt = DateTime.Now,
+                        Latitude = 10.8735842,
+                        Longitude = 106.8025134
+
                     },
                     new Location { 
                         LocationOwnerId = owners[1].LocationOwnerId, 
@@ -296,7 +298,8 @@ namespace SnapLink_Repository.Data
                         AvailabilityStatus = "Available", 
                         LocationType = "Registered",
                         ExternalPlaceId = "ChIJaXQRs6lZwokRY6EFpJnhNNE", // Example Google Places ID
-                        CreatedAt = DateTime.Now 
+                        CreatedAt = DateTime.Now,
+                        Latitude = 10.872345 ,Longitude = 106.895432
                     },
                     new Location { 
                         LocationOwnerId = owners[2].LocationOwnerId, 
@@ -310,7 +313,8 @@ namespace SnapLink_Repository.Data
                         AvailabilityStatus = "Busy", 
                         LocationType = "Registered",
                         ExternalPlaceId = "ChIJN1t_tDeuEmsRUsoyG83frY4", // Example Google Places ID
-                        CreatedAt = DateTime.Now 
+                        CreatedAt = DateTime.Now ,
+                        Latitude = 10.823456 ,Longitude = 106.765678
                     },
                     new Location { 
                         LocationOwnerId = owners[3].LocationOwnerId, 
@@ -324,7 +328,8 @@ namespace SnapLink_Repository.Data
                         AvailabilityStatus = "Available", 
                         LocationType = "Registered",
                         ExternalPlaceId = "ChIJKxjxuxlZwokRwA2Ire1V8mk", // Example Google Places ID
-                        CreatedAt = DateTime.Now 
+                        CreatedAt = DateTime.Now ,
+                        Latitude = 10.910987 ,Longitude = 106.845321
                     },
                     new Location { 
                         LocationOwnerId = owners[4].LocationOwnerId, 
@@ -338,7 +343,8 @@ namespace SnapLink_Repository.Data
                         AvailabilityStatus = "Available", 
                         LocationType = "Registered",
                         ExternalPlaceId = "ChIJaXQRs6lZwokRY6EFpJnhNNE", // Example Google Places ID
-                        CreatedAt = DateTime.Now 
+                        CreatedAt = DateTime.Now ,
+                        Latitude = 10.758765 ,Longitude = 106.825432
                     },
                     // 5 new locations for additional location owners
                     new Location { 
@@ -353,7 +359,8 @@ namespace SnapLink_Repository.Data
                         AvailabilityStatus = "Available", 
                         LocationType = "Registered",
                         ExternalPlaceId = "ChIJKxjxuxlZwokRwA2Ire1V8mk", // Example Google Places ID
-                        CreatedAt = DateTime.Now 
+                        CreatedAt = DateTime.Now ,
+                        Latitude = 10.935432 ,Longitude = 106.780987
                     },
                     new Location { 
                         LocationOwnerId = owners[6].LocationOwnerId, 
@@ -367,7 +374,8 @@ namespace SnapLink_Repository.Data
                         AvailabilityStatus = "Available", 
                         LocationType = "Registered",
                         ExternalPlaceId = "ChIJaXQRs6lZwokRY6EFpJnhNNE", // Example Google Places ID
-                        CreatedAt = DateTime.Now 
+                        CreatedAt = DateTime.Now ,
+                        Latitude = 10.801234 ,Longitude = 106.915678
                     },
                     new Location { 
                         LocationOwnerId = owners[7].LocationOwnerId, 
@@ -381,7 +389,8 @@ namespace SnapLink_Repository.Data
                         AvailabilityStatus = "Available", 
                         LocationType = "Registered",
                         ExternalPlaceId = "ChIJN1t_tDeuEmsRUsoyG83frY4", // Example Google Places ID
-                        CreatedAt = DateTime.Now 
+                        CreatedAt = DateTime.Now ,
+                        Latitude = 10.885678 ,Longitude = 106.735432
                     },
                     new Location { 
                         LocationOwnerId = owners[8].LocationOwnerId, 
@@ -395,7 +404,8 @@ namespace SnapLink_Repository.Data
                         AvailabilityStatus = "Available", 
                         LocationType = "Registered",
                         ExternalPlaceId = "ChIJKxjxuxlZwokRwA2Ire1V8mk", // Example Google Places ID
-                        CreatedAt = DateTime.Now 
+                        CreatedAt = DateTime.Now ,
+                        Latitude = 10.769876 ,Longitude = 106.905678
                     },
                     new Location { 
                         LocationOwnerId = owners[9].LocationOwnerId, 
@@ -409,51 +419,9 @@ namespace SnapLink_Repository.Data
                         AvailabilityStatus = "Available", 
                         LocationType = "Registered",
                         ExternalPlaceId = "ChIJaXQRs6lZwokRY6EFpJnhNNE", // Example Google Places ID
-                        CreatedAt = DateTime.Now 
+                        CreatedAt = DateTime.Now ,
+                        Latitude = 10.942345 ,Longitude = 106.830123
                     },
-                    // External locations (Google Places) - no fees
-                    new Location { 
-                        LocationOwnerId = owners[0].LocationOwnerId, 
-                        Name = "Central Park", 
-                        Address = "Central Park, New York, NY", 
-                        Description = "Iconic urban park with beautiful landscapes", 
-                        HourlyRate = 0, // No fee for external locations
-                        Capacity = 100, 
-                        Indoor = false, 
-                        Outdoor = true, 
-                        AvailabilityStatus = "Available", 
-                        LocationType = "External",
-                        ExternalPlaceId = "ChIJN1t_tDeuEmsRUsoyG83frY4", // Google Places ID for Central Park
-                        CreatedAt = DateTime.Now 
-                    },
-                    new Location { 
-                        LocationOwnerId = owners[1].LocationOwnerId, 
-                        Name = "Times Square", 
-                        Address = "Times Square, New York, NY", 
-                        Description = "Famous commercial intersection and tourist destination", 
-                        HourlyRate = 0, // No fee for external locations
-                        Capacity = 200, 
-                        Indoor = false, 
-                        Outdoor = true, 
-                        AvailabilityStatus = "Available", 
-                        LocationType = "External",
-                        ExternalPlaceId = "ChIJaXQRs6lZwokRY6EFpJnhNNE", // Google Places ID for Times Square
-                        CreatedAt = DateTime.Now 
-                    },
-                    new Location { 
-                        LocationOwnerId = owners[2].LocationOwnerId, 
-                        Name = "Brooklyn Bridge", 
-                        Address = "Brooklyn Bridge, New York, NY", 
-                        Description = "Historic suspension bridge connecting Manhattan and Brooklyn", 
-                        HourlyRate = 0, // No fee for external locations
-                        Capacity = 50, 
-                        Indoor = false, 
-                        Outdoor = true, 
-                        AvailabilityStatus = "Available", 
-                        LocationType = "External",
-                        ExternalPlaceId = "ChIJKxjxuxlZwokRwA2Ire1V8mk", // Google Places ID for Brooklyn Bridge
-                        CreatedAt = DateTime.Now 
-                    }
                 };
                 context.Locations.AddRange(locations);
                 context.SaveChanges();
