@@ -131,7 +131,14 @@ namespace SnapLink_Repository.Data
                     new Style { Name = "Cổ điển", Description = "Thanh lịch, sang trọng, hoài niệm" },
                     new Style { Name = "Hiện đại", Description = "Năng động, trẻ trung, tinh tế" },
                     new Style { Name = "Tối giản", Description = "Đơn giản, tinh gọn, tinh tế" },
-                    new Style { Name = "Quý phái", Description = "Quý phái, đẳng cấp, thu hút" }
+                    new Style { Name = "Quý phái", Description = "Quý phái, đẳng cấp, thu hút" },
+                    new Style { Name = "Năng động", Description = "Tươi trẻ, khỏe khoắn, đầy sức sống" },
+                    new Style { Name = "Lãng mạn", Description = "Ngọt ngào, trữ tình, ấm áp" },
+                    new Style { Name = "Thanh lịch", Description = "Dịu dàng, tinh tế, nhã nhặn" },
+                    new Style { Name = "Cá tính", Description = "Khác biệt, mạnh mẽ, nổi bật" },
+                    new Style { Name = "Trẻ trung", Description = "Năng động, sôi nổi, hiện đại" },
+                    new Style { Name = "Nghệ thuật", Description = "Sáng tạo, độc đáo, giàu cảm xúc" },
+                    new Style { Name = "Sang trọng", Description = "Đẳng cấp, quý phái, cuốn hút" }
                 };
                 context.Styles.AddRange(styles);
                 context.SaveChanges();
