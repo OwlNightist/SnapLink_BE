@@ -149,21 +149,22 @@ namespace SnapLink_Repository.Data
                 var users = context.Users.Take(16).ToList();
                 var photographers = new[]
                 {
-                    new Photographer { UserId = users[1].UserId, YearsExperience = 3, Equipment = "Iphone 19 Pro Max", HourlyRate = 5000, AvailabilityStatus = "Available", Rating = 4.5M },
-                    new Photographer { UserId = users[2].UserId, YearsExperience = 7, Equipment = "Iphone 18 Pro Max", HourlyRate = 120000, AvailabilityStatus = "Busy", Rating = 4.9M },
-                    new Photographer { UserId = users[3].UserId, YearsExperience = 2, Equipment = "Iphone 17 Pro Max", HourlyRate = 70000, AvailabilityStatus = "Available", Rating = 4.3M },
-                    new Photographer { UserId = users[4].UserId, YearsExperience = 4, Equipment = "Iphone 6 Pro Max", HourlyRate = 90000, AvailabilityStatus = "Available", Rating = 4.7M },
-                    new Photographer { UserId = users[5].UserId, YearsExperience = 6, Equipment = "Iphone 15 Pro Max", HourlyRate = 110000, AvailabilityStatus = "Available", Rating = 4.6M },
-                    new Photographer { UserId = users[6].UserId, YearsExperience = 4, Equipment = "Iphone 15 Pro Max", HourlyRate = 85000, AvailabilityStatus = "Available", Rating = 4.4M },
-                    new Photographer { UserId = users[7].UserId, YearsExperience = 8, Equipment = "Iphone 15 Pro Max", HourlyRate = 130000, AvailabilityStatus = "Busy", Rating = 4.9M },
-                    new Photographer { UserId = users[8].UserId, YearsExperience = 3, Equipment = "Iphone 15 Pro Max", HourlyRate = 75000, AvailabilityStatus = "Available", Rating = 4.2M },
-                    new Photographer { UserId = users[9].UserId, YearsExperience = 5, Equipment = "Iphone 15 Pro Max", HourlyRate = 95000, AvailabilityStatus = "Available", Rating = 4.5M },
-                    new Photographer { UserId = users[10].UserId, YearsExperience = 7, Equipment = "Iphone 15 Pro Max", HourlyRate = 105000, AvailabilityStatus = "Available", Rating = 4.7M },
-                    new Photographer { UserId = users[11].UserId, YearsExperience = 2, Equipment = "Iphone 15 Pro Max", HourlyRate = 65000, AvailabilityStatus = "Available", Rating = 4.1M },
-                    new Photographer { UserId = users[12].UserId, YearsExperience = 6, Equipment = "Iphone 15 Pro Max", HourlyRate = 115000, AvailabilityStatus = "Busy", Rating = 4.8M },
-                    new Photographer { UserId = users[13].UserId, YearsExperience = 4, Equipment = "Iphone 15 Pro Max", HourlyRate = 80000, AvailabilityStatus = "Available", Rating = 4.3M },
-                    new Photographer { UserId = users[14].UserId, YearsExperience = 9, Equipment = "Iphone 15 Pro Max", HourlyRate = 140000, AvailabilityStatus = "Available", Rating = 4.9M },
-                    new Photographer { UserId = users[15].UserId, YearsExperience = 9, Equipment = "Iphone 15 Pro Max", HourlyRate = 140000, AvailabilityStatus = "Available", Rating = 4.9M }
+            new Photographer { UserId = users[1].UserId, YearsExperience = 3, Equipment = "Iphone 19 Pro Max", HourlyRate = 5000, AvailabilityStatus = "Available", Rating = 4.67M, RatingCount = 12, RatingSum = 56 },
+            new Photographer { UserId = users[2].UserId, YearsExperience = 7, Equipment = "Iphone 18 Pro Max", HourlyRate = 120000, AvailabilityStatus = "Busy", Rating = 3.28M, RatingCount = 25, RatingSum = 82 },
+            new Photographer { UserId = users[3].UserId, YearsExperience = 2, Equipment = "Iphone 17 Pro Max", HourlyRate = 70000, AvailabilityStatus = "Available", Rating = 4.05M, RatingCount = 37, RatingSum = 150 },
+            new Photographer { UserId = users[4].UserId, YearsExperience = 4, Equipment = "Iphone 6 Pro Max", HourlyRate = 90000, AvailabilityStatus = "Available", Rating = 3.00M, RatingCount = 9, RatingSum = 27 },
+            new Photographer { UserId = users[5].UserId, YearsExperience = 6, Equipment = "Iphone 15 Pro Max", HourlyRate = 110000, AvailabilityStatus = "Available", Rating = 4.80M, RatingCount = 44, RatingSum = 211 },
+            new Photographer { UserId = users[6].UserId, YearsExperience = 4, Equipment = "Iphone 15 Pro Max", HourlyRate = 85000, AvailabilityStatus = "Available", Rating = 3.44M, RatingCount = 18, RatingSum = 62 },
+            new Photographer { UserId = users[7].UserId, YearsExperience = 8, Equipment = "Iphone 15 Pro Max", HourlyRate = 130000, AvailabilityStatus = "Busy", Rating = 4.38M, RatingCount = 21, RatingSum = 92 },
+            new Photographer { UserId = users[8].UserId, YearsExperience = 3, Equipment = "Iphone 15 Pro Max", HourlyRate = 75000, AvailabilityStatus = "Available", Rating = 3.00M, RatingCount = 15, RatingSum = 45 },
+            new Photographer { UserId = users[9].UserId, YearsExperience = 5, Equipment = "Iphone 15 Pro Max", HourlyRate = 95000, AvailabilityStatus = "Available", Rating = 3.88M, RatingCount = 33, RatingSum = 128 },
+            new Photographer { UserId = users[10].UserId, YearsExperience = 7, Equipment = "Iphone 15 Pro Max", HourlyRate = 105000, AvailabilityStatus = "Available", Rating = 4.79M, RatingCount = 28, RatingSum = 134 },
+            new Photographer { UserId = users[11].UserId, YearsExperience = 2, Equipment = "Iphone 15 Pro Max", HourlyRate = 65000, AvailabilityStatus = "Available", Rating = 3.64M, RatingCount = 11, RatingSum = 40 },
+            new Photographer { UserId = users[12].UserId, YearsExperience = 6, Equipment = "Iphone 15 Pro Max", HourlyRate = 115000, AvailabilityStatus = "Busy", Rating = 4.68M, RatingCount = 19, RatingSum = 89 },
+            new Photographer { UserId = users[13].UserId, YearsExperience = 4, Equipment = "Iphone 15 Pro Max", HourlyRate = 80000, AvailabilityStatus = "Available", Rating = 4.21M, RatingCount = 47, RatingSum = 198 },
+            new Photographer { UserId = users[14].UserId, YearsExperience = 9, Equipment = "Iphone 15 Pro Max", HourlyRate = 140000, AvailabilityStatus = "Available", Rating = 3.00M, RatingCount = 23, RatingSum = 69 },
+            new Photographer { UserId = users[15].UserId, YearsExperience = 9, Equipment = "Iphone 15 Pro Max", HourlyRate = 140000, AvailabilityStatus = "Available", Rating = 3.94M, RatingCount = 31, RatingSum = 122 },
+
                 };
                 context.Photographers.AddRange(photographers);
                 context.SaveChanges();

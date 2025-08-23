@@ -177,6 +177,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IImageGenerationService, ImageGenerationService>();
+builder.Services.AddScoped<IComplaintService, ComplaintService>();
 
 // Add Push Notification Services
 builder.Services.AddHttpClient<IPushNotificationService, PushNotificationService>();
