@@ -23,6 +23,7 @@ namespace SnapLink_Service.IService
 
         Task UpdateCoordinatesByAddressAsync(int locationId);
         Task<List<NearbyCombinedItem>> GetNearbyCombinedAsync(string address, double radiusInKm, string? tags, int limit);
+        Task<List<LocationNearbyResponse>> GetRegisteredLocationsNearbyAsync(double latitude, double longitude, double radiusKm = 50.0);
 
     }
 }

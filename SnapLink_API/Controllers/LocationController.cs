@@ -63,5 +63,48 @@ namespace SnapLink_API.Controllers
             return Ok("Coordinates updated.");
         }
 
+        [HttpGet("registered-nearby")]
+        public async Task<IActionResult> GetRegisteredLocationsNearby([FromQuery] double latitude, [FromQuery] double longitude, [FromQuery] double radiusKm = 50.0)
+        {
+            try
+            {
+                // Validate latitude and longitude
+                if (latitude < -90 || latitude > 90)
+                {
+                    return BadRequest(new { message = "Latitude must be between -90 and 90" });
+                }
+
+                if (longitude < -180 || longitude > 180)
+                {
+                    return BadRequest(new { message = "Longitude must be between -180 and 180" });
+                }
+
+                // Validate radius
+                if (radiusKm <= 0 || radiusKm > 200)
+                {
+                    return BadRequest(new { message = "Radius must be between 0 and 200 kilometers" });
+                }
+
+                var locations = await _service.GetRegisteredLocationsNearbyAsync(latitude, longitude, radiusKm);
+                
+                return Ok(new
+                {
+                    message = "Registered locations retrieved successfully",
+                    data = locations,
+                    count = locations.Count,
+                    searchParameters = new
+                    {
+                        latitude = latitude,
+                        longitude = longitude,
+                        radiusKm = radiusKm
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
     }
 }

@@ -319,6 +319,34 @@ namespace SnapLink_Service.Service
 
             return combined;
         }
+
+        public async Task<List<LocationNearbyResponse>> GetRegisteredLocationsNearbyAsync(double latitude, double longitude, double radiusKm = 50.0)
+        {
+            // Get all registered locations with coordinates
+            var registeredLocations = await _repo.GetAllAsync();
+            
+            var nearbyLocations = registeredLocations
+                .Where(l => l.LocationType == "Registered" && l.Latitude.HasValue && l.Longitude.HasValue)
+                .Select(l =>
+                {
+                    var distance = HaversineKm(latitude, longitude, l.Latitude!.Value, l.Longitude!.Value);
+                    return new LocationNearbyResponse
+                    {
+                        LocationId = l.LocationId,
+                        Name = l.Name,
+                        Address = l.Address,
+                        Latitude = l.Latitude,
+                        Longitude = l.Longitude,
+                        DistanceInKm = Math.Round(distance, 2)
+                    };
+                })
+                .Where(x => x.DistanceInKm <= radiusKm)
+                .OrderBy(x => x.DistanceInKm)
+                .ToList();
+
+            return nearbyLocations;
+        }
+
         private static double HaversineKm(double lat1, double lon1, double lat2, double lon2)
         {
             const double R = 6371;
