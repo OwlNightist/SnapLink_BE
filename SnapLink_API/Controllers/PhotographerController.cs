@@ -261,6 +261,57 @@ namespace SnapLink_API.Controllers
             }
         }
 
+        [HttpGet("popular")]
+        public async Task<IActionResult> GetPopularPhotographers([FromQuery] double? latitude = null, [FromQuery] double? longitude = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                // Validate pagination parameters
+                if (page < 1)
+                {
+                    return BadRequest(new { message = "Page must be greater than 0" });
+                }
+
+                if (pageSize < 1 || pageSize > 50)
+                {
+                    return BadRequest(new { message = "Page size must be between 1 and 50" });
+                }
+
+                // Validate coordinates if provided
+                if (latitude.HasValue && (latitude < -90 || latitude > 90))
+                {
+                    return BadRequest(new { message = "Latitude must be between -90 and 90" });
+                }
+
+                if (longitude.HasValue && (longitude < -180 || longitude > 180))
+                {
+                    return BadRequest(new { message = "Longitude must be between -180 and 180" });
+                }
+
+                // Both latitude and longitude must be provided together
+                if ((latitude.HasValue && !longitude.HasValue) || (!latitude.HasValue && longitude.HasValue))
+                {
+                    return BadRequest(new { message = "Both latitude and longitude must be provided together or both omitted" });
+                }
+
+                var photographers = await _locationService.GetPopularPhotographersAsync(latitude, longitude, page, pageSize);
+                return Ok(new { 
+                    message = "Popular photographers retrieved successfully", 
+                    data = photographers,
+                    pagination = new {
+                        page = page,
+                        pageSize = pageSize,
+                        count = photographers.Count()
+                    },
+                    hasDistance = latitude.HasValue && longitude.HasValue
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
         [HttpPost("{id}/styles/{styleId}")]
         public async Task<IActionResult> AddStyleToPhotographer(int id, int styleId)
         {

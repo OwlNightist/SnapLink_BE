@@ -234,5 +234,63 @@ namespace SnapLink_Service.Service
 
             return photographerResponses;
         }
+
+        public async Task<IEnumerable<PhotographerListResponse>> GetPopularPhotographersAsync(double? latitude = null, double? longitude = null, int page = 1, int pageSize = 10)
+        {
+            // Get all photographers with their details and ratings
+            var photographers = await _context.Photographers
+                .Include(p => p.User)
+                .Include(p => p.PhotographerStyles)
+                .ThenInclude(ps => ps.Style)
+                .Include(p => p.Ratings.OrderByDescending(r => r.CreatedAt).Take(5)) // Get last 5 ratings
+                .ToListAsync();
+
+            var photographerResponses = photographers
+                .Select(p => {
+                    var response = _mapper.Map<PhotographerListResponse>(p);
+                    
+                    // Calculate distance if coordinates are provided
+                    if (latitude.HasValue && longitude.HasValue && p.Latitude.HasValue && p.Longitude.HasValue)
+                    {
+                        var distance = CalculateDistance(latitude.Value, longitude.Value, p.Latitude.Value, p.Longitude.Value);
+                        response.DistanceKm = distance;
+                    }
+                    else
+                    {
+                        response.DistanceKm = null;
+                    }
+                    
+                    // Calculate average of last 5 bookings (ratings)
+                    var last5Ratings = p.Ratings
+                        .OrderByDescending(r => r.CreatedAt)
+                        .Take(5)
+                        .ToList();
+                    
+                    decimal last5Average = 0;
+                    if (last5Ratings.Any())
+                    {
+                        last5Average = (decimal)last5Ratings.Average(r => r.Score);
+                    }
+                    
+                    var ratingCount = p.RatingCount ?? 0;
+                    var overallRating = p.Rating ?? 0;
+                    
+                    return new { 
+                        Photographer = response, 
+                        Last5BookingsAverage = last5Average,
+                        OverallRating = overallRating,
+                        RatingCount = ratingCount,
+                        Distance = response.DistanceKm ?? double.MaxValue
+                    };
+                })
+                .OrderByDescending(x => x.Last5BookingsAverage)     // Last 5 bookings average first
+                .ThenByDescending(x => x.OverallRating)             // Overall rating as secondary sort
+                .ThenBy(x => x.Distance)                            // Closer distance as tertiary sort
+                .Skip((page - 1) * pageSize)                        // Pagination: skip previous pages
+                .Take(pageSize)                                     // Pagination: take current page
+                .Select(x => x.Photographer);
+
+            return photographerResponses;
+        }
     }
 } 
