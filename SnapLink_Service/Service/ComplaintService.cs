@@ -381,9 +381,17 @@ namespace SnapLink_Service.Service
                     return false;
                 }
 
+                // Get photographer's user ID
+                var photographer = await _unitOfWork.PhotographerRepository.GetByIdAsync(booking.PhotographerId);
+                if (photographer == null)
+                {
+                    return false;
+                }
+                var photographerUserId = photographer.UserId;
+
                 // Check if both users are involved in the booking
-                var isReporterInvolved = booking.UserId == reporterId || booking.PhotographerId == reporterId;
-                var isReportedUserInvolved = booking.UserId == reportedUserId || booking.PhotographerId == reportedUserId;
+                var isReporterInvolved = booking.UserId == reporterId || photographerUserId == reporterId;
+                var isReportedUserInvolved = booking.UserId == reportedUserId || photographerUserId == reportedUserId;
 
                 if (!isReporterInvolved || !isReportedUserInvolved)
                 {
