@@ -23,6 +23,8 @@ namespace SnapLink_Service.Service
 
         public async Task<Notification?> GetByIdAsync(int id) => await _repo.GetByIdAsync(id);
 
+        public async Task<IEnumerable<Notification>> GetByUserIdAsync(int userId) => await _repo.GetByUserIdAsync(userId);
+
         public async Task CreateAsync(NotificationDto dto)
         {
             var notification = new Notification

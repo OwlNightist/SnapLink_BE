@@ -25,6 +25,13 @@ namespace SnapLink_API.Controllers
             return result == null ? NotFound() : Ok(result);
         }
 
+        [HttpGet("GetNotificationsByUserId/{userId}")]
+        public async Task<IActionResult> GetByUserId(int userId)
+        {
+            var result = await _service.GetByUserIdAsync(userId);
+            return Ok(result);
+        }
+
         [HttpPost("CreateNotification")]
         public async Task<IActionResult> Create(NotificationDto dto)
         {

@@ -12,6 +12,7 @@ namespace SnapLink_Service.IService
     {
         Task<IEnumerable<Notification>> GetAllAsync();
         Task<Notification?> GetByIdAsync(int id);
+        Task<IEnumerable<Notification>> GetByUserIdAsync(int userId);
         Task CreateAsync(NotificationDto dto);
         Task UpdateAsync(int id, NotificationDto dto);
         Task DeleteAsync(int id);

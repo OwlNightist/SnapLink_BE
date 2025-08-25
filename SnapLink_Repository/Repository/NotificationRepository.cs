@@ -25,6 +25,12 @@ namespace SnapLink_Repository.Repository
         public async Task<Notification?> GetByIdAsync(int id) =>
             await _context.Notifications.Include(n => n.User).FirstOrDefaultAsync(n => n.MotificationId == id);
 
+        public async Task<IEnumerable<Notification>> GetByUserIdAsync(int userId) =>
+            await _context.Notifications.Include(n => n.User)
+                .Where(n => n.UserId == userId)
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+
         public async Task AddAsync(Notification notification) =>
             await _context.Notifications.AddAsync(notification);
 
