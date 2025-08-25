@@ -31,7 +31,7 @@ public partial class Booking
 
     public virtual Photographer Photographer { get; set; } = null!;
 
-    public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+
 
     public virtual User User { get; set; } = null!;
 

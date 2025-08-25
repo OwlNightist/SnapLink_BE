@@ -19,7 +19,7 @@ public partial class SnaplinkDbContext : DbContext
 
     public virtual DbSet<Administrator> Administrators { get; set; }
 
-    public virtual DbSet<Advertisement> Advertisements { get; set; }
+
 
     public virtual DbSet<Booking> Bookings { get; set; }
 
@@ -53,7 +53,7 @@ public partial class SnaplinkDbContext : DbContext
 
     public virtual DbSet<PremiumSubscription> PremiumSubscriptions { get; set; }
 
-    public virtual DbSet<Review> Reviews { get; set; }
+
 
     public virtual DbSet<Role> Roles { get; set; }
 
@@ -73,7 +73,7 @@ public partial class SnaplinkDbContext : DbContext
 
     public virtual DbSet<PhotoDelivery> PhotoDeliveries { get; set; }
 
-    public virtual DbSet<DeviceInfo> DeviceInfos { get; set; }
+
 
     public virtual DbSet<Device> Devices { get; set; }
 
@@ -361,22 +361,7 @@ public partial class SnaplinkDbContext : DbContext
                 .OnDelete(DeleteBehavior.NoAction);
         });
 
-        // Review entity configuration
-        modelBuilder.Entity<Review>(entity =>
-        {
-            entity.HasKey(e => e.ReviewId);
-            entity.Property(e => e.ReviewId).ValueGeneratedOnAdd();
-            entity.Property(e => e.Comment).HasMaxLength(1000);
-            entity.Property(e => e.Rating).IsRequired();
-            entity.Property(e => e.RevieweeType).HasMaxLength(50);
-            entity.Property(e => e.RevieweeId).IsRequired();
-            entity.Property(e => e.ReviewerId).IsRequired();
-            
-            entity.HasOne(e => e.Booking)
-                .WithMany(b => b.Reviews)
-                .HasForeignKey(e => e.BookingId)
-                .OnDelete(DeleteBehavior.NoAction);
-        });
+
 
         // Rating entity configuration
         modelBuilder.Entity<Rating>(entity =>
@@ -711,56 +696,9 @@ public partial class SnaplinkDbContext : DbContext
                 .OnDelete(DeleteBehavior.NoAction);
         });
 
-        // Advertisement entity configuration
-        modelBuilder.Entity<Advertisement>(entity =>
-        {
-            entity.HasKey(e => e.AdvertisementId);
-            entity.Property(e => e.AdvertisementId).ValueGeneratedOnAdd();
-            entity.Property(e => e.Title).HasMaxLength(200);
-            entity.Property(e => e.Description).HasMaxLength(1000);
-            entity.Property(e => e.ImageUrl).HasMaxLength(500);
-            entity.Property(e => e.Status).HasMaxLength(50);
-            entity.Property(e => e.StartDate);
-            entity.Property(e => e.EndDate);
-            entity.Property(e => e.Cost).HasPrecision(10, 2);
-            
-            entity.HasOne(e => e.Location)
-                .WithMany(l => l.Advertisements)
-                .HasForeignKey(e => e.LocationId)
-                .OnDelete(DeleteBehavior.NoAction);
-                
-            entity.HasOne(e => e.Payment)
-                .WithMany(p => p.Advertisements)
-                .HasForeignKey(e => e.PaymentId)
-                .OnDelete(DeleteBehavior.NoAction);
-        });
 
-        // DeviceInfo entity configuration
-        modelBuilder.Entity<DeviceInfo>(entity =>
-        {
-            entity.HasKey(e => e.DeviceInfoId);
-            entity.Property(e => e.DeviceInfoId).ValueGeneratedOnAdd();
-            entity.Property(e => e.DeviceType).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.Brand).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.Model).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.OperatingSystem).HasMaxLength(20);
-            entity.Property(e => e.OsVersion).HasMaxLength(20);
-            entity.Property(e => e.ScreenResolution).HasMaxLength(20);
-            entity.Property(e => e.CameraResolution).HasMaxLength(20);
-            entity.Property(e => e.StorageCapacity).HasMaxLength(100);
-            entity.Property(e => e.BatteryCapacity).HasMaxLength(100);
-            entity.Property(e => e.Features).HasMaxLength(500);
-            entity.Property(e => e.Status).HasMaxLength(20).IsRequired();
-            entity.Property(e => e.Notes).HasMaxLength(500);
-            entity.Property(e => e.LastUsedAt);
-            entity.Property(e => e.CreatedAt);
-            entity.Property(e => e.UpdatedAt);
-            
-            entity.HasOne(e => e.Photographer)
-                .WithMany(p => p.DeviceInfos)
-                .HasForeignKey(e => e.PhotographerId)
-                .OnDelete(DeleteBehavior.NoAction);
-        });
+
+
 
         // Device entity configuration (for push notifications)
         modelBuilder.Entity<Device>(entity =>

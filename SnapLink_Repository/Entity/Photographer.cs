@@ -50,7 +50,7 @@ public partial class Photographer
 
     public virtual ICollection<Availability> Availabilities { get; set; } = new List<Availability>();
     
-    public virtual ICollection<DeviceInfo> DeviceInfos { get; set; } = new List<DeviceInfo>();
+
     
     public virtual ICollection<EventPhotographer> EventPhotographers { get; set; } = new List<EventPhotographer>();
     public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();

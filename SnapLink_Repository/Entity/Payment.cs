@@ -30,7 +30,7 @@ public partial class Payment
 
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 
-    public virtual ICollection<Advertisement> Advertisements { get; set; } = new List<Advertisement>();
+
 
     public virtual ICollection<PremiumSubscription> PremiumSubscriptions { get; set; } = new List<PremiumSubscription>();
 }

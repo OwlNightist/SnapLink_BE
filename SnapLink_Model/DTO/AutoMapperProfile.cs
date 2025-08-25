@@ -28,7 +28,7 @@ namespace SnapLink_Model.DTO
                     AddedAt = us.CreatedAt
                 })))
                 .ForMember(dest => dest.TotalBookings, opt => opt.MapFrom(src => src.Bookings.Count))
-                .ForMember(dest => dest.TotalReviews, opt => opt.MapFrom(src => src.Bookings.SelectMany(b => b.Reviews).Count()));
+                .ForMember(dest => dest.TotalReviews, opt => opt.MapFrom(src => 0));
 
             // Photographer mappings
             CreateMap<Photographer, PhotographerResponse>()
@@ -123,15 +123,7 @@ namespace SnapLink_Model.DTO
             CreateMap<UpdateStyleRequest, Style>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            // Review mappings
-            CreateMap<Review, ReviewResponse>()
-                .ForMember(dest => dest.ReviewerName, opt => opt.MapFrom(src => src.Booking.User.FullName))
-                .ForMember(dest => dest.RevieweeName, opt => opt.MapFrom(src => src.Booking.Photographer.User.FullName))
-                .ForMember(dest => dest.BookingDescription, opt => opt.MapFrom(src => $"Booking on {src.Booking.StartDatetime:MMM dd, yyyy}"));
 
-            CreateMap<CreateReviewRequest, Review>();
-            CreateMap<UpdateReviewRequest, Review>()
-                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             CreateMap<User, UserDto>()
            .ForMember(dest => dest.Roles,

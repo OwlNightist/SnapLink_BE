@@ -442,39 +442,6 @@ namespace SnapLink_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "DeviceInfos",
-                columns: table => new
-                {
-                    DeviceInfoId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PhotographerId = table.Column<int>(type: "int", nullable: false),
-                    DeviceType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Brand = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Model = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    OperatingSystem = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    OsVersion = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    ScreenResolution = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    CameraResolution = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    StorageCapacity = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    BatteryCapacity = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Features = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    LastUsedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DeviceInfos", x => x.DeviceInfoId);
-                    table.ForeignKey(
-                        name: "FK_DeviceInfos_Photographers_PhotographerId",
-                        column: x => x.PhotographerId,
-                        principalTable: "Photographers",
-                        principalColumn: "PhotographerId");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PhotographerStyles",
                 columns: table => new
                 {
@@ -743,31 +710,6 @@ namespace SnapLink_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Reviews",
-                columns: table => new
-                {
-                    ReviewId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    BookingId = table.Column<int>(type: "int", nullable: false),
-                    ReviewerId = table.Column<int>(type: "int", nullable: false),
-                    RevieweeType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    RevieweeId = table.Column<int>(type: "int", nullable: false),
-                    Rating = table.Column<int>(type: "int", nullable: false),
-                    Comment = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Reviews", x => x.ReviewId);
-                    table.ForeignKey(
-                        name: "FK_Reviews_Bookings_BookingId",
-                        column: x => x.BookingId,
-                        principalTable: "Bookings",
-                        principalColumn: "BookingId");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "EventPhotographers",
                 columns: table => new
                 {
@@ -842,37 +784,6 @@ namespace SnapLink_API.Migrations
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "UserId");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Advertisements",
-                columns: table => new
-                {
-                    AdvertisementId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    LocationId = table.Column<int>(type: "int", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    ImageUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    Cost = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: true),
-                    PaymentId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Advertisements", x => x.AdvertisementId);
-                    table.ForeignKey(
-                        name: "FK_Advertisements_Locations_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Locations",
-                        principalColumn: "LocationId");
-                    table.ForeignKey(
-                        name: "FK_Advertisements_Payments_PaymentId",
-                        column: x => x.PaymentId,
-                        principalTable: "Payments",
-                        principalColumn: "PaymentId");
                 });
 
             migrationBuilder.CreateTable(
@@ -1007,16 +918,6 @@ namespace SnapLink_API.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Advertisements_LocationId",
-                table: "Advertisements",
-                column: "LocationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Advertisements_PaymentId",
-                table: "Advertisements",
-                column: "PaymentId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Availabilities_PhotographerId",
                 table: "Availabilities",
                 column: "PhotographerId");
@@ -1071,11 +972,6 @@ namespace SnapLink_API.Migrations
                 name: "IX_ConversationParticipants_UserId",
                 table: "ConversationParticipants",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DeviceInfos_PhotographerId",
-                table: "DeviceInfos",
-                column: "PhotographerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Devices_ExpoPushToken",
@@ -1273,11 +1169,6 @@ namespace SnapLink_API.Migrations
                 column: "ReviewerUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Reviews_BookingId",
-                table: "Reviews",
-                column: "BookingId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Roles_RoleName",
                 table: "Roles",
                 column: "RoleName",
@@ -1358,9 +1249,6 @@ namespace SnapLink_API.Migrations
                 name: "Administrators");
 
             migrationBuilder.DropTable(
-                name: "Advertisements");
-
-            migrationBuilder.DropTable(
                 name: "Availabilities");
 
             migrationBuilder.DropTable(
@@ -1368,9 +1256,6 @@ namespace SnapLink_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "ConversationParticipants");
-
-            migrationBuilder.DropTable(
-                name: "DeviceInfos");
 
             migrationBuilder.DropTable(
                 name: "Devices");
@@ -1398,9 +1283,6 @@ namespace SnapLink_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Ratings");
-
-            migrationBuilder.DropTable(
-                name: "Reviews");
 
             migrationBuilder.DropTable(
                 name: "Transactions");

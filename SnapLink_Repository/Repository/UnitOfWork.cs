@@ -13,7 +13,7 @@ namespace SnapLink_Repository.Repository
 
         // Repository instances
         private IGenericRepository<Administrator> _administratorRepository;
-        private IGenericRepository<Advertisement> _advertisementRepository;
+
         private IGenericRepository<Booking> _bookingRepository;
         private IGenericRepository<Complaint> _complaintRepository;
         private IGenericRepository<Location> _locationRepository;
@@ -27,7 +27,7 @@ namespace SnapLink_Repository.Repository
         private IGenericRepository<Wallet> _walletRepository;
         private IGenericRepository<PremiumPackage> _premiumPackageRepository;
         private IGenericRepository<PremiumSubscription> _premiumSubscriptionRepository;
-        private IGenericRepository<Review> _reviewRepository;
+
         private IGenericRepository<Role> _roleRepository;
         private IGenericRepository<Style> _styleRepository;
         private IGenericRepository<Transaction> _transactionRepository;
@@ -51,8 +51,7 @@ namespace SnapLink_Repository.Repository
         public IGenericRepository<Administrator> AdministratorRepository => 
             _administratorRepository ??= new GenericRepository<Administrator>(_context);
 
-        public IGenericRepository<Advertisement> AdvertisementRepository => 
-            _advertisementRepository ??= new GenericRepository<Advertisement>(_context);
+
 
         public IGenericRepository<Booking> BookingRepository => 
             _bookingRepository ??= new GenericRepository<Booking>(_context);
@@ -93,8 +92,7 @@ namespace SnapLink_Repository.Repository
         public IGenericRepository<PremiumSubscription> PremiumSubscriptionRepository => 
             _premiumSubscriptionRepository ??= new GenericRepository<PremiumSubscription>(_context);
 
-        public IGenericRepository<Review> ReviewRepository => 
-            _reviewRepository ??= new GenericRepository<Review>(_context);
+
 
         public IGenericRepository<Role> RoleRepository => 
             _roleRepository ??= new GenericRepository<Role>(_context);
