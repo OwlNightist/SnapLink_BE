@@ -33,7 +33,6 @@ namespace SnapLink_Service.Service
                 Title = dto.Title,
                 Content = dto.Content,
                 NotificationType = dto.NotificationType,
-                ReferenceId = dto.ReferenceId,
                 ReadStatus = dto.ReadStatus ?? false,
                 CreatedAt = DateTime.UtcNow
             };
@@ -50,7 +49,6 @@ namespace SnapLink_Service.Service
             notification.Title = dto.Title;
             notification.Content = dto.Content;
             notification.NotificationType = dto.NotificationType;
-            notification.ReferenceId = dto.ReferenceId;
             notification.ReadStatus = dto.ReadStatus ?? notification.ReadStatus;
 
             await _repo.UpdateAsync(notification);
