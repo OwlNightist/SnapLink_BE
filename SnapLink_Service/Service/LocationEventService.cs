@@ -323,8 +323,8 @@ namespace SnapLink_Service.Service
             if (application == null)
                 return false;
 
-            if (application.Status != "Applied")
-                return false; // Can only withdraw pending applications
+            // if (application.Status != "Applied")
+            //     return false; // Can only withdraw pending applications
 
             application.Status = "Withdrawn";
             _unitOfWork.EventPhotographerRepository.Update(application);
