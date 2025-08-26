@@ -223,11 +223,11 @@ namespace SnapLink_Service.Service
             if (photographer == null)
                 throw new ArgumentException($"Photographer with ID {request.PhotographerId} not found");
 
-            // Check if already applied
-            var existingApplication = await _unitOfWork.EventPhotographerRepository.GetAsync(
-                filter: ep => ep.EventId == request.EventId && ep.PhotographerId == request.PhotographerId
+            // Check if already applied (excluding withdrawn applications)
+            var activeApplication = await _unitOfWork.EventPhotographerRepository.GetAsync(
+                filter: ep => ep.EventId == request.EventId && ep.PhotographerId == request.PhotographerId && ep.Status != "Withdrawn"
             );
-            if (existingApplication.Any())
+            if (activeApplication.Any())
                 throw new InvalidOperationException("Photographer has already applied to this event");
 
             // Check capacity
