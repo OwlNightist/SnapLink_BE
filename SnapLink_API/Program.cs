@@ -21,6 +21,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
+// Configure BookingAutoCompletion settings
+builder.Services.Configure<BookingAutoCompletionSettings>(builder.Configuration.GetSection("BookingAutoCompletion"));
+
 
 
 builder.Services.AddAuthentication(options =>
@@ -193,6 +196,7 @@ builder.Services.AddScoped<IWithdrawalRequestService, WithdrawalRequestService>(
 // builder.Services.AddHostedService<BookingTimeoutService>(); 
 //builder.Services.AddHostedService<SubscriptionExpiryJob>();
 //builder.Services.AddHostedService<SnapLink_API.Jobs.BookingExpiryJob>();
+//builder.Services.AddHostedService<BookingAutoCompletionJob>();
 
 builder.Services.AddCors(opts =>
 {
