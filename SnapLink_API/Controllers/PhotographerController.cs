@@ -311,7 +311,20 @@ namespace SnapLink_API.Controllers
                 return StatusCode(500, new { message = "Internal server error", error = ex.Message });
             }
         }
-
+         [HttpGet("{id}/styles")]
+        public async Task<IActionResult> GetPhotographerStyles(int id)
+        {
+            try
+            {
+                var styles = await _photographerService.GetPhotographerStylesAsync(id);
+                return Ok(styles);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+        
         [HttpPost("{id}/styles/{styleId}")]
         public async Task<IActionResult> AddStyleToPhotographer(int id, int styleId)
         {
