@@ -12,10 +12,12 @@ namespace SnapLink_API.Controllers;
 public class BookingController : ControllerBase
 {
     private readonly IBookingService _bookingService;
+    private readonly IComplaintService _complaintService;
 
-    public BookingController(IBookingService bookingService)
+    public BookingController(IBookingService bookingService, IComplaintService complaintService)
     {
         _bookingService = bookingService;
+        _complaintService = complaintService;
     }
 
     [HttpPost("create")]
@@ -519,6 +521,81 @@ public class BookingController : ControllerBase
         catch (Exception ex)
         {
             Console.WriteLine($"Error in CleanupAllPendingBookings: {ex.Message}");
+            return StatusCode(500, new
+            {
+                Error = -1,
+                Message = "Internal server error",
+                Data = (object?)null
+            });
+        }
+    }
+
+    [HttpPut("{bookingId}/under-review")]
+    public async Task<IActionResult> SetBookingUnderReview(int bookingId)
+    {
+        try
+        {
+            // Extract user ID from JWT token for authorization (optional, you might want to restrict this to admin/moderator)
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new
+                {
+                    Error = -1,
+                    Message = "Invalid token or user not found",
+                    Data = (object?)null
+                });
+            }
+
+            // Update booking status to "Under Review"
+            var updateRequest = new UpdateBookingRequest
+            {
+                Status = "Under Review"
+            };
+
+            var bookingResult = await _bookingService.UpdateBookingAsync(bookingId, updateRequest);
+            if (bookingResult.Error != 0)
+            {
+                return BadRequest(new
+                {
+                    Error = bookingResult.Error,
+                    Message = $"Failed to update booking status: {bookingResult.Message}",
+                    Data = (object?)null
+                });
+            }
+
+            var complaint = await _complaintService.GetComplaintByBookingIdAsync(bookingId);
+            
+            bool complaintUpdated = false;
+            if (complaint != null)
+            {
+                complaintUpdated = await _complaintService.UpdateComplaintStatusAsync(complaint.ComplaintId, "Under Review");
+            }
+
+            string message = complaint != null && complaintUpdated 
+                ? "Booking and associated complaint set to Under Review successfully."
+                : complaint != null && !complaintUpdated
+                    ? "Booking status updated, but failed to update complaint status."
+                    : "Booking status updated successfully. No complaint found for this booking.";
+
+            return Ok(new
+            {
+                Error = 0,
+                Message = message,
+                Data = new
+                {
+                    BookingId = bookingId,
+                    BookingStatus = "Under Review",
+                    ComplaintFound = complaint != null,
+                    ComplaintUpdated = complaintUpdated,
+                    ComplaintId = complaint?.ComplaintId,
+                    Booking = bookingResult.Data
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in SetBookingUnderReview: {ex.Message}");
             return StatusCode(500, new
             {
                 Error = -1,

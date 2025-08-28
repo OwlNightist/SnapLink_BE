@@ -264,6 +264,27 @@ namespace SnapLink_API.Controllers
         }
 
         /// <summary>
+        /// Get complaint by booking ID
+        /// </summary>
+        [HttpGet("by-booking/{bookingId}")]
+        public async Task<ActionResult<ComplaintResponse>> GetComplaintByBookingId(int bookingId)
+        {
+            try
+            {
+                var complaint = await _complaintService.GetComplaintByBookingIdAsync(bookingId);
+                if (complaint == null)
+                {
+                    return NotFound(new { error = "No complaint found for this booking" });
+                }
+                return Ok(complaint);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "An error occurred while retrieving the complaint", details = ex.Message });
+            }
+        }
+
+        /// <summary>
         /// Update complaint (Admin/Moderator only)
         /// </summary>
         [HttpPut("{id}")]

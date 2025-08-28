@@ -17,6 +17,8 @@ namespace SnapLink_Service.IService
         Task<ComplaintListResponse> GetComplaintsByModeratorAsync(int moderatorId, int page = 1, int pageSize = 10);
         Task<ComplaintListResponse> GetComplaintsByStatusAsync(string status, int page = 1, int pageSize = 10);
         Task<ComplaintListResponse> GetComplaintsByTypeAsync(string complaintType, int page = 1, int pageSize = 10);
+        Task<ComplaintListResponse> GetComplaintsByBookingIdAsync(int bookingId, int page = 1, int pageSize = 10);
+        Task<ComplaintResponse?> GetComplaintByBookingIdAsync(int bookingId);
         
         // Update complaint
         Task<ComplaintResponse> UpdateComplaintAsync(int complaintId, UpdateComplaintRequest request);

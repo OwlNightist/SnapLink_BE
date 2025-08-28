@@ -245,6 +245,46 @@ namespace SnapLink_Service.Service
             };
         }
 
+        public async Task<ComplaintListResponse> GetComplaintsByBookingIdAsync(int bookingId, int page = 1, int pageSize = 10)
+        {
+            var query = await _unitOfWork.ComplaintRepository.GetAsync(
+                filter: c => c.BookingId == bookingId,
+                includeProperties: "Reporter,ReportedUser,AssignedModerator",
+                orderBy: q => q.OrderByDescending(c => c.CreatedAt)
+            );
+
+            var totalCount = query.Count();
+            var complaints = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new ComplaintListResponse
+            {
+                Complaints = complaints.Select(MapToComplaintResponse).ToList(),
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+            };
+        }
+
+        public async Task<ComplaintResponse?> GetComplaintByBookingIdAsync(int bookingId)
+        {
+            var complaints = await _unitOfWork.ComplaintRepository.GetAsync(
+                filter: c => c.BookingId == bookingId,
+                includeProperties: "Reporter,ReportedUser,AssignedModerator"
+            );
+
+            var complaint = complaints.FirstOrDefault();
+            if (complaint == null)
+            {
+                return null;
+            }
+
+            return MapToComplaintResponse(complaint);
+        }
+
         public async Task<ComplaintResponse> UpdateComplaintAsync(int complaintId, UpdateComplaintRequest request)
         {
             var complaint = await _unitOfWork.ComplaintRepository.GetByIdAsync(complaintId);
@@ -398,16 +438,14 @@ namespace SnapLink_Service.Service
                     return false;
                 }
 
-                // Check if there's already a complaint for this booking between these users
+                // Check if there's already ANY complaint for this booking (since 1 booking = 1 complaint)
                 var existingComplaints = await _unitOfWork.ComplaintRepository.GetAsync(
-                    filter: c => c.ReporterId == reporterId && 
-                                c.ReportedUserId == reportedUserId && 
-                                c.BookingId == bookingId.Value
+                    filter: c => c.BookingId == bookingId.Value
                 );
 
                 if (existingComplaints.Any())
                 {
-                    return false; // Complaint already exists
+                    return false; // Complaint already exists for this booking
                 }
             }
 
