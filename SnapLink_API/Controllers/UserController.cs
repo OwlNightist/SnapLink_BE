@@ -17,9 +17,9 @@ namespace SnapLink_API.Controllers
             _userService = userService;
         }
         [HttpPost("create-admin")]
-        public async Task<IActionResult> CreateAdmin([FromBody] CreateUserDto dto)
+        public async Task<IActionResult> CreateAdmin([FromBody] CreateAdministratorDto dto)
         {
-            var result = await _userService.CreateUserWithRoleAsync(dto, "Admin");
+            var result = await _userService.CreateAdministratorAsync(dto);
             return Ok(result);
         }
 
@@ -45,9 +45,9 @@ namespace SnapLink_API.Controllers
         }
 
         [HttpPost("create-moderator")]
-        public async Task<IActionResult> CreateModerator([FromBody] CreateUserDto dto)
+        public async Task<IActionResult> CreateModerator([FromBody] CreateModeratorDto dto)
         {
-            var result = await _userService.CreateUserWithRoleAsync(dto, "Moderator");
+            var result = await _userService.CreateModeratorAsync(dto);
             return Ok(result);
         }
 

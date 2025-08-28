@@ -20,12 +20,14 @@ namespace SnapLink_Service.Service
         private readonly IUserRepository _repo;
         private readonly IMapper _mapper;
         private readonly IChatService _chatService;
+        private readonly IUnitOfWork _unitOfWork;
         
-        public UserService(IUserRepository repo, IMapper mapper, IChatService chatService)
+        public UserService(IUserRepository repo, IMapper mapper, IChatService chatService, IUnitOfWork unitOfWork)
         {
             _repo = repo;
             _mapper = mapper;
             _chatService = chatService;
+            _unitOfWork = unitOfWork;
         }
         public async Task<string> CreateUserWithRoleAsync(CreateUserDto dto, string roleName)
         {
@@ -93,6 +95,93 @@ namespace SnapLink_Service.Service
             //}
 
             return $"User created with role '{roleName}'.";
+        }
+
+        public async Task<string> CreateAdministratorAsync(CreateAdministratorDto dto)
+        {
+            var role = await _repo.GetRoleByNameAsync("Admin");
+            if (role == null) return "Admin role not found.";
+            var existingUser = await _repo.GetByEmailAsync(dto.Email);
+            if (existingUser != null) return "Email already exists.";
+
+            string verifyCode = new Random().Next(100000, 999999).ToString();
+
+            var user = new User
+            {
+                UserName = dto.UserName,
+                Email = dto.Email,
+                PasswordHash = dto.PasswordHash,
+                FullName = dto.FullName,
+                PhoneNumber = dto.PhoneNumber,
+                CreateAt = DateTime.UtcNow,
+                UpdateAt = DateTime.UtcNow,
+                ProfileImage = dto.ProfileImage,
+                Bio = dto.Bio,
+                Status = "Active",
+                IsVerified = false,
+                VerificationCode = verifyCode
+            };
+
+            await _repo.AddUserWithRoleAsync(user, role.RoleId);
+            await _repo.SaveChangesAsync();
+
+            // Create Administrator entity
+            var administrator = new Administrator
+            {
+                UserId = user.UserId,
+                AccessLevel = dto.AccessLevel ?? "Standard",
+                Department = dto.Department
+            };
+
+            await _unitOfWork.AdministratorRepository.AddAsync(administrator);
+            await _unitOfWork.SaveChangesAsync();
+
+            await SendVerificationEmail(dto.Email, verifyCode);
+
+            return "Administrator created successfully.";
+        }
+
+        public async Task<string> CreateModeratorAsync(CreateModeratorDto dto)
+        {
+            var role = await _repo.GetRoleByNameAsync("Moderator");
+            if (role == null) return "Moderator role not found.";
+            var existingUser = await _repo.GetByEmailAsync(dto.Email);
+            if (existingUser != null) return "Email already exists.";
+
+            string verifyCode = new Random().Next(100000, 999999).ToString();
+
+            var user = new User
+            {
+                UserName = dto.UserName,
+                Email = dto.Email,
+                PasswordHash = dto.PasswordHash,
+                FullName = dto.FullName,
+                PhoneNumber = dto.PhoneNumber,
+                CreateAt = DateTime.UtcNow,
+                UpdateAt = DateTime.UtcNow,
+                ProfileImage = dto.ProfileImage,
+                Bio = dto.Bio,
+                Status = "Active",
+                IsVerified = false,
+                VerificationCode = verifyCode
+            };
+
+            await _repo.AddUserWithRoleAsync(user, role.RoleId);
+            await _repo.SaveChangesAsync();
+
+            // Create Moderator entity
+            var moderator = new Moderator
+            {
+                UserId = user.UserId,
+                AreasOfFocus = dto.AreasOfFocus ?? "General"
+            };
+
+            await _unitOfWork.ModeratorRepository.AddAsync(moderator);
+            await _unitOfWork.SaveChangesAsync();
+
+            await SendVerificationEmail(dto.Email, verifyCode);
+
+            return "Moderator created successfully.";
         }
         public async Task<string> UpdateUserAsync(UpdateUserDto dto)
         {

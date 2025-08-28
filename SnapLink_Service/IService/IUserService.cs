@@ -11,6 +11,8 @@ namespace SnapLink_Service.IService
     public interface IUserService
     {
         Task<string> CreateUserWithRoleAsync(CreateUserDto dto, string roleName);
+        Task<string> CreateAdministratorAsync(CreateAdministratorDto dto);
+        Task<string> CreateModeratorAsync(CreateModeratorDto dto);
         Task<string> UpdateUserAsync(UpdateUserDto dto);
         Task<string> DeleteUserAsync(int userId);
         Task<string> HardDeleteUserAsync(int userId);
