@@ -331,29 +331,29 @@ namespace SnapLink_API.Controllers
         /// <summary>
         /// Resolve complaint (Moderator only)
         /// </summary>
-        [HttpPost("{id}/resolve")]
-        [Authorize(Roles = "Admin,Moderator")]
-        public async Task<ActionResult<ComplaintResponse>> ResolveComplaint(int id, [FromBody] ResolveComplaintRequest request)
-        {
-            try
-            {
-                var currentUserId = GetCurrentUserId();
-                var complaint = await _complaintService.ResolveComplaintAsync(id, request, currentUserId);
-                return Ok(complaint);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Forbid(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = "An error occurred while resolving the complaint", details = ex.Message });
-            }
-        }
+       // [HttpPost("{id}/resolve")]
+       //// [Authorize(Roles = "Admin,Moderator")]
+       // public async Task<ActionResult<ComplaintResponse>> ResolveComplaint(int id, [FromBody] ResolveComplaintRequest request)
+       // {
+       //     try
+       //     {
+       //         var currentUserId = GetCurrentUserId();
+       //         var complaint = await _complaintService.ResolveComplaintAsync(id, request, currentUserId);
+       //         return Ok(complaint);
+       //     }
+       //     catch (ArgumentException ex)
+       //     {
+       //         return BadRequest(new { error = ex.Message });
+       //     }
+       //     catch (UnauthorizedAccessException ex)
+       //     {
+       //         return StatusCode(403, new { error = ex.Message });
+       //     }
+       //     catch (Exception ex)
+       //     {
+       //         return StatusCode(500, new { error = "An error occurred while resolving the complaint", details = ex.Message });
+       //     }
+       // }
 
         /// <summary>
         /// Update complaint status
