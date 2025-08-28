@@ -332,26 +332,14 @@ namespace SnapLink_Service.Service
                 throw new ArgumentException("Complaint not found");
             }
 
-            // Validate user exists
-            var user = await _unitOfWork.UserRepository.GetByIdAsync(request.UserId);
-            if (user == null)
+            // Validate moderator exists
+            var moderator = await _unitOfWork.ModeratorRepository.GetByIdAsync(request.ModeratorId);
+            if (moderator == null)
             {
-                throw new ArgumentException("User not found");
+                throw new ArgumentException("Moderator not found");
             }
 
-            // Check if user has moderator role
-            var userRoles = await _unitOfWork.UserRoleRepository.GetAsync(
-                filter: ur => ur.UserId == request.UserId,
-                includeProperties: "Role"
-            );
-
-            var hasModeratorRole = userRoles.Any(ur => ur.Role != null && ur.Role.RoleName == "Moderator");
-            if (!hasModeratorRole)
-            {
-                throw new ArgumentException("User does not have moderator role");
-            }
-
-            complaint.AssignedModeratorId = request.UserId;
+            complaint.AssignedModeratorId = request.ModeratorId;
             complaint.Status = "Assigned";
             complaint.UpdatedAt = DateTime.UtcNow;
 
