@@ -38,7 +38,7 @@ namespace SnapLink_Model.DTO.Request
     public class AssignModeratorRequest
     {
         [Required]
-        public int ModeratorId { get; set; }
+        public int UserId { get; set; }
     }
 
     public class ResolveComplaintRequest
