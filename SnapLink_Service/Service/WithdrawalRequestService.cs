@@ -272,10 +272,10 @@ namespace SnapLink_Service.Service
             }
 
             // Only allow processing if status is Pending
-            if (withdrawalRequest.RequestStatus != WithdrawalStatus.Pending)
-            {
-                throw new InvalidOperationException("Cannot process withdrawal request that is not pending");
-            }
+            //if (withdrawalRequest.RequestStatus != WithdrawalStatus.Pending)
+            //{
+            //    throw new InvalidOperationException("Cannot process withdrawal request that is not pending");
+            //}
 
             // Get wallet and user information
             var wallets = await _unitOfWork.WalletRepository.GetAsync(
@@ -298,6 +298,7 @@ namespace SnapLink_Service.Service
             // Update withdrawal request status
             withdrawalRequest.RequestStatus = request.Status;
             withdrawalRequest.ProcessedAt = DateTime.UtcNow;
+            withdrawalRequest.RejectionReason = request.RejectionReason;
             withdrawalRequest.ProcessedByModeratorId = moderatorId;
 
             if (request.Status == WithdrawalStatus.Rejected)
