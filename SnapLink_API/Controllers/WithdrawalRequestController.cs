@@ -374,7 +374,7 @@ namespace SnapLink_API.Controllers
                         message = "Withdrawal request rejected successfully";
                         break;
                     case "completed":
-                        result = await _withdrawalRequestService.CompleteWithdrawalRequestAsync(withdrawalId, moderatorId);
+                        result = await _withdrawalRequestService.CompleteWithdrawalRequestAsync(withdrawalId, moderatorId, request.Message);
                         message = "Withdrawal request completed successfully - funds deducted and transaction created";
                         break;
                     default:

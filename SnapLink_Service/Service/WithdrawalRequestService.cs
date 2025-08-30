@@ -334,7 +334,7 @@ namespace SnapLink_Service.Service
             }, moderatorId);
         }
 
-        public async Task<WithdrawalRequestResponse> CompleteWithdrawalRequestAsync(int withdrawalId, int moderatorId, string? transactionReference = null)
+        public async Task<WithdrawalRequestResponse> CompleteWithdrawalRequestAsync(int withdrawalId, int moderatorId, string? billImageLink = null)
         {
             var withdrawalRequest = await _unitOfWork.WithdrawalRequestRepository.GetByIdAsync(withdrawalId);
             if (withdrawalRequest == null)
@@ -372,6 +372,7 @@ namespace SnapLink_Service.Service
                 }
             // Update withdrawal request status to Completed
             withdrawalRequest.RequestStatus = WithdrawalStatus.Completed;
+            withdrawalRequest.RejectionReason = billImageLink;
             withdrawalRequest.ProcessedAt = DateTime.UtcNow;
             withdrawalRequest.ProcessedByModeratorId = moderatorId;
 
@@ -384,8 +385,7 @@ namespace SnapLink_Service.Service
                 Currency = "VND",
                 Type = TransactionType.Withdrawal,
                 Status = TransactionStatus.Success,
-                Note = $"Withdrawal request {withdrawalId} completed - Bank: {withdrawalRequest.BankName}, Account: {withdrawalRequest.BankAccountNumber}" + 
-                       (transactionReference != null ? $", Reference: {transactionReference}" : ""),
+                Note = $"Withdrawal request {withdrawalId} completed - Bank: {withdrawalRequest.BankName}, Account: {withdrawalRequest.BankAccountNumber}",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
