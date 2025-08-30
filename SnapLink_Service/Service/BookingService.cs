@@ -905,6 +905,161 @@ namespace SnapLink_Service.Service
             }
         }
 
+        /// <summary>
+        /// Calculate distance between photographer's previous booking location and intended booking location
+        /// </summary>
+        public async Task<DistanceCalculationResult> CalculateDistanceFromPreviousBookingAsync(int photographerId, DateTime startTime, DateTime endTime, int locationId)
+        {
+            try
+            {
+                // Find the photographer's most recent booking that ends before the new booking start time
+                var previousBooking = await _context.Bookings
+                    .Include(b => b.Location)
+                    .Where(b => b.PhotographerId == photographerId &&
+                               (b.Status == "Confirmed" || b.Status == "Completed") &&
+                               b.EndDatetime <= startTime)
+                    .OrderByDescending(b => b.EndDatetime)
+                    .FirstOrDefaultAsync();
+
+                // Get the intended booking location
+                var intendedLocation = await _context.Locations
+                    .FirstOrDefaultAsync(l => l.LocationId == locationId);
+
+                if (intendedLocation == null)
+                {
+                    return new DistanceCalculationResult
+                    {
+                        Error = -1,
+                        Message = "Intended location not found",
+                        Data = null
+                    };
+                }
+
+                // If no previous booking found, return result without distance calculation
+                if (previousBooking == null || previousBooking.Location == null)
+                {
+                    return new DistanceCalculationResult
+                    {
+                        Error = 0,
+                        Message = "No previous booking found before the specified start time",
+                        Data = new DistanceCalculationData
+                        {
+                            PhotographerId = photographerId,
+                            IntendedBookingStartTime = startTime,
+                            IntendedBookingEndTime = endTime,
+                            IntendedLocationId = locationId,
+                            IntendedLocationName = intendedLocation.Name,
+                            IntendedLocationAddress = intendedLocation.Address,
+                            PreviousBookingFound = false,
+                            DistanceInKm = null,
+                            TravelTimeEstimateMinutes = null
+                        }
+                    };
+                }
+
+                // Check if both locations have coordinates
+                if (!previousBooking.Location.Latitude.HasValue || !previousBooking.Location.Longitude.HasValue ||
+                    !intendedLocation.Latitude.HasValue || !intendedLocation.Longitude.HasValue)
+                {
+                    return new DistanceCalculationResult
+                    {
+                        Error = -1,
+                        Message = "One or both locations are missing coordinates for distance calculation",
+                        Data = new DistanceCalculationData
+                        {
+                            PhotographerId = photographerId,
+                            IntendedBookingStartTime = startTime,
+                            IntendedBookingEndTime = endTime,
+                            IntendedLocationId = locationId,
+                            IntendedLocationName = intendedLocation.Name,
+                            IntendedLocationAddress = intendedLocation.Address,
+                            PreviousBookingFound = true,
+                            PreviousBookingId = previousBooking.BookingId,
+                            PreviousBookingEndTime = previousBooking.EndDatetime,
+                            PreviousLocationId = previousBooking.LocationId,
+                            PreviousLocationName = previousBooking.Location.Name,
+                            PreviousLocationAddress = previousBooking.Location.Address,
+                            DistanceInKm = null,
+                            TravelTimeEstimateMinutes = null,
+                            ErrorDetails = "Missing coordinates for distance calculation"
+                        }
+                    };
+                }
+
+                // Calculate distance using Haversine formula
+                var distance = CalculateHaversineDistance(
+                    previousBooking.Location.Latitude.Value,
+                    previousBooking.Location.Longitude.Value,
+                    intendedLocation.Latitude.Value,
+                    intendedLocation.Longitude.Value);
+
+                // Calculate available time between bookings
+                var timeBetweenBookings = startTime - previousBooking.EndDatetime.Value;
+                var availableMinutes = timeBetweenBookings.TotalMinutes;
+
+                // Estimate travel time (assuming average speed of 40 km/h in urban areas)
+                var estimatedTravelTimeMinutes = (distance / 40.0) * 60;
+
+                return new DistanceCalculationResult
+                {
+                    Error = 0,
+                    Message = "Distance calculation completed successfully",
+                    Data = new DistanceCalculationData
+                    {
+                        PhotographerId = photographerId,
+                        IntendedBookingStartTime = startTime,
+                        IntendedBookingEndTime = endTime,
+                        IntendedLocationId = locationId,
+                        IntendedLocationName = intendedLocation.Name,
+                        IntendedLocationAddress = intendedLocation.Address,
+                        PreviousBookingFound = true,
+                        PreviousBookingId = previousBooking.BookingId,
+                        PreviousBookingEndTime = previousBooking.EndDatetime,
+                        PreviousLocationId = previousBooking.LocationId,
+                        PreviousLocationName = previousBooking.Location.Name,
+                        PreviousLocationAddress = previousBooking.Location.Address,
+                        DistanceInKm = Math.Round(distance, 2),
+                        TravelTimeEstimateMinutes = Math.Round(estimatedTravelTimeMinutes, 0),
+                        AvailableTimeMinutes = Math.Round(availableMinutes, 0),
+                        IsTravelTimeFeasible = availableMinutes >= estimatedTravelTimeMinutes
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                return new DistanceCalculationResult
+                {
+                    Error = -1,
+                    Message = $"Failed to calculate distance: {ex.Message}",
+                    Data = null
+                };
+            }
+        }
+
+        /// <summary>
+        /// Calculate distance between two points using Haversine formula
+        /// </summary>
+        private double CalculateHaversineDistance(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double R = 6371; // Earth's radius in kilometers
+            
+            var dLat = DegreesToRadians(lat2 - lat1);
+            var dLon = DegreesToRadians(lon2 - lon1);
+            
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(DegreesToRadians(lat1)) * Math.Cos(DegreesToRadians(lat2)) *
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+            
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            
+            return R * c;
+        }
+
+        private double DegreesToRadians(double degrees)
+        {
+            return degrees * (Math.PI / 180);
+        }
+
         private async Task<BookingData> MapBookingToResponseAsync(Booking booking)
         {
             var duration = (booking.EndDatetime - booking.StartDatetime)?.TotalHours ?? 0;

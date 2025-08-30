@@ -605,4 +605,32 @@ public class BookingController : ControllerBase
         }
     }
 
+    [HttpGet("distance-calculation")]
+    public async Task<IActionResult> CalculateDistanceFromPreviousBooking([FromQuery] int photographerId, [FromQuery] DateTime startTime, [FromQuery] DateTime endTime, [FromQuery] int locationId)
+    {
+        try
+        {
+            var result = await _bookingService.CalculateDistanceFromPreviousBookingAsync(photographerId, startTime, endTime, locationId);
+            
+            if (result.Error == 0)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in CalculateDistanceFromPreviousBooking: {ex.Message}");
+            return StatusCode(500, new
+            {
+                Error = -1,
+                Message = "Internal server error",
+                Data = (object?)null
+            });
+        }
+    }
+
 } 

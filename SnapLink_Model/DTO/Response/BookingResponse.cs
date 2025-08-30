@@ -54,4 +54,34 @@ public class BookingListData
     public int Page { get; set; }
     public int PageSize { get; set; }
     public int TotalPages { get; set; }
+}
+
+public class DistanceCalculationResult
+{
+    public int Error { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public DistanceCalculationData? Data { get; set; }
+}
+
+public class DistanceCalculationData
+{
+    public int PhotographerId { get; set; }
+    public DateTime IntendedBookingStartTime { get; set; }
+    public DateTime IntendedBookingEndTime { get; set; }
+    public int IntendedLocationId { get; set; }
+    public string? IntendedLocationName { get; set; }
+    public string? IntendedLocationAddress { get; set; }
+    
+    public bool PreviousBookingFound { get; set; }
+    public int? PreviousBookingId { get; set; }
+    public DateTime? PreviousBookingEndTime { get; set; }
+    public int? PreviousLocationId { get; set; }
+    public string? PreviousLocationName { get; set; }
+    public string? PreviousLocationAddress { get; set; }
+    
+    public double? DistanceInKm { get; set; }
+    public double? TravelTimeEstimateMinutes { get; set; }
+    public double? AvailableTimeMinutes { get; set; }
+    public bool? IsTravelTimeFeasible { get; set; }
+    public string? ErrorDetails { get; set; }
 } 

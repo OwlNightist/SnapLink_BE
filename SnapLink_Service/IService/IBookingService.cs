@@ -22,4 +22,5 @@ public interface IBookingService
     Task<int> CancelAllPendingBookingsAsync();
     Task<BookingResponse> ConfirmBookingAsync(int bookingId, int userId);
     Task<(bool IsValid, string ErrorMessage)> ValidateBookingRequestAsync(CreateBookingRequest request, int userId);
+    Task<DistanceCalculationResult> CalculateDistanceFromPreviousBookingAsync(int photographerId, DateTime startTime, DateTime endTime, int locationId);
 } 
