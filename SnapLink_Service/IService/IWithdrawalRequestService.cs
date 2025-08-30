@@ -19,7 +19,7 @@ namespace SnapLink_Service.IService
         
         // Admin/Moderator operations
         Task<WithdrawalRequestResponse> ProcessWithdrawalRequestAsync(int withdrawalId, ProcessWithdrawalRequest request, int moderatorId);
-        Task<WithdrawalRequestResponse> ApproveWithdrawalRequestAsync(int withdrawalId, int moderatorId);
+        Task<WithdrawalRequestResponse> ApproveWithdrawalRequestAsync(int withdrawalId, int moderatorId, string billImageLink);
         Task<WithdrawalRequestResponse> RejectWithdrawalRequestAsync(int withdrawalId, string rejectionReason, int moderatorId);
         Task<WithdrawalRequestResponse> CompleteWithdrawalRequestAsync(int withdrawalId, int moderatorId, string? transactionReference = null);
         

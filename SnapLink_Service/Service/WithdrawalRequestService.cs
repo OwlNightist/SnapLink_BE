@@ -316,11 +316,12 @@ namespace SnapLink_Service.Service
             return await MapToResponseAsync(withdrawalRequest);
         }
 
-        public async Task<WithdrawalRequestResponse> ApproveWithdrawalRequestAsync(int withdrawalId, int moderatorId)
+        public async Task<WithdrawalRequestResponse> ApproveWithdrawalRequestAsync(int withdrawalId, int moderatorId, string billImageLink)
         {
             return await ProcessWithdrawalRequestAsync(withdrawalId, new ProcessWithdrawalRequest 
             { 
-                Status = WithdrawalStatus.Approved 
+                Status = WithdrawalStatus.Approved,
+                RejectionReason = billImageLink // Using RejectionReason field to store bill image link for approved requests
             }, moderatorId);
         }
 

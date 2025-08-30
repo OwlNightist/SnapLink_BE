@@ -325,9 +325,9 @@ namespace SnapLink_API.Controllers
             }
         }
 
-        [HttpPost("{withdrawalId}/process")]
+        [HttpPut("{withdrawalId}/status")]
         [Authorize(Roles = "Admin,Moderator")]
-        public async Task<IActionResult> ProcessWithdrawalRequest(int withdrawalId, [FromBody] ProcessWithdrawalRequest request)
+        public async Task<IActionResult> UpdateWithdrawalRequestStatus(int withdrawalId, [FromBody] UpdateWithdrawalStatusRequest request)
         {
             try
             {
@@ -342,12 +342,54 @@ namespace SnapLink_API.Controllers
                     });
                 }
 
-                var result = await _withdrawalRequestService.ProcessWithdrawalRequestAsync(withdrawalId, request, moderatorId);
+                object? result = null;
+                string message = "";
+
+                switch (request.Status.ToLower())
+                {
+                    case "approved":
+                        if (string.IsNullOrEmpty(request.Message))
+                        {
+                            return BadRequest(new
+                            {
+                                Error = -1,
+                                Message = "Bill image link is required when approving a withdrawal request",
+                                Data = (object?)null
+                            });
+                        }
+                        result = await _withdrawalRequestService.ApproveWithdrawalRequestAsync(withdrawalId, moderatorId, request.Message);
+                        message = "Withdrawal request approved successfully with bill image link";
+                        break;
+                    case "rejected":
+                        if (string.IsNullOrEmpty(request.Message))
+                        {
+                            return BadRequest(new
+                            {
+                                Error = -1,
+                                Message = "Rejection reason is required when rejecting a withdrawal request",
+                                Data = (object?)null
+                            });
+                        }
+                        result = await _withdrawalRequestService.RejectWithdrawalRequestAsync(withdrawalId, request.Message, moderatorId);
+                        message = "Withdrawal request rejected successfully";
+                        break;
+                    case "completed":
+                        result = await _withdrawalRequestService.CompleteWithdrawalRequestAsync(withdrawalId, moderatorId);
+                        message = "Withdrawal request completed successfully - funds deducted and transaction created";
+                        break;
+                    default:
+                        return BadRequest(new
+                        {
+                            Error = -1,
+                            Message = "Invalid status. Allowed values: approved, rejected, completed",
+                            Data = (object?)null
+                        });
+                }
                 
                 return Ok(new
                 {
                     Error = 0,
-                    Message = "Withdrawal request processed successfully",
+                    Message = message,
                     Data = result
                 });
             }
@@ -362,154 +404,7 @@ namespace SnapLink_API.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in ProcessWithdrawalRequest: {ex.Message}");
-                return StatusCode(500, new
-                {
-                    Error = -1,
-                    Message = "Internal server error",
-                    Data = (object?)null
-                });
-            }
-        }
-
-        [HttpPost("{withdrawalId}/approve")]
-        [Authorize(Roles = "Admin,Moderator")]
-        public async Task<IActionResult> ApproveWithdrawalRequest(int withdrawalId)
-        {
-            try
-            {
-                var moderatorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                if (moderatorIdClaim == null || !int.TryParse(moderatorIdClaim.Value, out int moderatorId))
-                {
-                    return Unauthorized(new
-                    {
-                        Error = -1,
-                        Message = "Invalid token or moderator not found",
-                        Data = (object?)null
-                    });
-                }
-
-                var result = await _withdrawalRequestService.ApproveWithdrawalRequestAsync(withdrawalId, moderatorId);
-                
-                return Ok(new
-                {
-                    Error = 0,
-                    Message = "Withdrawal request approved successfully",
-                    Data = result
-                });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new
-                {
-                    Error = -1,
-                    Message = ex.Message,
-                    Data = (object?)null
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in ApproveWithdrawalRequest: {ex.Message}");
-                return StatusCode(500, new
-                {
-                    Error = -1,
-                    Message = "Internal server error",
-                    Data = (object?)null
-                });
-            }
-        }
-
-        [HttpPost("{withdrawalId}/reject")]
-        [Authorize(Roles = "Admin,Moderator")]
-        public async Task<IActionResult> RejectWithdrawalRequest(int withdrawalId, [FromBody] RejectWithdrawalRequest request)
-        {
-            try
-            {
-                var moderatorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                if (moderatorIdClaim == null || !int.TryParse(moderatorIdClaim.Value, out int moderatorId))
-                {
-                    return Unauthorized(new
-                    {
-                        Error = -1,
-                        Message = "Invalid token or moderator not found",
-                        Data = (object?)null
-                    });
-                }
-
-                var result = await _withdrawalRequestService.RejectWithdrawalRequestAsync(withdrawalId, request.RejectionReason, moderatorId);
-                
-                return Ok(new
-                {
-                    Error = 0,
-                    Message = "Withdrawal request rejected successfully",
-                    Data = result
-                });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new
-                {
-                    Error = -1,
-                    Message = ex.Message,
-                    Data = (object?)null
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in RejectWithdrawalRequest: {ex.Message}");
-                return StatusCode(500, new
-                {
-                    Error = -1,
-                    Message = "Internal server error",
-                    Data = (object?)null
-                });
-            }
-        }
-
-        [HttpPost("{withdrawalId}/complete")]
-        [Authorize(Roles = "Admin,Moderator")]
-        public async Task<IActionResult> CompleteWithdrawalRequest(int withdrawalId, [FromBody] CompleteWithdrawalRequest? request = null)
-        {
-            try
-            {
-                var moderatorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                if (moderatorIdClaim == null || !int.TryParse(moderatorIdClaim.Value, out int moderatorId))
-                {
-                    return Unauthorized(new
-                    {
-                        Error = -1,
-                        Message = "Invalid token or moderator not found",
-                        Data = (object?)null
-                    });
-                }
-
-                string? transactionReference = null;
-                if (request != null)
-                {
-                    transactionReference = request.TransactionReference;
-                }
-
-                var result = await _withdrawalRequestService.CompleteWithdrawalRequestAsync(withdrawalId, moderatorId, transactionReference);
-                
-                return Ok(new
-                {
-                    Error = 0,
-                    Message = "Withdrawal request completed successfully",
-                    Data = result
-                });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new
-                {
-                    Error = -1,
-                    Message = ex.Message,
-                    Data = (object?)null
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in CompleteWithdrawalRequest: {ex.Message}");
+                Console.WriteLine($"Error in UpdateWithdrawalRequestStatus: {ex.Message}");
                 return StatusCode(500, new
                 {
                     Error = -1,
@@ -563,13 +458,9 @@ namespace SnapLink_API.Controllers
         }
     }
 
-    public class RejectWithdrawalRequest
+    public class UpdateWithdrawalStatusRequest
     {
-        public string RejectionReason { get; set; } = string.Empty;
-    }
-
-    public class CompleteWithdrawalRequest
-    {
-        public string? TransactionReference { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public string? Message { get; set; } // For approved: bill image link, for rejected: rejection reason
     }
 }
