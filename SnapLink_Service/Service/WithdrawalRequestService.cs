@@ -344,10 +344,10 @@ namespace SnapLink_Service.Service
             }
 
             // Only allow completion if status is Approved
-            if (withdrawalRequest.RequestStatus != WithdrawalStatus.Approved)
-            {
-                throw new InvalidOperationException("Cannot complete withdrawal request that is not approved");
-            }
+            // if (withdrawalRequest.RequestStatus != WithdrawalStatus.Approved)
+            // {
+            //     throw new InvalidOperationException("Cannot complete withdrawal request that is not approved");
+            // }
 
             // Get wallet and user information
             var wallets = await _unitOfWork.WalletRepository.GetAsync(

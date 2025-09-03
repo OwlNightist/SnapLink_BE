@@ -298,7 +298,7 @@ namespace SnapLink_Repository.Data
                         Name = "Riverside Venue", 
                         Address = "456 River Rd, New York, NY", 
                         Description = "Beautiful riverside location", 
-                        HourlyRate = 70, 
+                        HourlyRate = 70000, 
                         Capacity = 50, 
                         Indoor = false, 
                         Outdoor = true, 
@@ -328,7 +328,7 @@ namespace SnapLink_Repository.Data
                         Name = "Garden Spot", 
                         Address = "321 Garden Ln, New York, NY", 
                         Description = "Lush garden for outdoor shoots", 
-                        HourlyRate = 40, 
+                        HourlyRate = 40000, 
                         Capacity = 15, 
                         Indoor = false, 
                         Outdoor = true, 
@@ -343,7 +343,7 @@ namespace SnapLink_Repository.Data
                         Name = "Mountain View", 
                         Address = "654 Hill Rd, New York, NY", 
                         Description = "Scenic mountain backdrop", 
-                        HourlyRate = 80, 
+                        HourlyRate = 80000, 
                         Capacity = 25, 
                         Indoor = false, 
                         Outdoor = true, 
@@ -359,7 +359,7 @@ namespace SnapLink_Repository.Data
                         Name = "Studio Elite", 
                         Address = "555 Elite Ave, New York, NY", 
                         Description = "Premium photography studio with state-of-the-art equipment", 
-                        HourlyRate = 90, 
+                        HourlyRate = 90000, 
                         Capacity = 40, 
                         Indoor = true, 
                         Outdoor = false, 
@@ -374,7 +374,7 @@ namespace SnapLink_Repository.Data
                         Name = "Creative Spaces", 
                         Address = "777 Creative Blvd, New York, NY", 
                         Description = "Versatile creative space for all types of photography", 
-                        HourlyRate = 65, 
+                        HourlyRate = 65000, 
                         Capacity = 35, 
                         Indoor = true, 
                         Outdoor = true, 
@@ -389,7 +389,7 @@ namespace SnapLink_Repository.Data
                         Name = "Modern Venues", 
                         Address = "888 Modern St, New York, NY", 
                         Description = "Contemporary venue with minimalist design", 
-                        HourlyRate = 75, 
+                        HourlyRate = 75000, 
                         Capacity = 45, 
                         Indoor = true, 
                         Outdoor = false, 
@@ -404,7 +404,7 @@ namespace SnapLink_Repository.Data
                         Name = "Premium Studios", 
                         Address = "999 Premium Dr, New York, NY", 
                         Description = "High-end studio with luxury amenities", 
-                        HourlyRate = 100, 
+                        HourlyRate = 10000, 
                         Capacity = 30, 
                         Indoor = true, 
                         Outdoor = false, 
@@ -419,7 +419,7 @@ namespace SnapLink_Repository.Data
                         Name = "Luxury Locations", 
                         Address = "111 Luxury Way, New York, NY", 
                         Description = "Exclusive location for premium photography sessions", 
-                        HourlyRate = 120, 
+                        HourlyRate = 120000, 
                         Capacity = 25, 
                         Indoor = true, 
                         Outdoor = true, 
@@ -435,140 +435,140 @@ namespace SnapLink_Repository.Data
                 Console.WriteLine($"Locations seeded successfully: {locations.Length} locations added");
             }
 
-            // Seed Bookings
-            if (!context.Bookings.Any())
-            {
-                Console.WriteLine("Seeding Bookings...");
-                var users = context.Users.Take(10).ToList();
-                var photographers = context.Photographers.Take(5).ToList();
-                var locations = context.Locations.Take(8).ToList(); // Now we have 8 locations (5 registered + 3 external)
-                var bookings = new[]
-                {
-                    // Bookings with registered locations (include location fees)
-                    new Booking { 
-                        UserId = users[1].UserId, 
-                        PhotographerId = photographers[1].PhotographerId, 
-                        LocationId = locations[1].LocationId, // Riverside Venue (Registered)
-                        StartDatetime = DateTime.Now.AddDays(2), 
-                        EndDatetime = DateTime.Now.AddDays(2).AddHours(3), 
-                        Status = "Pending", 
-                        TotalPrice = 450, // Photographer (80/hr * 3) + Location (70/hr * 3) = 450
-                        CreatedAt = DateTime.Now 
-                    },
-                    new Booking { 
-                        UserId = users[2].UserId, 
-                        PhotographerId = photographers[2].PhotographerId, 
-                        LocationId = locations[2].LocationId, // Urban Loft (Registered)
-                        StartDatetime = DateTime.Now.AddDays(3), 
-                        EndDatetime = DateTime.Now.AddDays(3).AddHours(1), 
-                        Status = "Confirmed", 
-                        TotalPrice = 180, // Photographer (120/hr * 1) + Location (60/hr * 1) = 180
-                        CreatedAt = DateTime.Now 
-                    },
-                    // Bookings with external locations (no location fees)
-                    new Booking { 
-                        UserId = users[3].UserId, 
-                        PhotographerId = photographers[3].PhotographerId, 
-                        LocationId = locations[5].LocationId, // Central Park (External)
-                        StartDatetime = DateTime.Now.AddDays(4), 
-                        EndDatetime = DateTime.Now.AddDays(4).AddHours(2), 
-                        Status = "Confirmed", 
-                        TotalPrice = 140, // Photographer (70/hr * 2) + Location (0/hr * 2) = 140
-                        CreatedAt = DateTime.Now 
-                    },
-                    new Booking { 
-                        UserId = users[4].UserId, 
-                        PhotographerId = photographers[4].PhotographerId, 
-                        LocationId = locations[6].LocationId, // Times Square (External)
-                        StartDatetime = DateTime.Now.AddDays(5), 
-                        EndDatetime = DateTime.Now.AddDays(5).AddHours(2), 
-                        Status = "Confirmed", 
-                        TotalPrice = 180, // Photographer (90/hr * 2) + Location (0/hr * 2) = 180
-                        CreatedAt = DateTime.Now 
-                    }
-                };
-                context.Bookings.AddRange(bookings);
-                context.SaveChanges();
-                Console.WriteLine($"Bookings seeded successfully: {bookings.Length} bookings added");
-            }
+            //// Seed Bookings
+            //if (!context.Bookings.Any())
+            //{
+            //    Console.WriteLine("Seeding Bookings...");
+            //    var users = context.Users.Take(10).ToList();
+            //    var photographers = context.Photographers.Take(5).ToList();
+            //    var locations = context.Locations.Take(8).ToList(); // Now we have 8 locations (5 registered + 3 external)
+            //    var bookings = new[]
+            //    {
+            //        // Bookings with registered locations (include location fees)
+            //        new Booking { 
+            //            UserId = users[1].UserId, 
+            //            PhotographerId = photographers[1].PhotographerId, 
+            //            LocationId = locations[1].LocationId, // Riverside Venue (Registered)
+            //            StartDatetime = DateTime.Now.AddDays(2), 
+            //            EndDatetime = DateTime.Now.AddDays(2).AddHours(3), 
+            //            Status = "Pending", 
+            //            TotalPrice = 450, // Photographer (80/hr * 3) + Location (70/hr * 3) = 450
+            //            CreatedAt = DateTime.Now 
+            //        },
+            //        new Booking { 
+            //            UserId = users[2].UserId, 
+            //            PhotographerId = photographers[2].PhotographerId, 
+            //            LocationId = locations[2].LocationId, // Urban Loft (Registered)
+            //            StartDatetime = DateTime.Now.AddDays(3), 
+            //            EndDatetime = DateTime.Now.AddDays(3).AddHours(1), 
+            //            Status = "Confirmed", 
+            //            TotalPrice = 180, // Photographer (120/hr * 1) + Location (60/hr * 1) = 180
+            //            CreatedAt = DateTime.Now 
+            //        },
+            //        // Bookings with external locations (no location fees)
+            //        new Booking { 
+            //            UserId = users[3].UserId, 
+            //            PhotographerId = photographers[3].PhotographerId, 
+            //            LocationId = locations[5].LocationId, // Central Park (External)
+            //            StartDatetime = DateTime.Now.AddDays(4), 
+            //            EndDatetime = DateTime.Now.AddDays(4).AddHours(2), 
+            //            Status = "Confirmed", 
+            //            TotalPrice = 140, // Photographer (70/hr * 2) + Location (0/hr * 2) = 140
+            //            CreatedAt = DateTime.Now 
+            //        },
+            //        new Booking { 
+            //            UserId = users[4].UserId, 
+            //            PhotographerId = photographers[4].PhotographerId, 
+            //            LocationId = locations[6].LocationId, // Times Square (External)
+            //            StartDatetime = DateTime.Now.AddDays(5), 
+            //            EndDatetime = DateTime.Now.AddDays(5).AddHours(2), 
+            //            Status = "Confirmed", 
+            //            TotalPrice = 180, // Photographer (90/hr * 2) + Location (0/hr * 2) = 180
+            //            CreatedAt = DateTime.Now 
+            //        }
+            //    };
+            //    context.Bookings.AddRange(bookings);
+            //    context.SaveChanges();
+            //    Console.WriteLine($"Bookings seeded successfully: {bookings.Length} bookings added");
+            //}
 
 
 
-            // Seed Payments
-            if (!context.Payments.Any())
-            {
-                Console.WriteLine("Seeding Payments...");
-                var bookings = context.Bookings.Take(4).ToList();
-                var users = context.Users.Take(5).ToList();
-                var payments = new[]
-                {
-                    // Payment for registered location booking (Central Park Studio)
-                    new Payment { 
-                        CustomerId = users[0].UserId,
-                        BookingId = bookings[0].BookingId, 
-                        TotalAmount = 300, 
-                        Status = PaymentStatus.Success, 
-                        Method = "PayOS",
-                        ExternalTransactionId = "1111",
-                        Note = "Payment for Central Park Studio booking",
-                        CreatedAt = DateTime.Now 
-                    },
-                    // Payment for registered location booking (Riverside Venue)
-                    new Payment { 
-                        CustomerId = users[1].UserId,
-                        BookingId = bookings[1].BookingId, 
-                        TotalAmount = 450, 
-                        Status = PaymentStatus.Pending, 
-                        Method = "PayOS",
-                        ExternalTransactionId = "2222",
-                        Note = "Payment for Riverside Venue booking",
-                        CreatedAt = DateTime.Now 
-                    },
-                    // Payment for registered location booking (Urban Loft)
-                    new Payment { 
-                        CustomerId = users[2].UserId,
-                        BookingId = bookings[2].BookingId, 
-                        TotalAmount = 180, 
-                        Status = PaymentStatus.Success, 
-                        Method = "PayOS",
-                        ExternalTransactionId = "3333",
-                        Note = "Payment for Urban Loft booking",
-                        CreatedAt = DateTime.Now 
-                    },
-                    // Payment for external location booking (Central Park - no location fee)
-                    new Payment { 
-                        CustomerId = users[3].UserId,
-                        BookingId = bookings[3].BookingId, 
-                        TotalAmount = 140, 
-                        Status = PaymentStatus.Success, 
-                        Method = "PayOS",
-                        ExternalTransactionId = "4444",
-                        Note = "Payment for external location booking",
-                        CreatedAt = DateTime.Now 
-                    }
-                };
-                context.Payments.AddRange(payments);
-                context.SaveChanges();
-                Console.WriteLine($"Payments seeded successfully: {payments.Length} payments added");
-            }
+            //// Seed Payments
+            //if (!context.Payments.Any())
+            //{
+            //    Console.WriteLine("Seeding Payments...");
+            //    var bookings = context.Bookings.Take(4).ToList();
+            //    var users = context.Users.Take(5).ToList();
+            //    var payments = new[]
+            //    {
+            //        // Payment for registered location booking (Central Park Studio)
+            //        new Payment { 
+            //            CustomerId = users[0].UserId,
+            //            BookingId = bookings[0].BookingId, 
+            //            TotalAmount = 300, 
+            //            Status = PaymentStatus.Success, 
+            //            Method = "PayOS",
+            //            ExternalTransactionId = "1111",
+            //            Note = "Payment for Central Park Studio booking",
+            //            CreatedAt = DateTime.Now 
+            //        },
+            //        // Payment for registered location booking (Riverside Venue)
+            //        new Payment { 
+            //            CustomerId = users[1].UserId,
+            //            BookingId = bookings[1].BookingId, 
+            //            TotalAmount = 450, 
+            //            Status = PaymentStatus.Pending, 
+            //            Method = "PayOS",
+            //            ExternalTransactionId = "2222",
+            //            Note = "Payment for Riverside Venue booking",
+            //            CreatedAt = DateTime.Now 
+            //        },
+            //        // Payment for registered location booking (Urban Loft)
+            //        new Payment { 
+            //            CustomerId = users[2].UserId,
+            //            BookingId = bookings[2].BookingId, 
+            //            TotalAmount = 180, 
+            //            Status = PaymentStatus.Success, 
+            //            Method = "PayOS",
+            //            ExternalTransactionId = "3333",
+            //            Note = "Payment for Urban Loft booking",
+            //            CreatedAt = DateTime.Now 
+            //        },
+            //        // Payment for external location booking (Central Park - no location fee)
+            //        new Payment { 
+            //            CustomerId = users[3].UserId,
+            //            BookingId = bookings[3].BookingId, 
+            //            TotalAmount = 140, 
+            //            Status = PaymentStatus.Success, 
+            //            Method = "PayOS",
+            //            ExternalTransactionId = "4444",
+            //            Note = "Payment for external location booking",
+            //            CreatedAt = DateTime.Now 
+            //        }
+            //    };
+            //    context.Payments.AddRange(payments);
+            //    context.SaveChanges();
+            //    Console.WriteLine($"Payments seeded successfully: {payments.Length} payments added");
+            //}
 
             // Seed Notifications
-            if (!context.Notifications.Any())
-            {
-                Console.WriteLine("Seeding Notifications...");
-                var users = context.Users.Take(5).ToList();
-                var notifications = new[]
-                {
-                    new Notification { UserId = users[0].UserId, Content = "Welcome to SnapLink!", CreatedAt = DateTime.Now },
-                    new Notification { UserId = users[1].UserId, Content = "Your booking is confirmed.", CreatedAt = DateTime.Now },
-                    new Notification { UserId = users[2].UserId, Content = "Payment received.", CreatedAt = DateTime.Now },
-                    new Notification { UserId = users[3].UserId, Content = "Booking completed.", CreatedAt = DateTime.Now },
-                    new Notification { UserId = users[4].UserId, Content = "Profile updated.", CreatedAt = DateTime.Now }
-                };
-                context.Notifications.AddRange(notifications);
-                context.SaveChanges();
-                Console.WriteLine($"Notifications seeded successfully: {notifications.Length} notifications added");
-            }
+            //if (!context.Notifications.Any())
+            //{
+            //    Console.WriteLine("Seeding Notifications...");
+            //    var users = context.Users.Take(5).ToList();
+            //    var notifications = new[]
+            //    {
+            //        new Notification { UserId = users[0].UserId, Content = "Welcome to SnapLink!", CreatedAt = DateTime.Now },
+            //        new Notification { UserId = users[1].UserId, Content = "Your booking is confirmed.", CreatedAt = DateTime.Now },
+            //        new Notification { UserId = users[2].UserId, Content = "Payment received.", CreatedAt = DateTime.Now },
+            //        new Notification { UserId = users[3].UserId, Content = "Booking completed.", CreatedAt = DateTime.Now },
+            //        new Notification { UserId = users[4].UserId, Content = "Profile updated.", CreatedAt = DateTime.Now }
+            //    };
+            //    context.Notifications.AddRange(notifications);
+            //    context.SaveChanges();
+            //    Console.WriteLine($"Notifications seeded successfully: {notifications.Length} notifications added");
+            //}
 
             // Seed Administrators
             //if (!context.Administrators.Any())
@@ -618,7 +618,7 @@ namespace SnapLink_Repository.Data
             //    context.SaveChanges();
             //}
 
-            // Seed PremiumPackages
+            //Seed PremiumPackages
             if (!context.PremiumPackages.Any())
             {
                 Console.WriteLine("Seeding PremiumPackages...");
@@ -635,132 +635,93 @@ namespace SnapLink_Repository.Data
                 Console.WriteLine($"PremiumPackages seeded successfully: {packages.Length} packages added");
             }
 
-            // Seed PremiumSubscriptions
-            if (!context.PremiumSubscriptions.Any())
-            {
-                Console.WriteLine("Seeding PremiumSubscriptions...");
-                var users = context.Users.Take(5).ToList();
-                var packages = context.PremiumPackages.Take(5).ToList();
-                var subscriptions = new[]
-                {
-                   
-                    new PremiumSubscription { UserId = users[1].UserId, PackageId = packages[1].PackageId, StartDate = DateTime.Now.AddDays(-20), EndDate = DateTime.Now.AddDays(10), Status = "Expired" },
-                    new PremiumSubscription { UserId = users[2].UserId, PackageId = packages[2].PackageId, StartDate = DateTime.Now.AddDays(-5), EndDate = DateTime.Now.AddDays(25), Status = "Active" },
-                    new PremiumSubscription { UserId = users[3].UserId, PackageId = packages[3].PackageId, StartDate = DateTime.Now.AddDays(-15), EndDate = DateTime.Now.AddDays(15), Status = "Active" },
-                    new PremiumSubscription { UserId = users[4].UserId, PackageId = packages[4].PackageId, StartDate = DateTime.Now.AddDays(-30), EndDate = DateTime.Now.AddDays(5), Status = "Expired" }
-                };
-                context.PremiumSubscriptions.AddRange(subscriptions);
-                context.SaveChanges();
-                Console.WriteLine($"PremiumSubscriptions seeded successfully: {subscriptions.Length} subscriptions added");
-            }
-
-            // Seed Transactions
-            if (!context.Transactions.Any())
-            {
-                Console.WriteLine("Seeding Transactions...");
-                var users = context.Users.Take(5).ToList();
-                var transactions = new[]
-                {
-                 
-                    new Transaction { FromUserId = users[1].UserId, ToUserId = null, Amount = 50, Type = TransactionType.Refund, Status = TransactionStatus.Success, Note = "Withdrawal", CreatedAt = DateTime.Now },
-                    new Transaction { FromUserId = null, ToUserId = users[2].UserId, Amount = 75, Type = TransactionType.Refund, Status = TransactionStatus.Success, Note = "Refund for cancelled booking", CreatedAt = DateTime.Now },
-                    new Transaction { FromUserId = users[3].UserId, ToUserId = null, Amount = 120, Type = TransactionType.PhotographerFee, Status = TransactionStatus.Pending, Note = "Photographer payout", CreatedAt = DateTime.Now },
-                    new Transaction { FromUserId = null, ToUserId = users[4].UserId, Amount = 200, Type = TransactionType.PlatformFee, Status = TransactionStatus.Success, Note = "Referral bonus", CreatedAt = DateTime.Now }
-                };
-                context.Transactions.AddRange(transactions);
-                context.SaveChanges();
-                Console.WriteLine($"Transactions seeded successfully: {transactions.Length} transactions added");
-            }
-
-            // Seed Wallets
-            if (!context.Wallets.Any())
-            {
-                Console.WriteLine("Seeding Wallets...");
-                var users = context.Users.Take(20).ToList(); // Take all 20 users
-                var wallets = new[]
-                {
-                    new Wallet { UserId = users[0].UserId, Balance = 0, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[1].UserId, Balance = 200000, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[2].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[3].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[4].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[5].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[6].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[7].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[8].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[9].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
-                    // Additional wallets for new users
-                    new Wallet { UserId = users[10].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[11].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[12].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[13].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[14].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
-                    new Wallet { UserId = users[15].UserId, Balance = 100000, UpdatedAt = DateTime.Now }, // Peter - Location Owner
-                    new Wallet { UserId = users[16].UserId, Balance = 100000, UpdatedAt = DateTime.Now }, // Sarah - Location Owner
-                    new Wallet { UserId = users[17].UserId, Balance = 100000, UpdatedAt = DateTime.Now }, // Mike - Location Owner
-                    new Wallet { UserId = users[18].UserId, Balance = 100000, UpdatedAt = DateTime.Now }, // Lisa - Location Owner
-                    new Wallet { UserId = users[19].UserId, Balance = 100000, UpdatedAt = DateTime.Now }  // David - Location Owner
-                };
-                context.Wallets.AddRange(wallets);
-                context.SaveChanges();
-                Console.WriteLine($"Wallets seeded successfully: {wallets.Length} wallets added");
-            }
-
-            // Seed WithdrawalRequests
-            if (!context.WithdrawalRequests.Any())
-            {
-                Console.WriteLine("Seeding WithdrawalRequests...");
-                var wallets = context.Wallets.Take(5).ToList();
-                var requests = new[]
-                {
-                  
-                    new WithdrawalRequest { WalletId = wallets[1].WalletId, Amount = 200, BankAccountNumber = "222222", BankAccountName = "Bob Johnson", BankName = "Bank B", RequestStatus = "Approved", RequestedAt = DateTime.Now },
-                    new WithdrawalRequest { WalletId = wallets[2].WalletId, Amount = 150, BankAccountNumber = "333333", BankAccountName = "Carol White", BankName = "Bank C", RequestStatus = "Rejected", RequestedAt = DateTime.Now },
-                    new WithdrawalRequest { WalletId = wallets[3].WalletId, Amount = 120, BankAccountNumber = "444444", BankAccountName = "Dave Brown", BankName = "Bank D", RequestStatus = "Pending", RequestedAt = DateTime.Now },
-                    new WithdrawalRequest { WalletId = wallets[4].WalletId, Amount = 180, BankAccountNumber = "555555", BankAccountName = "Eve Black", BankName = "Bank E", RequestStatus = "Approved", RequestedAt = DateTime.Now }
-                };
-                context.WithdrawalRequests.AddRange(requests);
-                context.SaveChanges();
-                Console.WriteLine($"WithdrawalRequests seeded successfully: {requests.Length} withdrawal requests added");
-            }
-
-            // Seed Complaints
-            // if (!context.Complaints.Any())
-            // {
-            //     Console.WriteLine("Seeding Complaints...");
-            //     var users = context.Users.Take(5).ToList();
-            //     var bookings = context.Bookings.Take(4).ToList();
-            //     var moderators = context.Moderators.Take(5).ToList();
-            //     var complaints = new[]
-            //     {
-            //         new Complaint { ReporterId = users[0].UserId, ReportedUserId = users[1].UserId, BookingId = bookings[0].BookingId, ComplaintType = "Service", Description = "Late arrival", Status = "Open", AssignedModeratorId = moderators[0].ModeratorId, CreatedAt = DateTime.Now },
-            //         new Complaint { ReporterId = users[1].UserId, ReportedUserId = users[2].UserId, BookingId = bookings[1].BookingId, ComplaintType = "Payment", Description = "Overcharged", Status = "Closed", AssignedModeratorId = moderators[1].ModeratorId, CreatedAt = DateTime.Now },
-            //         new Complaint { ReporterId = users[2].UserId, ReportedUserId = users[3].UserId, BookingId = bookings[2].BookingId, ComplaintType = "Behavior", Description = "Rude behavior", Status = "Open", AssignedModeratorId = moderators[2].ModeratorId, CreatedAt = DateTime.Now },
-            //         new Complaint { ReporterId = users[3].UserId, ReportedUserId = users[4].UserId, BookingId = bookings[3].BookingId, ComplaintType = "Quality", Description = "Low quality photos", Status = "Closed", AssignedModeratorId = moderators[3].ModeratorId, CreatedAt = DateTime.Now },
-            //         new Complaint { ReporterId = users[4].UserId, ReportedUserId = users[0].UserId, BookingId = bookings[4].BookingId, ComplaintType = "Other", Description = "Other issue", Status = "Open", AssignedModeratorId = moderators[4].ModeratorId, CreatedAt = DateTime.Now }
-            //     };
-            //     context.Complaints.AddRange(complaints);
-            //     context.SaveChanges();
-            //     Console.WriteLine($"Complaints seeded successfully: {complaints.Length} complaints added");
-            // }
-
-            // Seed Advertisements
-            //if (!context.Advertisements.Any())
+            //// Seed PremiumSubscriptions
+            //if (!context.PremiumSubscriptions.Any())
             //{
-            //    Console.WriteLine("Seeding Advertisements...");
-            //    var locations = context.Locations.Take(5).ToList();
-            //    var payments = context.Payments.Take(5).ToList();
-            //    var ads = new[]
+            //    Console.WriteLine("Seeding PremiumSubscriptions...");
+            //    var users = context.Users.Take(5).ToList();
+            //    var packages = context.PremiumPackages.Take(5).ToList();
+            //    var subscriptions = new[]
             //    {
-            //        new Advertisement { LocationId = locations[0].LocationId, Title = "Grand Opening", Description = "Special offer for new customers", ImageUrl = "url1.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30), Status = "Active", Cost = 100, PaymentId = payments[0].PaymentId },
-            //        new Advertisement { LocationId = locations[1].LocationId, Title = "Summer Sale", Description = "Discounts on bookings", ImageUrl = "url2.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(15), Status = "Active", Cost = 80, PaymentId = payments[1].PaymentId },
-            //        new Advertisement { LocationId = locations[2].LocationId, Title = "Wedding Season", Description = "Book now for weddings", ImageUrl = "url3.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(45), Status = "Inactive", Cost = 120, PaymentId = payments[2].PaymentId },
-            //        new Advertisement { LocationId = locations[3].LocationId, Title = "Photo Contest", Description = "Join and win prizes", ImageUrl = "url4.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(10), Status = "Active", Cost = 60, PaymentId = payments[3].PaymentId },
-            //        new Advertisement { LocationId = locations[4].LocationId, Title = "Holiday Shoots", Description = "Special holiday packages", ImageUrl = "url5.jpg", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(20), Status = "Active", Cost = 90, PaymentId = payments[4].PaymentId }
+
+            //        new PremiumSubscription { UserId = users[1].UserId, PackageId = packages[1].PackageId, StartDate = DateTime.Now.AddDays(-20), EndDate = DateTime.Now.AddDays(10), Status = "Expired" },
+            //        new PremiumSubscription { UserId = users[2].UserId, PackageId = packages[2].PackageId, StartDate = DateTime.Now.AddDays(-5), EndDate = DateTime.Now.AddDays(25), Status = "Active" },
+            //        new PremiumSubscription { UserId = users[3].UserId, PackageId = packages[3].PackageId, StartDate = DateTime.Now.AddDays(-15), EndDate = DateTime.Now.AddDays(15), Status = "Active" },
+            //        new PremiumSubscription { UserId = users[4].UserId, PackageId = packages[4].PackageId, StartDate = DateTime.Now.AddDays(-30), EndDate = DateTime.Now.AddDays(5), Status = "Expired" }
             //    };
-            //    context.Advertisements.AddRange(ads);
+            //    context.PremiumSubscriptions.AddRange(subscriptions);
             //    context.SaveChanges();
-            //    Console.WriteLine($"Advertisements seeded successfully: {ads.Length} advertisements added");
+            //    Console.WriteLine($"PremiumSubscriptions seeded successfully: {subscriptions.Length} subscriptions added");
+            //}
+
+            //// Seed Transactions
+            //if (!context.Transactions.Any())
+            //{
+            //    Console.WriteLine("Seeding Transactions...");
+            //    var users = context.Users.Take(5).ToList();
+            //    var transactions = new[]
+            //    {
+
+            //        new Transaction { FromUserId = users[1].UserId, ToUserId = null, Amount = 50, Type = TransactionType.Refund, Status = TransactionStatus.Success, Note = "Withdrawal", CreatedAt = DateTime.Now },
+            //        new Transaction { FromUserId = null, ToUserId = users[2].UserId, Amount = 75, Type = TransactionType.Refund, Status = TransactionStatus.Success, Note = "Refund for cancelled booking", CreatedAt = DateTime.Now },
+            //        new Transaction { FromUserId = users[3].UserId, ToUserId = null, Amount = 120, Type = TransactionType.PhotographerFee, Status = TransactionStatus.Pending, Note = "Photographer payout", CreatedAt = DateTime.Now },
+            //        new Transaction { FromUserId = null, ToUserId = users[4].UserId, Amount = 200, Type = TransactionType.PlatformFee, Status = TransactionStatus.Success, Note = "Referral bonus", CreatedAt = DateTime.Now }
+            //    };
+            //    context.Transactions.AddRange(transactions);
+            //    context.SaveChanges();
+            //    Console.WriteLine($"Transactions seeded successfully: {transactions.Length} transactions added");
+            //}
+
+            //// Seed Wallets
+            //if (!context.Wallets.Any())
+            //{
+            //    Console.WriteLine("Seeding Wallets...");
+            //    var users = context.Users.Take(20).ToList(); // Take all 20 users
+            //    var wallets = new[]
+            //    {
+            //        new Wallet { UserId = users[0].UserId, Balance = 0, UpdatedAt = DateTime.Now },
+            //        new Wallet { UserId = users[1].UserId, Balance = 200000, UpdatedAt = DateTime.Now },
+            //        new Wallet { UserId = users[2].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+            //        new Wallet { UserId = users[3].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+            //        new Wallet { UserId = users[4].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+            //        new Wallet { UserId = users[5].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+            //        new Wallet { UserId = users[6].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+            //        new Wallet { UserId = users[7].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+            //        new Wallet { UserId = users[8].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+            //        new Wallet { UserId = users[9].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+            //        // Additional wallets for new users
+            //        new Wallet { UserId = users[10].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+            //        new Wallet { UserId = users[11].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+            //        new Wallet { UserId = users[12].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+            //        new Wallet { UserId = users[13].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+            //        new Wallet { UserId = users[14].UserId, Balance = 100000, UpdatedAt = DateTime.Now },
+            //        new Wallet { UserId = users[15].UserId, Balance = 100000, UpdatedAt = DateTime.Now }, // Peter - Location Owner
+            //        new Wallet { UserId = users[16].UserId, Balance = 100000, UpdatedAt = DateTime.Now }, // Sarah - Location Owner
+            //        new Wallet { UserId = users[17].UserId, Balance = 100000, UpdatedAt = DateTime.Now }, // Mike - Location Owner
+            //        new Wallet { UserId = users[18].UserId, Balance = 100000, UpdatedAt = DateTime.Now }, // Lisa - Location Owner
+            //        new Wallet { UserId = users[19].UserId, Balance = 100000, UpdatedAt = DateTime.Now }  // David - Location Owner
+            //    };
+            //    context.Wallets.AddRange(wallets);
+            //    context.SaveChanges();
+            //    Console.WriteLine($"Wallets seeded successfully: {wallets.Length} wallets added");
+            //}
+
+            //// Seed WithdrawalRequests
+            //if (!context.WithdrawalRequests.Any())
+            //{
+            //    Console.WriteLine("Seeding WithdrawalRequests...");
+            //    var wallets = context.Wallets.Take(5).ToList();
+            //    var requests = new[]
+            //    {
+
+            //        new WithdrawalRequest { WalletId = wallets[1].WalletId, Amount = 200000, BankAccountNumber = "222222", BankAccountName = "Bob Johnson", BankName = "Bank B", RequestStatus = "Approved", RequestedAt = DateTime.Now },
+            //        new WithdrawalRequest { WalletId = wallets[2].WalletId, Amount = 100000, BankAccountNumber = "333333", BankAccountName = "Carol White", BankName = "Bank C", RequestStatus = "Rejected", RequestedAt = DateTime.Now },
+            //        new WithdrawalRequest { WalletId = wallets[3].WalletId, Amount = 50000, BankAccountNumber = "444444", BankAccountName = "Dave Brown", BankName = "Bank D", RequestStatus = "Pending", RequestedAt = DateTime.Now },
+            //        new WithdrawalRequest { WalletId = wallets[4].WalletId, Amount = 75000, BankAccountNumber = "555555", BankAccountName = "Eve Black", BankName = "Bank E", RequestStatus = "Approved", RequestedAt = DateTime.Now }
+            //    };
+            //    context.WithdrawalRequests.AddRange(requests);
+            //    context.SaveChanges();
+            //    Console.WriteLine($"WithdrawalRequests seeded successfully: {requests.Length} withdrawal requests added");
             //}
 
             // Seed PhotographerEvents
@@ -1134,88 +1095,7 @@ namespace SnapLink_Repository.Data
                 context.SaveChanges();
                 Console.WriteLine($"Availabilities seeded successfully: {availabilities.Count} availabilities added");
             }
-
-
-
-            // Seed PhotoDeliveries
-            if (!context.PhotoDeliveries.Any())
-            {
-                Console.WriteLine("Seeding PhotoDeliveries...");
-                var bookings = context.Bookings.Take(4).ToList();
-                var photoDeliveries = new[]
-                {
-                    // PhotoDelivery 1 - Completed delivery via Google Drive
-                    new PhotoDelivery { 
-                        BookingId = bookings[0].BookingId, 
-                        DeliveryMethod = "PhotographerDevice", 
-                        DriveLink = "https://drive.google.com/drive/folders/1ABC123DEF456GHI789JKL", 
-                        DriveFolderName = "Alice_Smith_Portrait_Session_2024", 
-                        PhotoCount = 45, 
-                        Status = "Delivered", 
-                        UploadedAt = DateTime.Now.AddDays(-2), 
-                        DeliveredAt = DateTime.Now.AddDays(-1), 
-                        ExpiresAt = DateTime.Now.AddDays(30), 
-                        Notes = "Portrait session photos - 45 high-quality images delivered", 
-                        CreatedAt = DateTime.Now.AddDays(-3), 
-                        UpdatedAt = DateTime.Now.AddDays(-1) 
-                    },
-                    
-                    // PhotoDelivery 2 - Pending delivery
-                    new PhotoDelivery { 
-                        BookingId = bookings[1].BookingId, 
-                        DeliveryMethod = "CustomerDevice", 
-                        DriveLink = null, 
-                        DriveFolderName = null, 
-                        PhotoCount = null, 
-                        Status = "Pending", 
-                        UploadedAt = null, 
-                        DeliveredAt = null, 
-                        ExpiresAt = null, 
-                        Notes = "Customer will provide device for direct transfer", 
-                        CreatedAt = DateTime.Now.AddDays(-1), 
-                        UpdatedAt = DateTime.Now.AddDays(-1) 
-                    },
-                    
-                    // PhotoDelivery 3 - Currently uploading
-                    new PhotoDelivery { 
-                        BookingId = bookings[2].BookingId, 
-                        DeliveryMethod = "PhotographerDevice", 
-                        DriveLink = "https://drive.google.com/drive/folders/2XYZ789ABC123DEF456GHI", 
-                        DriveFolderName = "Carol_White_Wedding_Photos", 
-                        PhotoCount = 120, 
-                        Status = "Uploading", 
-                        UploadedAt = DateTime.Now.AddHours(-2), 
-                        DeliveredAt = null, 
-                        ExpiresAt = DateTime.Now.AddDays(60), 
-                        Notes = "Wedding photography session - uploading 120 photos", 
-                        CreatedAt = DateTime.Now.AddDays(-2), 
-                        UpdatedAt = DateTime.Now.AddHours(-2) 
-                    },
-                    
-                    // PhotoDelivery 4 - Not required (customer took photos themselves)
-                    new PhotoDelivery { 
-                        BookingId = bookings[3].BookingId, 
-                        DeliveryMethod = "CustomerDevice", 
-                        DriveLink = null, 
-                        DriveFolderName = null, 
-                        PhotoCount = 0, 
-                        Status = "NotRequired", 
-                        UploadedAt = null, 
-                        DeliveredAt = null, 
-                        ExpiresAt = null, 
-                        Notes = "Customer used their own device for photos", 
-                        CreatedAt = DateTime.Now.AddDays(-1), 
-                        UpdatedAt = DateTime.Now.AddDays(-1) 
-                    }
-                };
-                context.PhotoDeliveries.AddRange(photoDeliveries);
-                context.SaveChanges();
-                Console.WriteLine($"PhotoDeliveries seeded successfully: {photoDeliveries.Length} photo deliveries added");
-            }
-            else
-            {
-                Console.WriteLine("PhotoDeliveries already exist, skipping...");
-            }
+     
 
             Console.WriteLine("=== Database Initialization Completed Successfully ===");
         }
