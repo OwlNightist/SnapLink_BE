@@ -12,7 +12,7 @@ using SnapLink_Repository.DBContext;
 namespace SnapLink_API.Migrations
 {
     [DbContext(typeof(SnaplinkDbContext))]
-    [Migration("20250825145014_InitialCreate")]
+    [Migration("20250903114231_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
