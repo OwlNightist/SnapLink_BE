@@ -906,18 +906,22 @@ namespace SnapLink_Service.Service
         }
 
         /// <summary>
-        /// Calculate distance between photographer's previous booking location and intended booking location
+        /// Calculate distance between photographer's previous booking location and intended booking location (same day only)
         /// </summary>
         public async Task<DistanceCalculationResult> CalculateDistanceFromPreviousBookingAsync(int photographerId, DateTime startTime, DateTime endTime, int locationId)
         {
             try
             {
-                // Find the photographer's most recent booking that ends before the new booking start time
+                // Get the date of the intended booking
+                var bookingDate = startTime.Date;
+                
+                // Find the photographer's most recent booking that ends before the new booking start time on the same day
                 var previousBooking = await _context.Bookings
                     .Include(b => b.Location)
                     .Where(b => b.PhotographerId == photographerId &&
                                (b.Status == "Confirmed" || b.Status == "Completed") &&
-                               b.EndDatetime <= startTime)
+                               b.EndDatetime <= startTime &&
+                               b.EndDatetime.Value.Date == bookingDate) // Only consider bookings on the same day
                     .OrderByDescending(b => b.EndDatetime)
                     .FirstOrDefaultAsync();
 
@@ -941,7 +945,7 @@ namespace SnapLink_Service.Service
                     return new DistanceCalculationResult
                     {
                         Error = 0,
-                        Message = "No previous booking found before the specified start time",
+                        Message = "No previous booking found on the same day before the specified start time",
                         Data = new DistanceCalculationData
                         {
                             PhotographerId = photographerId,
