@@ -46,18 +46,18 @@ namespace SnapLink_Service.Service
         public async Task<string> VerifyResetCodeAsync(VerifyResetCodeRequest req)
         {
             var user = await _users.GetByEmailAsync(req.Email);
-            // if (user == null || user.Status == "Deleted") throw new Exception("Email không tồn tại.");
-            // if (string.IsNullOrEmpty(user.PasswordResetCode) || user.PasswordResetExpiry == null)
-            //     throw new Exception("Không có yêu cầu đặt lại mật khẩu.");
-            // if (DateTime.UtcNow > user.PasswordResetExpiry.Value) throw new Exception("Mã đã hết hạn.");
+            if (user == null || user.Status == "Deleted") throw new Exception("Email không tồn tại.");
+            if (string.IsNullOrEmpty(user.PasswordResetCode) || user.PasswordResetExpiry == null)
+                throw new Exception("Không có yêu cầu đặt lại mật khẩu.");
+            if (DateTime.UtcNow > user.PasswordResetExpiry.Value) throw new Exception("Mã đã hết hạn.");
 
-            // if (!string.Equals(user.PasswordResetCode, req.Code, StringComparison.Ordinal))
-            // {
-            //     user.PasswordResetAttempts = (user.PasswordResetAttempts ?? 0) + 1;
-            //     await _users.UpdateUserAsync(user);
-            //     await _users.SaveChangesAsync();
-            //     throw new Exception("Mã không đúng.");
-            // }
+            if (!string.Equals(user.PasswordResetCode, req.Code, StringComparison.Ordinal))
+            {
+                user.PasswordResetAttempts = (user.PasswordResetAttempts ?? 0) + 1;
+                await _users.UpdateUserAsync(user);
+                await _users.SaveChangesAsync();
+                throw new Exception("Mã không đúng.");
+            }
             return "Mã hợp lệ.";
         }
 
