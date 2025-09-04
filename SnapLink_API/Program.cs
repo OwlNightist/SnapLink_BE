@@ -193,9 +193,9 @@ builder.Services.AddScoped<IGooglePlacesService,GooglePlacesService>();
 builder.Services.AddScoped<IWithdrawalRequestService, WithdrawalRequestService>();
 
 // Add Background Services
-//builder.Services.AddHostedService<SubscriptionExpiryJob>();
-//builder.Services.AddHostedService<SnapLink_API.Jobs.BookingExpiryJob>();
-//builder.Services.AddHostedService<BookingAutoCompletionJob>();
+builder.Services.AddHostedService<SubscriptionExpiryJob>();
+builder.Services.AddHostedService<SnapLink_API.Jobs.BookingExpiryJob>();
+builder.Services.AddHostedService<BookingAutoCompletionJob>();
 
 builder.Services.AddCors(opts =>
 {
